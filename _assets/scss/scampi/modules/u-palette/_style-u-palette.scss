@@ -1,0 +1,146 @@
+// layout
+.sg-color-boxes {
+  display: flex;
+  flex-wrap: wrap;
+  padding-left: 0;
+  list-style-type: none;
+  text-indent: 0;
+}
+
+.sg-color-box {
+
+  &::before {
+    display: none;
+  }
+
+  ul {
+    padding-left: 0;
+    list-style-type: none;
+    text-indent: 0;
+  }
+
+  li::before {
+    display: none;
+  }
+}
+
+.sg-color-box-title {
+  margin-bottom: 0;
+}
+
+.sg-color-swatch-hex {
+  font-size: .75em;
+}
+
+.sg-color-swatch {
+  position: relative;
+  margin-bottom: 1em;
+  padding: .5em;
+}
+
+.sg-color-swatch-lighten,
+.sg-color-swatch-darken {
+  display: block;
+  position: absolute;
+  bottom: 0;
+  width: 50%;
+  height: 2.5em;
+  line-height: 2.5;
+  text-align: center;
+  font-size: .75em;
+  margin-bottom: 0;
+}
+
+.sg-color-swatch-lighten {
+  left: 0;
+  color: #000;
+}
+
+.sg-color-swatch-darken {
+  right: 0;
+  color: #fff;
+}
+
+.sg-with_variant-palette {
+  .sg-color-box {
+    margin: 0 1em 1.5em 0;
+  }
+
+  .sg-color-swatch {
+    width: 10.75em;
+    height: 10em;
+
+    @include media-breakpoint-down(small) {
+      height: 6.5em;
+    }
+  }
+}
+
+.sg-simple-palette {
+
+  .sg-color-box {
+    width: 9.5em;
+  }
+
+  .sg-color-swatch {
+    width: 9.25em;
+    height: 4em;
+  }
+}
+
+// couleurs site JO
+.swatch-body-color {
+  @include make-swatch($body-color);
+}
+.swatch-headings-color {
+  @include make-swatch($headings-color);
+}
+.swatch-primary-color {
+  @include make-swatch($primary-color);
+}
+
+// palette messages scampi
+.swatch-info-color {
+  @include make-swatch($info-color, 25%, 25%);
+}
+.swatch-success-color {
+  @include make-swatch($success-color, 25%, 25%);
+}
+.swatch-warning-color {
+  @include make-swatch($warning-color, 25%, 30%);
+}
+.swatch-danger-color {
+  @include make-swatch($danger-color);
+}
+
+.swatch-gray-1 {
+  @include make-swatch($gray-1);
+}
+.swatch-gray-2 {
+  @include make-swatch($gray-2);
+}
+.swatch-gray-3 {
+  @include make-swatch($gray-3);
+}
+.swatch-gray-4 {
+  @include make-swatch($gray-4);
+}
+.swatch-gray-5 {
+  @include make-swatch($gray-5);
+}
+.swatch-gray-6 {
+  @include make-swatch($gray-6);
+}
+.swatch-gray-7 {
+  @include make-swatch($gray-7);
+}
+.swatch-gray-8 {
+  @include make-swatch($gray-8);
+}
+.swatch-gray-9 {
+  @include make-swatch($gray-9);
+}
+.swatch-gray-10 {
+  @include make-swatch($gray-10);
+}
+

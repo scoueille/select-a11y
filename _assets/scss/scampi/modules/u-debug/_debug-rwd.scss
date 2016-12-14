@@ -1,0 +1,24 @@
+// debug rwd
+// --------------------------------------------------
+
+// affiche en bas à droite de la page, le nom de la mediaquery
+
+$debug-rwd : false !default;
+
+@if $debug-rwd {
+  body::before {
+    position: fixed;
+    bottom:0;
+    right:0;
+    z-index: 11;
+    padding: 0 .5em;
+    color:#000;
+    background-color:#fff;
+  }
+
+  @each $key, $value in $grid-breakpoints {
+    @media (min-width: $value) {
+      body::before {content: "'" + $key + "'";}
+    }
+  }
+}

@@ -1,0 +1,71 @@
+// Debugs divers
+// =============
+
+// box-sizing
+html {
+  box-sizing: border-box;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+
+// Make viewport responsive
+@at-root {
+  @-moz-viewport      { width: device-width; }
+  @-ms-viewport       { width: device-width; }
+  @-o-viewport        { width: device-width; }
+  @-webkit-viewport   { width: device-width; }
+  @viewport           { width: device-width; }
+}
+
+
+// Reset HTML, body, and more
+html {
+  font-size: 100%;
+  -webkit-tap-highlight-color: rgba(0,0,0,0);
+}
+
+body {
+  font-size: $font-size-base;
+  line-height: $line-height;
+  color: $body-color;
+  background-color: $body-bg;
+}
+
+// Suppress the focus outline on elements that cannot be accessed via keyboard.
+[tabindex="-1"]:focus {
+  outline: none !important;
+}
+
+// iOS "clickable elements" fix for role="button"
+[role="button"] {
+  cursor: pointer;
+}
+
+// Avoid 300ms click delay on touch devices that support the `touch-action` CSS property.
+a,
+area,
+button,
+[role="button"],
+input,
+label,
+select,
+summary,
+textarea {
+  touch-action: manipulation;
+}
+
+// Always hide an element with the `hidden` HTML attribute (from PureCSS).
+[hidden] {
+  display: none !important;
+}
+
+// reset figure margins to 0 and let more styling happen
+// in project styles
+figure {
+  margin: 0;
+}

@@ -1,0 +1,65 @@
+// skip-link
+// les liens d'évitement
+// --------------------------------------------------
+
+.skip-link {
+  margin: 0;
+  padding:0;
+  background: $skip-link-bg;
+  color: $skip-link-color;
+
+  .container {
+    position: relative;
+    &.skip-link-focus {
+      height: 2em;
+    }
+  }
+
+  ul {
+    margin: 0;
+    padding: 0;
+  }
+
+  li {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  a {
+    padding: 0;
+    color: $skip-link-color;
+    text-decoration: none;
+  }
+
+  @if $enable-skip-link-js {
+    a {
+      position: absolute;
+      left: -7000px;
+      z-index: 1000;
+      padding: 0;
+      &:focus {
+        position: absolute;
+        top:0.2em;
+        left:0;
+      }
+    }
+  }
+
+}
+
+.no-js .skip-link {
+  .container {
+    min-height: 2em;
+    padding-top: 0.2em;
+  }
+  li {
+    display: inline-block;
+    padding-right: 1em;
+  }
+  a {
+    position: static;
+    &:focus,
+    &:hover {text-decoration: underline;}
+  }
+}

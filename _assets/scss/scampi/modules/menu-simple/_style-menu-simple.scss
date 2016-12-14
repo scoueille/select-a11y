@@ -1,0 +1,125 @@
+// menu horizontal simple
+// replié sur mobile et tablette
+// -----------------------------
+
+// bouton du menu
+.toggle-menu {
+  width: 100%;
+  padding: .5em 1em;
+  border: none;
+  margin: 0;
+  background-color: $toggle-menu-bg-color;
+  color: $toggle-menu-text-color;
+  text-align: left;
+
+  &:before {
+    display: inline-block;
+    content: "\2261";
+    font-size: 1.5em;
+    padding-right: .5em;
+    line-height: 1;
+    speak: none;
+    vertical-align: bottom;
+  }
+
+  &:hover,
+  &:focus {
+    background-color: $toggle-menu-bg-color-hover;
+    color: $toggle-menu-text-color-hover;
+  }
+
+  &.is-open {
+    background-color: $toggle-menu-bg-color-open;
+    color: $toggle-menu-text-color-open;
+
+    &:before {
+      content: "\00D7";
+    }
+
+    &:focus {
+      border: 1px dotted #fff;
+    }
+  }
+
+  @include media-breakpoint-up(medium) {
+    display: none;
+  }
+}
+
+// menu mobile first
+.nav-main {
+  background-color: $toggle-menu-bg-color;
+  color: $toggle-menu-text-color;
+
+  .container {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .nav-main-list {
+    display: none;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+  }
+
+  .nav-link {
+    display: block;
+    padding: 1em;
+    color: $toggle-menu-text-color;
+    font-size: .875em;
+    text-decoration: none;
+    text-transform: uppercase;
+    width: 100%;
+
+    &:visited,
+    &:hover,
+    &:focus {
+      background-color: $menu-simple-bg-color-hover;
+      color: $menu-simple-text-color-hover;
+    }
+
+    &.is-active {
+      background-color: $menu-simple-bg-color-open;
+      color: $menu-simple-text-color-open;
+    }
+  }
+}
+
+.nav-main-list.is-open {
+  display: block;
+}
+
+// si pas de js, pas de bouton
+.no-js .toggle-menu {
+  display: none;
+}
+
+// si pas de js, éléments du menu affichés
+.no-js .nav-main-list {
+  display: block;
+}
+
+// à partir de la taille medium, affichage
+// à l'horizontale
+@include media-breakpoint-up(medium) {
+  .nav-main {
+    .nav-main-list {
+      display: table;
+      padding: 0;
+      list-style-type: none;
+      color: #fff;
+      background-color: $primary-color;
+      text-align: center;
+      width: 100%;
+
+      .nav-item {
+        display: table-cell;
+        line-height: 1;
+      }
+    }
+  }
+}
+
+

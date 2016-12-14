@@ -1,0 +1,28 @@
+// Mixins et fonctions transverses
+// ===================================================
+
+// tools
+@import "mixins/function-px-to-em";
+@import "mixins/mixin-propvalue";
+
+// texte
+@import "mixins/mixin-hover";
+@import "mixins/mixin-lists";
+@import "mixins/mixin-reset-text";
+@import "mixins/mixin-screen-reader";
+@import "mixins/mixin-tab-focus";
+@import "mixins/mixin-text-truncate";
+
+// images
+@import "mixins/mixin-figure";
+@import "mixins/mixin-image";
+
+// layout
+@import "mixins/mixin-breakpoints";
+@import "mixins/mixin-clearfix";
+@import "mixins/mixin-center-block";
+
+// skin
+@import "mixins/mixin-border-radius";
+@import "mixins/mixin-box-shadow";
+@import "mixins/mixin-transition";

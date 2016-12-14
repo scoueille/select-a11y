@@ -1,0 +1,21 @@
+{
+  "name": "filter-component",
+  "version": "0.1.0",
+  "description": "Module de gestion de filtre",
+  "main": "index.js",
+  "dependencies": {
+    "gulp": "^3.9.1",
+    "gulp-autoprefixer": "^3.1.1",
+    "gulp-sass": "^2.3.2",
+    "gulp-sourcemaps": "^1.8.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@gitlab.spplusplus.fr:service-public/filter-component.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "DILA - DPSN - Pidila",
+  "license": ""
+}

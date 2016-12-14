@@ -1,0 +1,45 @@
+// u-comments
+// Permet d'afficher masquer des commentaires en 'post-it' pendant la phase de développement.
+
+.sg-toggle-comments,
+.sg-comment {
+  background-color: #FFFFbf;
+  box-shadow: 3px 3px 5px rgba(180, 180, 180, 0.5);
+  font-family: monospace;
+  border: none;
+}
+
+.sg-toggle-comments {
+  position: absolute;
+  top: 0;
+  right: 1em;
+  padding: .5em 1em;
+  margin-bottom: 1em;
+  border-radius: 0;
+
+  @include media-breakpoint-up(medium) {
+    &:before {
+      content: "Masquer les "
+    }
+
+    &.is-closed {
+      &:before {
+        content: "Afficher les "
+      }
+    }
+  }
+}
+
+.sg-comment {
+  display: none;
+  padding: .5em 1em;
+  margin-bottom: 1em;
+
+  p {
+    margin-bottom: .5em;
+  }
+}
+
+.sg-comment.is-visible {
+  display: block;
+}

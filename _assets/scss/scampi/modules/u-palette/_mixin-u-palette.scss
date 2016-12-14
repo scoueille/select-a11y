@@ -1,0 +1,29 @@
+// palette des couleurs
+// ---------------------
+
+// fonction
+@function set-rgaa-color($color) {
+  @if (lightness($color) > 50) {
+    @return #000000; // Lighter background, return dark color
+  } @else {
+    @return #ffffff; // Darker background, return light color
+  }
+}
+
+
+// mixin
+@mixin make-swatch($color, $lighten-factor: 45%, $darken-factor: 10%) {
+
+  .sg-color-swatch {
+    background: $color;
+    color: set-rgaa-color($color);
+  }
+
+  .sg-color-swatch-lighten {
+    background: lighten($color, $lighten-factor);
+  }
+
+  .sg-color-swatch-darken {
+    background: darken($color, $darken-factor);
+  }
+}

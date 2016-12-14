@@ -1,0 +1,25 @@
+// rwd-typo-size
+// ------------------------------------------------------
+// Cherche les propriétés/valeurs associées à un nom de la map des breakpoints
+// puis les affecte au sélecteur dans les media queries correspondantes
+// (et affecte la propriété/valeur de "base" hors des mediaqueries)
+// si $enable-rwd est à false ou que la map est vide, ne fait rien du tout.
+
+@mixin rwd-typo-size($element) {
+
+  @if $enable-rwd and map-has-key($typo-size-map, $element) {
+    $map: map-get($typo-size-map, $element);
+    $base: map-get($map, base);
+
+    @include propValue($base);
+
+    $mq: map-remove($map, base);
+
+    @each $bp, $attr in $mq {
+      @include media-breakpoint-up($bp) {
+        @include propValue($attr);
+      }
+    }
+  }
+
+}

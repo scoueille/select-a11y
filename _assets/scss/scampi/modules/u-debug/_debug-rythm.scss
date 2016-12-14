@@ -1,0 +1,31 @@
+/// @inspired by http://zellwk.com/blog/web-typography-broken/
+
+@mixin debug-rythm($row-height: 24, $color: red) {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent (($row-height - 1) + #{px}),
+    $color (($row-height - 1) + #{px}),
+    $color (($row-height) + #{px})
+    );
+}
+
+// usage
+// -----------------------------------------------
+
+// body {
+//   @include debug-rythm();
+// }
+
+// body {
+//   @include debug-rythm(24);
+// }
+
+// body {
+//   @include debug-rythm($color:green);
+// }
+
+// body {
+//   @include debug-rythm(24, red);
+// }
+

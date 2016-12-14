@@ -1,0 +1,18 @@
+// settings
+// -------------------------
+
+$enable-fontface: false !default;
+$fonts-map: () !default;
+$webfont-path: "../webfonts/" !default;
+
+
+// mixin
+
+@import "mixin-fontface";
+
+
+// font-face declarations
+
+@if ($enable-fontface) {
+  @include sc-import-fonts($map);
+}

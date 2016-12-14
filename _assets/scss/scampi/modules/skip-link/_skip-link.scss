@@ -1,0 +1,11 @@
+// Scampi skip-link
+// --------------------------------------------------
+
+// settings
+$enable-skip-link-js :     true !default;
+
+$skip-link-bg         :     black !default;
+$skip-link-color      :     white !default;
+
+// styles
+@import "style-skip-link";

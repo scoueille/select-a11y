@@ -1,0 +1,18 @@
+// Pagination
+// ==========================================================
+
+$page-link-color  : $body-color !default;
+$page-link-bg     : transparent !default;
+$page-link-border : $gray-9 !default;
+
+$page-link-color-focus : $primary-color !default;
+$page-link-bg-focus    : $primary-color-light !default;
+
+$page-link-active-color : $primary-color !default;
+$page-link-active-bg    : $primary-color-light !default;
+
+$page-item-prev-icon   : "\2039" !default;
+$page-item-next-icon   : "\203A" !default;
+
+// styles
+@import "style-pagination";

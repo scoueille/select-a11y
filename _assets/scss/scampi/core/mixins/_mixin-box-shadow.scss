@@ -1,0 +1,10 @@
+// Mixin box-shadow
+//
+// Ombrages de boîtes si $enable-shadows est à true
+// =======================================================================
+
+@mixin box-shadow($shadow...) {
+  @if $enable-shadows {
+    box-shadow: $shadow;
+  }
+}

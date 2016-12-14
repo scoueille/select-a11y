@@ -1,0 +1,9 @@
+// blockquote
+// =======================================================================
+
+// settings
+$blockquote-small-color:      $gray !default;
+$blockquote-border-color:     $gray-8 !default;
+
+// mixin
+@import "mixin-blockquote";

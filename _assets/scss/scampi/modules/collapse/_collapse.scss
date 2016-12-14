@@ -1,0 +1,27 @@
+.js-to_expand[aria-hidden=true],
+.js-to_expand[data-hidden=true] {
+  display: none;
+}
+
+.expandmore__button {
+  background: none;
+  font-size: inherit;
+  color: inherit;
+  border: none;
+}
+
+// // Exemple de règles pour visualiser la fonctionalité
+// // plier /déplier
+
+.expandmore__button[aria-expanded=false]:before,
+.expandmore__button[data-expanded=false]:before {
+  content : '+ ';
+  speak: none;
+}
+
+.expandmore__button[aria-expanded=true]:before,
+.expandmore__button[data-expanded=true]:before {
+  content : '- ';
+  speak: none;
+}
+

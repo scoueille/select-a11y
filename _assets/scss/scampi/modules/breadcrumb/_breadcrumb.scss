@@ -1,0 +1,32 @@
+// Breadcrumb
+// ----------
+
+$breadcrumb-sign : "\203A" !default;
+
+.breadcrumb {
+  font-size: .875em;
+  line-height: 1.25;
+  margin: .5em 0;
+
+    // liens successifs
+    a {
+      color: $body-color;
+      padding-right: .5em;
+    }
+
+    span {
+      display: inline-block;
+      padding-right: .5em;
+
+      &::after {
+        content: $breadcrumb-sign;
+        font-size: 1.25em;
+      }
+    }
+
+    // item actif
+    strong {
+       color: $primary-color;
+       font-weight: bold;
+  }
+}

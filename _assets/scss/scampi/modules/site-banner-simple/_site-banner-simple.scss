@@ -1,0 +1,36 @@
+// site-banner-simple
+// logo à gauche, titre à droite
+
+.site-id {
+
+  a {
+    display: table;
+    width: 100%;
+
+    &:link,
+    &:visited {
+      text-decoration: none;
+    }
+  }
+}
+
+.site-logo,
+.site-title {
+  display: table-cell;
+  vertical-align: middle;
+  line-height: 1;
+}
+
+.site-logo {
+  max-width: 100%;
+  padding-right: 1em;
+}
+
+.site-title {
+  font-size: 1.5em;
+
+  @include media-breakpoint-up(medium) {
+    font-size: 2em;
+  }
+}
+

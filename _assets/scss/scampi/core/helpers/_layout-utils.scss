@@ -1,0 +1,22 @@
+// Classes utilitaires de positionnement
+// ===================================================
+
+.clearfix {
+  @include clearfix();
+}
+
+.center-block {
+  @include center-block();
+}
+
+.container {
+  @include center-block();
+  @include clearfix();
+
+  padding-left:  ($spacer-x / 2);
+  padding-right: ($spacer-x / 2);
+}
+
+.main-container {
+  padding-top: ($spacer-y * 2)
+}

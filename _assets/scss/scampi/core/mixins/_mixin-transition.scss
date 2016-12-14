@@ -1,0 +1,8 @@
+// Mixin transition
+// =======================================================================
+
+@mixin transition($transition...) {
+  @if $enable-transitions {
+    transition: $transition;
+  }
+}

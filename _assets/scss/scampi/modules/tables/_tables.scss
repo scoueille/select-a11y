@@ -1,0 +1,24 @@
+// settings
+$table-cell-padding:            .75em !default;
+$table-sm-cell-padding:         .25em !default;
+
+$table-bg:                      transparent !default;
+$table-bg-accent:               $gray-9 !default;
+$table-bg-hover:                $gray-10 !default;
+$table-bg-active:               $table-bg-hover !default;
+
+$table-border-width:            $border-width !default;
+$table-border-color:            $gray-9 !default;
+
+$table-inverse-bg-color:        $gray-1 !default;
+$table-inverse-text-color:      #fff !default;
+$table-inverse-border-color:    $gray-9 !default;
+
+
+
+
+// mixin
+@import "mixin-tables";
+
+// styles
+@import "style-tables";
