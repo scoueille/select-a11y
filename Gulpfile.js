@@ -1,13 +1,7 @@
 // //////////////////////////////////////// //
 //
-//    Tout construire   :   gulp build
-//    Tout nettoyer     :   gulp clean
-//
 //    compiler sass     :   gulp make:css
-//    compiler twig     :   gulp make:html
 //    watch html et css :   gulp
-//
-//    Constuire pour gitlab     :   gulp build --gitlab
 //
 // //////////////////////////////////////// //
 
@@ -29,7 +23,7 @@ var paths = {
   destStylesCss: '_assets/css/',
 };
 
-// 3. Sass > Css
+// 1. Sass > Css
 // ===========================================================
 
 // Compilation scss et génération sourcemaps
@@ -52,7 +46,7 @@ gulp.task('watch:css', function() {
 gulp.task('watch',['watch:css']);
 
 
-// 8. Tâche par défaut
+// 2. Tâche par défaut
 // ===========================================================
 
 // la plupart du temps en cours de dev

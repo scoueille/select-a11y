@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="fr" class="no-js" dir="ltr">
+
+<head>
+
+  <meta charset="utf-8">
+  <title>Filter componant</title>
+
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <meta name="description" content="">
+
+  <script type="text/javascript" src="_assets/scripts/libs/modernizr.js"></script>
+
+  <link rel="stylesheet" href="_assets/css/style.css">
+  <link rel="stylesheet" media="print" href="_assets/css/print.css">
+
+  <!-- en dev uniquement -->
+  <meta name="robots" content="noindex nofollow">
+
+</head>
+<!-- fin bloc head -->
+
+<body>
+
+<noscript>
+  <p class="js-off">Javascript est desactivé dans votre navigateur.</p>
+</noscript>
+<!--[if lt IE 8]>
+  <div class="browsehappy">
+    <div class="container">
+      <p>Savez-vous que votre navigateur est obsolète ?<p>
+      <p>Pour naviguer de la manière la plus satisfaisante sur le Web, nous vous recommandons de procéder à une <a href="http://windows.microsoft.com/fr-fr/internet-explorer/download-ie">mise à jour de votre navigateur</a>.
+      <br>Vous pouvez aussi <a href="http://browsehappy.com/">essayer d’autres navigateurs web populaires</a>.</p>
+      </div>
+    </div>
+<![endif]-->
+
+<header role="banner">
+  <div class="skip-link">
+    <div class="container" id="top">
+      <ul>
+        <li><a href="#main">Aller au contenu</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="logo">
+      <a href="/"><img src="_assets/images/logo-select.png" alt="Accueil Filter componant" height="100" width="100"></a>
+    </div>
+  </div>
+</header>
+
+<main role="main" id="main" class="main">
+  <div class="container main-container">
+
+    <h1>Filter componant</h1>
+
+    <h2>Avant transformation js</h2>
+
+    <h3>Si on choisit un liste de checkbox</h3>
+
+    <form action="">
+      <fieldset>
+        <legend>Options de choix</legend>
+        <ul>
+          <li>
+            <div class="form-check">
+              <label class="form-check-label" for="option-1">
+                <input class="form-check-input" type="checkbox" value="" id="option-1">
+                Option 1 
+              </label>
+            </div>
+          </li>
+          <li>
+            <div class="form-check">
+              <label class="form-check-label" for="option-2">
+                <input class="form-check-input" type="checkbox" value="" id="option-2">
+                Option 2
+              </label>
+            </div>
+          </li>
+        </ul>
+      </fieldset>
+      <p>
+        <button class="btn btn-primary" type="submit">Filtrer</button>
+      </p>
+    </form>
+
+    <h3>Si on choisit un select multiple</h3>
+
+    <form action="">
+      <div class="form-group">
+        <label for="select">Options de choix</label>
+        <select class="form-control" id="select" multiple>
+          <option>Option 1</option>
+          <option>Option 2</option>
+          <option>Option 3</option>
+          <option>Option 4</option>
+          <option>Option 5</option>
+        </select>
+      </div>
+
+      <p>
+        <button class="btn btn-primary" type="submit">Filtrer</button>
+      </p>
+    </form>
+
+
+    <h2>Après transformation js</h2>
+
+    <!-- <button aria-extended="true|false" name="Choisir un code" /> -->
+
+    <ul>
+      <li>
+        <span id="selected-option-1" class="tag-item">
+          option 1 
+          <button class="tag-item-supp" type="button" aria-labbeledby="selected-option-1">
+            <span class="sr-only" title="supprimer la selection">supprimer</span>
+          </button>
+        </span>
+      </li>
+
+    </ul>
+
+    <div (display yes/no)>
+     <div aria-live="polite" class="ZZsr-only">
+       <p>Nombre de suggestions etc...</p>
+     </div>
+
+     <div class="form-group row">
+      <label for="select-js">Options de choix</label>
+      <input class="form-control" type="text" id="select-js" autocomplete="">
+    </div>     
+
+    <div class="form-group"> <!-- caché et reçoit les élements clavier -->
+     <label for="select">Options de choix</label>
+     <select class="form-control" id="select" multiple>
+       <option>Option 1</option>
+       <option>Option 2</option>
+       <option>Option 3</option>
+       <option>Option 4</option>
+       <option>Option 5</option>
+     </select>
+   </div>
+
+     </div>
+
+
+
+  </div>
+</main>
+
+
+<script src="_assets/scripts/libs/jquery-2.2.0.min.js"></script>
+<script src="_assets/scripts/anchor_focus.js"></script>
+<script src="_assets/scripts/filter-componant.js"></script>
+
+</body>
+</html>

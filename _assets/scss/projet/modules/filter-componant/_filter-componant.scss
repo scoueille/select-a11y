@@ -1,0 +1,23 @@
+// filter componant
+// ==========================================================
+
+
+
+
+.tag-item {
+  border:1px solid $gray;
+  padding: 0.2em 0.5em;
+}
+.tag-item-supp {
+  background-color: transparent;
+  border:0;
+  &:before {
+    content :"\274c";
+    speak:none;
+    line-height:1;
+  }
+}
+
+
+
+

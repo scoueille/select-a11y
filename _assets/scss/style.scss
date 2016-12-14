@@ -10,7 +10,8 @@
 @import "scampi/core/version";
 
 // settings, mixins, fonctions
-@import "scampi/core/core-scampi-settings";
+// @import "scampi/core/core-scampi-settings";
+@import "projet/core/core-projet-settings";
 @import "scampi/core/core-scampi-mixins";
 
 // css core
@@ -29,10 +30,16 @@
 @import "scampi/modules/forms/forms";
 @import "scampi/modules/input-group/input-group";
 @import "scampi/modules/menu-simple/menu-simple";
-@import "scampi/modules/rwd-utils/rwd-utils";
+@import "projet/modules/rwd-utils";
 @import "scampi/modules/skip-link/skip-link";
 @import "scampi/modules/tables/tables";
 @import "scampi/modules/site-banner-simple/site-banner-simple";
+
+
+// css projet
+@import "projet/modules/filter-componant/filter-componant";
+
+
 
 // css de développement
 // ne pas importer en production
@@ -43,17 +50,3 @@
 // css classes utilitaires
 // à importer en dernier
 @import "scampi/core/core-scampi-helpers";
-
-
-
-
-
-
-// --------------------------
-
-
-
-
-
-
-
