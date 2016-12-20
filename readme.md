@@ -19,3 +19,8 @@ NodeJs + npm
 
 ```$ gulp watch``` pour lancer le watch.
 
+
+## références
+
+https://select2.github.io/examples.html
+https://a11y.nicolas-hoffmann.net/autocomplet-list/
