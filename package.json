@@ -4,18 +4,29 @@
   "description": "Module de gestion de filtre",
   "main": "index.js",
   "dependencies": {
-    "gulp": "^3.9.1",
-    "gulp-autoprefixer": "^3.1.1",
-    "gulp-sass": "^2.3.2",
-    "gulp-sourcemaps": "^1.8.1"
   },
   "repository": {
     "type": "git",
     "url": "git@gitlab.spplusplus.fr:service-public/filter-component.git"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "./node_modules/.bin/gulp serve:test"
   },
   "author": "DILA - DPSN - Pidila",
-  "license": ""
+  "license": "",
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-autoprefixer": "^3.1.1",
+    "gulp-sass": "^2.3.2",
+    "gulp-sourcemaps": "^1.8.1",
+    "connect": "^3.5.0",
+    "connect-livereload": "^0.6.0",
+    "gulp-livereload": "^3.8.1",
+    "jasmine-core": "^2.5.2",
+    "jasmine-jquery": "^2.1.1",
+    "jquery": "^3.1.1",
+    "opn": "^4.0.2",
+    "requirejs": "^2.3.2",
+    "serve-static": "^1.11.1"
+  }
 }
