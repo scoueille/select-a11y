@@ -10,6 +10,7 @@
   <meta name="description" content="">
 
   <script type="text/javascript" src="_assets/scripts/libs/modernizr.js"></script>
+  <script type="text/javascript" src="node_modules/requirejs/require.js" data-main="main"></script>
 
   <link rel="stylesheet" href="_assets/css/style.css">
   <link rel="stylesheet" media="print" href="_assets/css/print.css">
@@ -44,7 +45,7 @@
 
   <div class="container">
     <div class="logo">
-      <a href="/"><img src="_assets/images/logo-select.png" alt="Accueil Filter componant" height="100" width="100"></a>
+      <a href="/"><img src="_assets/images/logo-select.png" alt="Accueil Filter componant" height="200" width="200"></a>
     </div>
   </div>
 </header>
@@ -58,8 +59,8 @@
 
   <form action="">
     <div class="form-group">
-      <label for="select">Ajouter un filtre</label>
-      <select class="form-control" id="select" multiple>
+      <label for="select-before">Ajouter un filtre</label>
+      <select class="form-control" id="select-before" multiple>
         <option>Option 1</option>
         <option>Option 2</option>
         <option>Option 3</option>
@@ -81,7 +82,7 @@
     <li>
       <span id="selected-option-1" class="tag-item">
         option 1 
-        <button class="tag-item-supp" title="supprimer la selection" aria-labbeledby="selected-option-1" type="button">
+        <button class="tag-item-supp" title="supprimer la selection" aria-labelledby="selected-option-1" type="button">
           <span class="sr-only">supprimer</span>
         </button>
       </span>
@@ -90,7 +91,7 @@
     <li>
       <span id="selected-option-2" class="tag-item">
         option 2 
-        <button class="tag-item-supp" title="supprimer la selection" aria-labbeledby="selected-option-2" type="button">
+        <button class="tag-item-supp" title="supprimer la selection" aria-labelledby="selected-option-2" type="button">
           <span class="sr-only">supprimer</span>
         </button>
       </span>
@@ -98,7 +99,7 @@
   </ul>
 
   <form action="">
-    <button type="button" class="btn" aria-extended="true|false">
+    <button type="button" class="btn" aria-expanded="true">
       Ajouter un filtre
     </button>
     <!-- au click sur le bouton, on affiche champs de recherche ainsi que le "select" -->
@@ -123,8 +124,8 @@
       </div>     
 
       <div class="form-group" hidden> <!-- caché et stocke l'information, reçoit les élements clavier ? -->
-        <label for="select">Options de choix</label>
-        <select class="form-control" id="select" multiple>
+        <label for="select-after">Options de choix</label>
+        <select class="form-control" id="select-after" multiple>
           <option>Option 1</option>
           <option>Option 2</option>
           <option>Option 3</option>
@@ -139,9 +140,26 @@
     </p>
   </form>
 
-  <p>
-    <button class="btn btn-primary" type="submit">Filtrer</button>
-  </p>
+  <hr>
+
+  <h2>Test transformation js</h2>
+
+  <form action="" data-filter-component>
+    <div class="form-group">
+      <label for="select">Ajouter un filtre</label>
+      <select class="form-control" id="select" multiple>
+        <option>Option 1</option>
+        <option>Option 2</option>
+        <option>Option 3</option>
+        <option>Option 4</option>
+        <option>Option 5</option>
+      </select>
+    </div>
+
+    <p>
+      <button class="btn btn-primary" type="submit">Filtrer</button>
+    </p>
+  </form>
 
 </div>
 </main>
@@ -149,7 +167,6 @@
 
 <script src="_assets/scripts/libs/jquery-2.2.0.min.js"></script>
 <script src="_assets/scripts/main/anchor_focus.js"></script>
-<script src="_assets/scripts/main/filter-component.js"></script>
 
 </body>
 </html>

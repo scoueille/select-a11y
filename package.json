@@ -4,6 +4,7 @@
   "description": "Module de gestion de filtre",
   "main": "index.js",
   "dependencies": {
+    "jquery": "^3.1.1"
   },
   "repository": {
     "type": "git",
@@ -24,7 +25,6 @@
     "gulp-livereload": "^3.8.1",
     "jasmine-core": "^2.5.2",
     "jasmine-jquery": "^2.1.1",
-    "jquery": "^3.1.1",
     "opn": "^4.0.2",
     "requirejs": "^2.3.2",
     "serve-static": "^1.11.1"
