@@ -116,7 +116,6 @@ define(['../lib/filter-component'], function (filterComponent) {
                     });
 
                     it("should have an input text", function () {
-                        var input = a11yDiv.find(':text');
                         expect(input).toExist();
                     });
 
@@ -192,6 +191,17 @@ define(['../lib/filter-component'], function (filterComponent) {
                                 });
                             });
 
+                        });
+                    });
+
+                    describe("on selection of an item in a11y selector", function () {
+
+                        beforeEach(function () {
+                            a11yDiv.find('#a11y-select-js').val('Option 2').trigger('input');
+                        });
+
+                        it('should empty the input after selection', function () {
+                            expect(input).toHaveValue('');
                         });
                     });
                 });
