@@ -259,6 +259,7 @@ define(['../lib/filter-component'], function (filterComponent) {
                             expect(span).toExist();
                             expect(span).toHaveId('selected-item-1');
                             expect(span).toHaveClass('tag-item');
+                            expect(span).toHaveData('value', 'Option 2');
                         });
 
                         it("should have a button to permit the deletion", function () {
@@ -291,22 +292,22 @@ define(['../lib/filter-component'], function (filterComponent) {
 
                     });
 
-                    describe('on the hidden select', function() {
+                    describe('on the hidden select', function () {
                         var hiddenSelect;
 
-                        beforeEach(function(){
+                        beforeEach(function () {
                             hiddenSelect = hiddenDiv.find('select');
                         });
 
-                        it('should select the option in the hidden select', function() {
+                        it('should select the option in the hidden select', function () {
                             var selectedOptions = hiddenSelect.find('option:selected');
                             expect(selectedOptions).toHaveLength(1);
                             expect(selectedOptions[0]).toHaveText('Option 2');
                         });
 
-                        describe('with several selections', function() {
+                        describe('with several selections', function () {
 
-                            beforeEach(function() {
+                            beforeEach(function () {
                                 a11yDiv.find('#a11y-select-js').val('Option 3').trigger('input');
                             });
 
@@ -318,6 +319,35 @@ define(['../lib/filter-component'], function (filterComponent) {
                             });
                         });
 
+                    });
+
+                    describe('on deletion of a list item', function () {
+
+                        beforeEach(function () {
+                            a11yDiv.find('#a11y-select-js').val('Option 3').trigger('input');
+                            listItem.find('span button').click();
+                        });
+
+                        it('should delete the list item', function () {
+                            listItem = ulSelection.find('li');
+                            expect(listItem.length).toEqual(1);
+                            expect(listItem[0]).toContainText('Option 3');
+                        });
+
+                        describe('on the hidden select', function () {
+                            var hiddenSelect;
+
+                            beforeEach(function () {
+                                hiddenSelect = hiddenDiv.find('select');
+                            });
+
+                            it('should unselect the option in the hidden select', function () {
+                                var selectedOptions = hiddenSelect.find('option:selected');
+                                expect(selectedOptions).toHaveLength(1);
+                                expect(selectedOptions[0]).toHaveText('Option 3');
+                            });
+
+                        });
                     });
 
                 });
