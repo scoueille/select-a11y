@@ -290,6 +290,36 @@ define(['../lib/filter-component'], function (filterComponent) {
                         });
 
                     });
+
+                    describe('on the hidden select', function() {
+                        var hiddenSelect;
+
+                        beforeEach(function(){
+                            hiddenSelect = hiddenDiv.find('select');
+                        });
+
+                        it('should select the option in the hidden select', function() {
+                            var selectedOptions = hiddenSelect.find('option:selected');
+                            expect(selectedOptions).toHaveLength(1);
+                            expect(selectedOptions[0]).toHaveText('Option 2');
+                        });
+
+                        describe('with several selections', function() {
+
+                            beforeEach(function() {
+                                a11yDiv.find('#a11y-select-js').val('Option 3').trigger('input');
+                            });
+
+                            it('should select the multiple options in the hidden select', function () {
+                                var selectedOptions = hiddenSelect.find('option:selected');
+                                expect(selectedOptions).toHaveLength(2);
+                                expect(selectedOptions[0]).toHaveText('Option 2');
+                                expect(selectedOptions[1]).toHaveText('Option 3');
+                            });
+                        });
+
+                    });
+
                 });
             })
         });
