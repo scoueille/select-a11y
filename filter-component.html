@@ -27,9 +27,11 @@
 <!--[if lt IE 8]>
 <div class="browsehappy">
   <div class="container">
-    <p>Savez-vous que votre navigateur est obsolète ?<p>
-    <p>Pour naviguer de la manière la plus satisfaisante sur le Web, nous vous recommandons de procéder à une <a href="http://windows.microsoft.com/fr-fr/internet-explorer/download-ie">mise à jour de votre navigateur</a>.
-    <br>Vous pouvez aussi <a href="http://browsehappy.com/">essayer d’autres navigateurs web populaires</a>.</p>
+    <p>Savez-vous que votre navigateur est obsolète ?
+    <p>
+    <p>Pour naviguer de la manière la plus satisfaisante sur le Web, nous vous recommandons de procéder à une <a
+        href="http://windows.microsoft.com/fr-fr/internet-explorer/download-ie">mise à jour de votre navigateur</a>.
+      <br>Vous pouvez aussi <a href="http://browsehappy.com/">essayer d’autres navigateurs web populaires</a>.</p>
   </div>
 </div>
 <![endif]-->
@@ -51,61 +53,88 @@
 </header>
 
 <main role="main" id="main" class="main">
-<div class="container main-container">
+  <div class="container main-container">
 
-  <h1>Filter component</h1>
+    <h1>Filter component</h1>
 
-  <h2>Avant transformation js</h2>
+    <h2>Test transformation js</h2>
 
-  <form action="">
-    <div class="form-group">
-      <label for="select-before">Ajouter un filtre</label>
-      <select class="form-control" id="select-before" multiple>
-        <option>Option 1</option>
-        <option>Option 2</option>
-        <option>Option 3</option>
-        <option>Option 4</option>
-        <option>Option 5</option>
-      </select>
-    </div>
-
-    <p>
-      <button class="btn btn-primary" type="submit">Filtrer</button>
-    </p>
-  </form>
-
-  <hr>
-
-  <h2>Après transformation js</h2>
-
-  <form action="">
-    <button type="button" class="btn" aria-expanded="true">
-      Ajouter un filtre
-    </button>
-    <!-- au click sur le bouton, on affiche champs de recherche ainsi que le "select" -->
-
-    <div class="">
-      <div aria-live="polite" class="sr-only">
-        <p>Ici le nombre de suggestions et autres actions partinentes à vocaliser</p>
+    <form action="" data-filter-component>
+      <div class="form-group">
+        <label for="select">Ajouter un filtre</label>
+        <select class="form-control" id="select" multiple>
+          <option>Albanie</option>
+          <option>Allemagne</option>
+          <option>Andorre</option>
+          <option>Arménie1</option>
+          <option>Autriche</option>
+          <option>Azerbaïdjan1</option>
+          <option>Belgique</option>
+          <option>Biélorussie</option>
+          <option>Bosnie-Herzégovine</option>
+          <option>Bulgarie</option>
+          <option>Chypre1</option>
+          <option>Croatie</option>
+          <option>Danemark</option>
+          <option>Espagne</option>
+          <option>Estonie</option>
+          <option>Finlande</option>
+          <option>France</option>
+          <option>Géorgie</option>
+          <option>Grèce</option>
+          <option>Hongrie</option>
+          <option>Irlande</option>
+          <option>Islande</option>
+          <option>Italie</option>
+          <option>Kazakhstan</option>
+          <option>Kosovo</option>
+          <option>Lettonie</option>
+          <option>Liechtenstein</option>
+          <option>Lituanie</option>
+          <option>Luxembourg</option>
+          <option>Macédoine</option>
+          <option>Malte</option>
+          <option>Moldavie</option>
+          <option>Monaco</option>
+          <option>Monténégro</option>
+          <option>Norvège</option>
+          <option>Pays-Bas</option>
+          <option>Pologne</option>
+          <option>Portugal</option>
+          <option>République tchèque</option>
+          <option>Roumanie</option>
+          <option>Royaume-Uni</option>
+          <option>Russie</option>
+          <option>Saint-Marin</option>
+          <option>Serbie</option>
+          <option>Slovaquie</option>
+          <option>Slovénie</option>
+          <option>Suède</option>
+          <option>Suisse</option>
+          <option>Turquie</option>
+          <option>Ukraine</option>
+          <option>Vatican</option>
+        </select>
       </div>
 
-      <div class="form-group row">
-        <label for="select-js" class="sr-only">Chercher dans les filtres</label>
-        <input type="text"  id="select-js" class="form-control js-combobox" list="option-list" >
-        <datalist id="option-list">
-          <option value="option 1">
-          <option value="option 2">
-          <option value="option 3">
-          <option value="option 4">
-          <option value="option 5">
-          <option value="option 6">
-          <option value="truc 1">
-        </datalist>
-      </div>     
+      <p>
+        <button class="btn btn-primary" type="submit">Filtrer</button>
+      </p>
+    </form>
 
-      <div class="form-group" hidden> <!-- caché et stocke l'information, reçoit les élements clavier ? -->
-        <label for="select-after">Options de choix</label>
-        <select class="form-control" id="select-after" multiple>
+    <br>
+    <br>
+    <hr>
+    <br>
+    <br>
+
+    <h2>Spécification</h2>
+    <h3>Avant transformation js</h3>
+
+    <form action="">
+      <div class="form-group">
+        <label for="select-before">Ajouter un filtre</label>
+        <select class="form-control" id="select-before" multiple>
           <option>Option 1</option>
           <option>Option 2</option>
           <option>Option 3</option>
@@ -114,55 +143,80 @@
         </select>
       </div>
 
-    </div>
+      <p>
+        <button class="btn btn-primary" type="submit">Filtrer</button>
+      </p>
+    </form>
 
-    <ul class="list-inline">
-      <li>
-      <span id="selected-option-1" class="tag-item">
-        option 1
-        <button class="tag-item-supp" title="supprimer la selection" aria-labelledby="selected-option-1" type="button">
-          <span class="sr-only">supprimer</span>
-        </button>
-      </span>
-      </li>
+    <hr>
 
-      <li>
-      <span id="selected-option-2" class="tag-item">
-        option 2
-        <button class="tag-item-supp" title="supprimer la selection" aria-labelledby="selected-option-2" type="button">
-          <span class="sr-only">supprimer</span>
-        </button>
-      </span>
-      </li>
-    </ul>
+    <h3>Après transformation js</h3>
 
-    <p>
-      <button class="btn btn-primary" type="submit">Filtrer</button>
-    </p>
-  </form>
+    <form action="">
+      <button type="button" class="btn" aria-expanded="true">
+        Ajouter un filtre
+      </button>
+      <!-- au click sur le bouton, on affiche champs de recherche ainsi que le "select" -->
 
-  <hr>
+      <div class="">
+        <div aria-live="polite" class="sr-only">
+          <p>Ici le nombre de suggestions et autres actions partinentes à vocaliser</p>
+        </div>
 
-  <h2>Test transformation js</h2>
+        <div class="form-group row">
+          <label for="select-js" class="sr-only">Chercher dans les filtres</label>
+          <input type="text" id="select-js" class="form-control js-combobox" list="option-list">
+          <datalist id="option-list">
+            <option value="option 1">
+            <option value="option 2">
+            <option value="option 3">
+            <option value="option 4">
+            <option value="option 5">
+            <option value="option 6">
+            <option value="truc 1">
+          </datalist>
+        </div>
 
-  <form action="" data-filter-component>
-    <div class="form-group">
-      <label for="select">Ajouter un filtre</label>
-      <select class="form-control" id="select" multiple>
-        <option>Option 1</option>
-        <option>Option 2</option>
-        <option>Option 3</option>
-        <option>Option 4</option>
-        <option>Option 5</option>
-      </select>
-    </div>
+        <div class="form-group" hidden> <!-- caché et stocke l'information, reçoit les élements clavier ? -->
+          <label for="select-after">Options de choix</label>
+          <select class="form-control" id="select-after" multiple>
+            <option>Option 1</option>
+            <option>Option 2</option>
+            <option>Option 3</option>
+            <option>Option 4</option>
+            <option>Option 5</option>
+          </select>
+        </div>
 
-    <p>
-      <button class="btn btn-primary" type="submit">Filtrer</button>
-    </p>
-  </form>
+        <ul class="list-inline">
+          <li>
+            <span id="selected-option-1" class="tag-item">
+              option 1
+              <button class="tag-item-supp" title="supprimer la selection" aria-labelledby="selected-option-1"
+                      type="button">
+                <span class="sr-only">supprimer</span>
+              </button>
+            </span>
+          </li>
 
-</div>
+          <li>
+            <span id="selected-option-2" class="tag-item">
+              option 2
+              <button class="tag-item-supp" title="supprimer la selection" aria-labelledby="selected-option-2"
+                      type="button">
+                <span class="sr-only">supprimer</span>
+              </button>
+            </span>
+          </li>
+        </ul>
+      </div>
+
+      <p>
+        <button class="btn btn-primary" type="submit">Filtrer</button>
+      </p>
+    </form>
+
+  </div>
 </main>
 
 
