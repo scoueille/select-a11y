@@ -169,6 +169,10 @@ define(['../lib/filter-component'], function (filterComponent) {
                                 expect(input).toHaveAttr('list', 'a11y-select-option-list');
                             });
 
+                            it("should have an attribut 'autocomplete' to off", function () {
+                                expect(input).toHaveAttr('autocomplete', 'off');
+                            });
+
                             it("should have a label for sr only", function () {
                                 var label = a11yDiv.find('label');
                                 expect(label).toExist();
