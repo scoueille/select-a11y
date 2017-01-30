@@ -59,10 +59,10 @@
 
     <h2>Test transformation js</h2>
 
-    <form action="" data-filter-component>
+    <form action="">
       <div class="form-group">
         <label for="select">Ajouter un filtre</label>
-        <select class="form-control" id="select" multiple>
+        <select class="form-control" id="select" multiple data-filter-component>
           <option>Albanie</option>
           <option>Allemagne</option>
           <option>Andorre</option>
@@ -153,16 +153,16 @@
     <h3>Après transformation js</h3>
 
     <form action="">
-      <button type="button" class="btn" aria-expanded="true">
-        Ajouter un filtre
-      </button>
-      <!-- au click sur le bouton, on affiche champs de recherche ainsi que le "select" -->
 
       <div class="">
         <div aria-live="polite" class="sr-only">
           <p>Ici le nombre de suggestions et autres actions partinentes à vocaliser</p>
         </div>
 
+        <button type="button" class="btn" aria-expanded="true">
+          Ajouter un filtre
+        </button>
+        <!-- au click sur le bouton, on affiche champs de recherche ainsi que le "select" -->
         <div class="form-group row">
           <label for="select-js" class="sr-only">Chercher dans les filtres</label>
           <input type="text" id="select-js" class="form-control js-combobox" list="option-list">

@@ -5,10 +5,10 @@ define(['../lib/filter-component'], function (filterComponent) {
 
         beforeEach(function () {
             fixture = setFixtures('' +
-                '<form action="" data-filter-component>' +
+                '<form action="">' +
                 '  <div class="form-group">' +
-                '    <label for="select">Ajouter un filtre</label>' +
-                '    <select class="form-control" id="select" multiple>' +
+                '    <label for="select">Sélectionner une option</label>' +
+                '    <select class="form-control" id="selectOption" multiple data-filter-component>' +
                 '        <option>Option 1</option>' +
                 '        <option>Option 2</option>' +
                 '        <option>Option 3</option>' +
@@ -16,14 +16,8 @@ define(['../lib/filter-component'], function (filterComponent) {
                 '        <option>Option 5</option>' +
                 '    </select>' +
                 '  </div>' +
-                '  <p>' +
-                '    <button class="btn btn-primary" type="submit">Filtrer</button>' +
-                '  </p>' +
-                '</form>' +
-                '' +
-                '<form action="" class="form-i-must-not-tranform">' +
                 '  <div class="form-group">' +
-                '    <label for="select">Ajouter un filtre pas transformé</label>' +
+                '    <label for="select-i-must-not-transform">Ajouter un filtre pas transformé</label>' +
                 '    <select class="form-control" id="select-i-must-not-transform" multiple>' +
                 '        <option>Option 1</option>' +
                 '        <option>Option 2</option>' +
@@ -37,51 +31,51 @@ define(['../lib/filter-component'], function (filterComponent) {
         });
 
         describe("before transformation", function () {
-            var formToTranform;
+            var selectToTransform;
 
             beforeEach(function () {
-                formToTranform = fixture.find('form[data-filter-component]');
+                selectToTransform = fixture.find('select[data-filter-component]');
             });
 
-            it("should have a form with data-filter-component", function () {
-                expect(formToTranform).toExist();
+            it("should have a data-filter-component", function () {
+                expect(selectToTransform).toExist();
             });
 
-            it("should have one submit button", function () {
-                var button = formToTranform.find(':submit');
-                expect(button).toExist();
+            it("should have a div as parent", function () {
+                expect(selectToTransform.parent()).toBeMatchedBy('div');
             });
 
-            it("should have one select", function () {
-                var select = formToTranform.find('select');
-                expect(select).toExist();
+            it("should have an id", function () {
+                expect(selectToTransform).toHaveId('selectOption');
             });
 
-            it("should have one select in a div", function () {
-                var select = formToTranform.find('select');
-                expect(select.parent()).toBeMatchedBy('div');
+            it("should have a label", function () {
+                var label = selectToTransform.parent().find('label');
+                expect(label).toHaveAttr('for', 'select');
             });
 
         });
 
         describe("after transformation", function () {
-            var tranformedForm;
+            var tranformedSelect;
+            var hiddenSelectId;
             var a11yDiv;
             var hiddenDiv;
 
             beforeEach(function () {
                 filterComponent.transform();
-                tranformedForm = fixture.find('form[data-filter-component]');
-                hiddenDiv = tranformedForm.find('select').parent();
+                tranformedSelect = fixture.find('select[data-filter-component]');
+                hiddenSelectId = tranformedSelect.attr('id');
+                hiddenDiv = tranformedSelect.parent();
                 a11yDiv = hiddenDiv.prev();
             });
 
-            it("should hide the transformed form", function () {
-                expect(tranformedForm).toBeHidden();
+            it("should hide the a11y selector", function () {
+                expect(a11yDiv).toBeHidden();
             });
 
-            it("should NOT hide the form I must not transform", function () {
-                var divIMustNotTransform = fixture.find('form.form-i-must-not-tranform');
+            it("should NOT hide the select I must not transform", function () {
+                var divIMustNotTransform = fixture.find('#select-i-must-not-transform');
                 expect(divIMustNotTransform).not.toBeHidden();
             });
 
@@ -89,14 +83,18 @@ define(['../lib/filter-component'], function (filterComponent) {
                 var filterButton;
 
                 beforeEach(function () {
-                    filterButton = tranformedForm.prev();
+                    filterButton = a11yDiv.prev();
                 });
 
-                it("should add a button before the transformed form", function () {
+                it("should be before the a11y selector", function () {
                     expect(filterButton).toExist();
                     expect(filterButton).toBeMatchedBy('button');
                     expect(filterButton).toHaveClass('btn');
                     expect(filterButton).toHaveAttr('aria-expanded', 'true');
+                });
+
+                it("should have the same text than the label of the hidden select", function () {
+                    expect(filterButton).toHaveText('Sélectionner une option');
                 });
 
                 describe("on click on the button", function () {
@@ -104,17 +102,12 @@ define(['../lib/filter-component'], function (filterComponent) {
                         filterButton.click();
                     });
 
-                    it("should show the transformed form", function () {
-                        expect(tranformedForm).not.toBeHidden();
+                    it("should show the a11y selector", function () {
+                        expect(a11yDiv).not.toBeHidden();
                     });
 
                     it("should hide the inner div of the transformed form", function () {
                         expect(hiddenDiv).toBeHidden();
-                    });
-
-                    it("should NOT hide the inner div of the form I must not transform", function () {
-                        var divIMustNotTransform = fixture.find('form.form-i-must-not-tranform div');
-                        expect(divIMustNotTransform).not.toBeHidden();
                     });
 
                     describe("a new div contains the a11y selector", function () {
@@ -148,8 +141,8 @@ define(['../lib/filter-component'], function (filterComponent) {
                                 expect(input).toExist();
                             });
 
-                            it("should have an id", function () {
-                                expect(input).toHaveId('a11y-select-js');
+                            it("should have an id build with transformed select id", function () {
+                                expect(input).toHaveId('a11y-' + hiddenSelectId + '-js');
                             });
 
                             it("should have a class js-combobox", function () {
@@ -166,7 +159,7 @@ define(['../lib/filter-component'], function (filterComponent) {
                             });
 
                             it("should have an attribut 'list'", function () {
-                                expect(input).toHaveAttr('list', 'a11y-select-option-list');
+                                expect(input).toHaveAttr('list', 'a11y-' + hiddenSelectId + '-list');
                             });
 
                             it("should have an attribut 'autocomplete' to off", function () {
@@ -177,7 +170,7 @@ define(['../lib/filter-component'], function (filterComponent) {
                                 var label = a11yDiv.find('label');
                                 expect(label).toExist();
                                 expect(label).toHaveClass('sr-only');
-                                expect(label).toHaveAttr('for', 'a11y-select-js');
+                                expect(label).toHaveAttr('for', 'a11y-' + hiddenSelectId + '-js');
                             });
 
                             describe("The datalist is filled with the hidden select options", function () {
@@ -192,7 +185,7 @@ define(['../lib/filter-component'], function (filterComponent) {
                                 });
 
                                 it("should have an id", function () {
-                                    expect(datalist).toHaveId('a11y-select-option-list');
+                                    expect(datalist).toHaveId('a11y-' + hiddenSelectId + '-list');
                                 });
 
                                 describe("should be filled with the existing hidden select options", function () {
@@ -230,7 +223,7 @@ define(['../lib/filter-component'], function (filterComponent) {
                             describe("on selection of an item in a11y selector", function () {
 
                                 beforeEach(function () {
-                                    a11yDiv.find('#a11y-select-js').val('Option 2').trigger('input');
+                                    a11yDiv.find('#a11y-' + hiddenSelectId + '-js').val('Option 2').trigger('input');
                                 });
 
                                 it('should empty the input after selection', function () {
@@ -242,11 +235,9 @@ define(['../lib/filter-component'], function (filterComponent) {
 
                     describe("a new div contains the descrition for a11y screen reader", function () {
                         var srDiv;
-                        var hiddenDiv;
 
                         beforeEach(function () {
-                            hiddenDiv = tranformedForm.find('div:hidden');
-                            srDiv = hiddenDiv.prev().prev();
+                            srDiv = a11yDiv.prev().prev();
                         });
 
                         it("should add the div before the a11y enhanced selector div", function () {
@@ -287,7 +278,7 @@ define(['../lib/filter-component'], function (filterComponent) {
                             var listItem;
 
                             beforeEach(function () {
-                                a11yDiv.find('#a11y-select-js').val('Option 2').trigger('input');
+                                a11yDiv.find('#a11y-' + hiddenSelectId + '-js').val('Option 2').trigger('input');
                                 listItem = ulSelection.find('li');
                             });
 
@@ -351,7 +342,7 @@ define(['../lib/filter-component'], function (filterComponent) {
                                 describe('with several selections', function () {
 
                                     beforeEach(function () {
-                                        a11yDiv.find('#a11y-select-js').val('Option 3').trigger('input');
+                                        a11yDiv.find('#a11y-' + hiddenSelectId + '-js').val('Option 3').trigger('input');
                                     });
 
                                     it('should select the multiple options in the hidden select', function () {
@@ -367,7 +358,7 @@ define(['../lib/filter-component'], function (filterComponent) {
                             describe('on deletion of a list item', function () {
 
                                 beforeEach(function () {
-                                    a11yDiv.find('#a11y-select-js').val('Option 3').trigger('input');
+                                    a11yDiv.find('#a11y-' + hiddenSelectId + '-js').val('Option 3').trigger('input');
                                     listItem.find('span button').click();
                                 });
 
