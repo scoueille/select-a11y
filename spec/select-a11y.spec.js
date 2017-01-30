@@ -1,6 +1,6 @@
 /* global describe, expect, it, beforeEach */
-define(['../lib/filter-component'], function (filterComponent) {
-    describe("A accessybility select", function () {
+define(['../lib/select-a11y'], function (filterComponent) {
+    describe("An accessybility select", function () {
         var fixture;
 
         beforeEach(function () {
@@ -8,7 +8,7 @@ define(['../lib/filter-component'], function (filterComponent) {
                 '<form action="">' +
                 '  <div class="form-group">' +
                 '    <label for="select-option">Sélectionner une option</label>' +
-                '    <select class="form-control" id="select-option" multiple data-filter-component>' +
+                '    <select class="form-control" id="select-option" multiple data-select-a11y>' +
                 '        <option>Option 1</option>' +
                 '        <option>Option 2</option>' +
                 '        <option>Option 3</option>' +
@@ -18,7 +18,7 @@ define(['../lib/filter-component'], function (filterComponent) {
                 '  </div>' +
                 '  <div class="form-group">' +
                 '    <label for="select-element">Sélectionner un élément</label>' +
-                '    <select class="form-control" id="select-element" multiple data-filter-component>' +
+                '    <select class="form-control" id="select-element" multiple data-select-a11y>' +
                 '        <option>Element 1</option>' +
                 '        <option>Element 2</option>' +
                 '        <option>Element 3</option>' +
@@ -42,7 +42,7 @@ define(['../lib/filter-component'], function (filterComponent) {
             var selectsToTransform;
 
             beforeEach(function () {
-                selectsToTransform = fixture.find('select[data-filter-component]');
+                selectsToTransform = fixture.find('select[data-select-a11y]');
             });
 
             function executeTests(index) {
@@ -55,7 +55,7 @@ define(['../lib/filter-component'], function (filterComponent) {
                 describe("for select[" + index + "]", function () {
                     var ids = ['select-option', 'select-element'];
 
-                    it("should have a data-filter-component", function () {
+                    it("should have a data-select-a11y", function () {
                         expect(selectToTransform).toExist();
                     });
 
@@ -85,7 +85,7 @@ define(['../lib/filter-component'], function (filterComponent) {
 
             beforeEach(function () {
                 filterComponent.transform();
-                transformedSelects = fixture.find('select[data-filter-component]');
+                transformedSelects = fixture.find('select[data-select-a11y]');
             });
 
             function executeTests(index) {

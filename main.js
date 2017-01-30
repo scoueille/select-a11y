@@ -5,6 +5,6 @@ require.config({
     }
 });
 
-requirejs(['lib/filter-component'], function (filterComponent) {
-    filterComponent.transform();
+requirejs(['lib/select-a11y'], function (a11ySelect) {
+    a11ySelect.transform();
 });

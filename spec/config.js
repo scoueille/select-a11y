@@ -23,7 +23,7 @@ require.config({
 });
 
 var specification_list = [
-    'spec/filter-component.spec'
+    'spec/select-a11y.spec'
 ];
 
 requirejs(['jasmine-jquery'], function () {
