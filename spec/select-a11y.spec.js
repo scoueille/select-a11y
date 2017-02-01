@@ -143,6 +143,11 @@ define(['../lib/select-a11y'], function (filterComponent) {
                                 expect(hiddenDiv).toBeHidden();
                             });
 
+                            it("should change the focus to the input", function () {
+                                var input = a11yDiv.find(':text');
+                                expect(input).toBeFocused();
+                            });
+
                             describe("a new div contains the a11y selector", function () {
 
                                 it("should add the div before the hidden div", function () {
@@ -205,6 +210,11 @@ define(['../lib/select-a11y'], function (filterComponent) {
                                         expect(label).toHaveClass('sr-only');
                                         expect(label).toHaveAttr('for', 'a11y-' + hiddenSelectId + '-js');
                                         expect(label).toHaveText(labels[index]);
+                                    });
+
+                                    it("should hide the parent on focus out", function () {
+                                        input.trigger('focusout');
+                                        expect(a11yDiv).toBeHidden();
                                     });
 
                                     describe("The datalist is filled with the hidden select options", function () {
