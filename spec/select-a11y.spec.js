@@ -401,7 +401,7 @@ define(['../lib/select-a11y'], function (filterComponent) {
 
                                     describe("when the selected element is already selected", function () {
                                         beforeEach(function () {
-                                            a11yDiv.find('#a11y-select-js').val(testFirstInputValues[index]).trigger('input');
+                                            a11yDiv.find('#a11y-' + hiddenSelectId + '-js').val(testFirstInputValues[index]).trigger('input');
                                             listItem = ulSelection.find('li');
                                         });
 
