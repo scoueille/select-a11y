@@ -59,10 +59,10 @@
 
     <h2>Test transformation js</h2>
 
-    <form action="">
+    <form action="" method="post">
       <div class="form-group">
         <label for="select-europe">Ajouter un pays européen</label>
-        <select class="form-control" id="select-europe" multiple data-select-a11y>
+        <select name="select-europe" class="form-control" id="select-europe" multiple data-select-a11y>
           <option>Albanie</option>
           <option>Allemagne</option>
           <option>Andorre</option>
@@ -118,7 +118,7 @@
       </div>
       <div class="form-group">
         <label for="select-amerique">Ajouter un pays américain</label>
-        <select class="form-control" id="select-amerique" multiple data-select-a11y>
+        <select name="select-amerique" class="form-control" id="select-amerique" multiple data-select-a11y>
           <option>Antigua-et-Barbuda</option>
           <option>Argentine</option>
           <option>Bahamas</option>
@@ -127,7 +127,7 @@
           <option>Bolivie</option>
           <option>Brésil</option>
           <option>Canada</option>
-          <option>Chili-Herzégovine</option>
+          <option>Chili</option>
           <option>Colombie</option>
           <option>Costa Rica</option>
           <option>Cuba</option>
@@ -171,10 +171,10 @@
     <h2>Spécification</h2>
     <h3>Avant transformation js</h3>
 
-    <form action="">
+    <form action="" method="post">
       <div class="form-group">
         <label for="select-before">Ajouter un filtre</label>
-        <select class="form-control" id="select-before" multiple>
+        <select name="select-before" class="form-control" id="select-before" multiple>
           <option>Option 1</option>
           <option>Option 2</option>
           <option>Option 3</option>
@@ -192,8 +192,7 @@
 
     <h3>Après transformation js</h3>
 
-    <form action="">
-
+    <form action="" method="post">
       <div class="">
         <div aria-live="polite" class="sr-only">
           <p>Ici le nombre de suggestions et autres actions partinentes à vocaliser</p>
@@ -219,7 +218,7 @@
 
         <div class="form-group" hidden> <!-- caché et stocke l'information, reçoit les élements clavier ? -->
           <label for="select-after">Options de choix</label>
-          <select class="form-control" id="select-after" multiple>
+          <select name="select-after" class="form-control" id="select-after" multiple>
             <option>Option 1</option>
             <option>Option 2</option>
             <option>Option 3</option>
