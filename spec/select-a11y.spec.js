@@ -291,6 +291,45 @@ define(['../lib/select-a11y'], function (filterComponent) {
                                 it("should have an attribut 'aria-live'", function () {
                                     expect(srDiv).toHaveAttr('aria-live', 'polite');
                                 });
+
+                                describe("on input in a11y selector", function () {
+                                    var listItem;
+                                    var description;
+                                    var testInputValues = ['Option', 'Element'];
+                                    var testInputListSize = [5, 3];
+
+                                    beforeEach(function () {
+                                        var ulSelection = hiddenDiv.next();
+
+                                        a11yDiv.find('#a11y-' + hiddenSelectId + '-js').val(testInputValues[index]).trigger('input');
+                                        listItem = ulSelection.find('li');
+                                        description = srDiv.find('p');
+                                    });
+
+                                    it("should NOT add a list item in the selected items list", function () {
+                                        expect(listItem.length).toEqual(0);
+                                    });
+
+                                    it("should update the a11y screen reader with the number of filtered items", function () {
+                                        expect(description).toHaveText(testInputListSize[index] + ' éléments dans la liste');
+                                    });
+                                });
+
+                                describe("on selection of an item in a11y selector", function () {
+                                    var description;
+                                    var testInputValues = ['Option 2', 'Element 2'];
+
+                                    beforeEach(function () {
+
+                                        a11yDiv.find('#a11y-' + hiddenSelectId + '-js').val(testInputValues[index]).trigger('input');
+                                        description = srDiv.find('p');
+                                    });
+
+                                    it("should update the a11y screen reader with the selected item", function () {
+                                        expect(description).toHaveText(testInputValues[index] + ' sélectionné');
+                                    });
+                                });
+
                             });
 
                             describe("a list contains the selected items", function () {
