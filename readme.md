@@ -1,4 +1,4 @@
-# Filter componant
+# Filter component
 
 Un module pour gérer des filtres
 

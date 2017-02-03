@@ -111,7 +111,7 @@ define(['../lib/select-a11y'], function (filterComponent) {
                         expect(divIMustNotTransform).not.toBeHidden();
                     });
 
-                    describe("a new button permit to add a filter", function () {
+                    describe("a new button permit to show the a11y selector", function () {
                         var filterButton;
                         var labels = ["Sélectionner une option", "Sélectionner un élément"];
 
@@ -168,6 +168,9 @@ define(['../lib/select-a11y'], function (filterComponent) {
                                 it("should have the classes of the hidden div", function () {
                                     var classList = hiddenDiv.attr('class').split(/\s+/);
 
+                                    var indexOfTagHiddenClass = classList.indexOf('tag-hidden');
+                                    classList.splice(indexOfTagHiddenClass, 1);
+
                                     classList.forEach(function (clazz) {
                                         expect(a11yDiv).toHaveClass(clazz);
                                     });
@@ -201,11 +204,11 @@ define(['../lib/select-a11y'], function (filterComponent) {
                                         });
                                     });
 
-                                    it("should have an attribut 'list'", function () {
+                                    it("should have an attribute 'list'", function () {
                                         expect(input).toHaveAttr('list', 'a11y-' + hiddenSelectId + '-list');
                                     });
 
-                                    it("should have an attribut 'autocomplete' to off", function () {
+                                    it("should have an attribute 'autocomplete' to off", function () {
                                         expect(input).toHaveAttr('autocomplete', 'off');
                                     });
 
@@ -298,7 +301,7 @@ define(['../lib/select-a11y'], function (filterComponent) {
                                     expect(srDiv.find('p')).toExist();
                                 });
 
-                                it("should have an attribut 'aria-live'", function () {
+                                it("should have an attribute 'aria-live'", function () {
                                     expect(srDiv).toHaveAttr('aria-live', 'polite');
                                 });
 

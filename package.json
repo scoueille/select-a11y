@@ -1,7 +1,7 @@
 {
-  "name": "filter-component",
-  "version": "0.1.0",
-  "description": "Module de gestion de filtre",
+  "name": "select-a11y",
+  "version": "0.2.0",
+  "description": "Module de select multiple accessible",
   "main": "index.js",
   "dependencies": {
     "jquery": "^3.1.1"
