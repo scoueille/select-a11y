@@ -123,7 +123,11 @@ define(['../lib/select-a11y'], function (filterComponent) {
                             expect(filterButton).toExist();
                             expect(filterButton).toBeMatchedBy('button');
                             expect(filterButton).toHaveClass('btn');
-                            expect(filterButton).toHaveAttr('aria-expanded', 'true');
+                        });
+
+                        it("should have aria-expanded to 'false' when a11y selector is hidden", function () {
+                            expect(a11yDiv).toBeHidden();
+                            expect(filterButton).toHaveAttr('aria-expanded', 'false');
                         });
 
                         it("should have the same text than the label of the hidden select", function () {
@@ -137,6 +141,7 @@ define(['../lib/select-a11y'], function (filterComponent) {
 
                             it("should show the a11y selector", function () {
                                 expect(a11yDiv).not.toBeHidden();
+                                expect(filterButton).toHaveAttr('aria-expanded', 'true');
                             });
 
                             it("should hide the inner div of the transformed form", function () {
