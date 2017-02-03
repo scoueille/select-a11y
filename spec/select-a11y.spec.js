@@ -212,11 +212,6 @@ define(['../lib/select-a11y'], function (filterComponent) {
                                         expect(label).toHaveText(labels[index]);
                                     });
 
-                                    it("should hide the parent on focus out", function () {
-                                        input.trigger('focusout');
-                                        expect(a11yDiv).toBeHidden();
-                                    });
-
                                     describe("The datalist is filled with the hidden select options", function () {
                                         var datalist;
 
@@ -386,8 +381,7 @@ define(['../lib/select-a11y'], function (filterComponent) {
                                             var button = listItem.find('span button');
                                             expect(button).toExist();
                                             expect(button).toHaveClass('tag-item-supp');
-                                            expect(button).toHaveAttr('title', 'supprimer la selection');
-                                            expect(button).toHaveAttr('aria-labelledby', hiddenSelectId + '-1');
+                                            expect(button).toHaveAttr('title', 'supprimer ' + testFirstInputValues[index]);
                                             expect(button).toHaveAttr('type', 'button');
                                         });
 
