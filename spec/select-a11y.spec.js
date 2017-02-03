@@ -444,13 +444,19 @@ define(['../lib/select-a11y'], function (filterComponent) {
 
                                         beforeEach(function () {
                                             a11yDiv.find('#a11y-' + hiddenSelectId + '-js').val(testSecondInputValues[index]).trigger('input');
-                                            listItem.find('span button').click();
+                                            listItem = ulSelection.find('li');
+                                            $(listItem[1]).find('span button').click();
+                                            listItem = ulSelection.find('li');
                                         });
 
                                         it("should delete the list item", function () {
-                                            listItem = ulSelection.find('li');
                                             expect(listItem.length).toEqual(1);
-                                            expect(listItem[0]).toContainText(testSecondInputValues[index]);
+                                            expect(listItem[0]).toContainText(testFirstInputValues[index]);
+                                        });
+
+                                        it("should focus on the previous list item button", function () {
+                                            var previousDeleteButton = $(listItem[0]).find('button');
+                                            expect(previousDeleteButton).toBeFocused();
                                         });
 
                                         describe("on the hidden select", function () {
@@ -463,9 +469,21 @@ define(['../lib/select-a11y'], function (filterComponent) {
                                             it("should unselect the option in the hidden select", function () {
                                                 var selectedOptions = hiddenSelect.find('option:selected');
                                                 expect(selectedOptions).toHaveLength(1);
-                                                expect(selectedOptions[0]).toHaveText(testSecondInputValues[index]);
+                                                expect(selectedOptions[0]).toHaveText(testFirstInputValues[index]);
                                             });
 
+                                        });
+
+                                        describe("on the last item deletion", function () {
+                                            beforeEach(function () {
+                                                $(listItem[0]).find('span button').click();
+                                                listItem = ulSelection.find('li');
+                                            });
+
+                                            it("should focus on the input", function () {
+                                                var input = a11yDiv.find(':text');
+                                                expect(input).toBeFocused();
+                                            });
                                         });
                                     });
 
