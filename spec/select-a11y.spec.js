@@ -316,7 +316,7 @@ define(['../lib/select-a11y'], function (filterComponent) {
                                     });
 
                                     it("should update the a11y screen reader with the number of filtered items", function () {
-                                        expect(description).toHaveText(testInputListSize[index] + ' éléments dans la liste');
+                                        expect(description).toHaveText(testInputListSize[index] + ' suggestions disponibles');
                                     });
                                 });
 
