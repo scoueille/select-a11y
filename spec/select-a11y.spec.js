@@ -83,415 +83,627 @@ define(['../lib/select-a11y'], function (filterComponent) {
         describe("after transformation", function () {
             var transformedSelects;
 
+            function createTabEvent(shift) {
+                return $.Event('keydown', {keyCode: 9, shiftKey: !!shift});
+            }
+
+            function createUpArrowEvent() {
+                return $.Event('keydown', {keyCode: 38});
+            }
+
+            function createDownArrowEvent() {
+                return $.Event('keydown', {keyCode: 40});
+            }
+
+            function createEscEvent() {
+                return $.Event('keydown', {keyCode: 27});
+            }
+
+            function createEnterEvent() {
+                return $.Event('keydown', {keyCode: 13});
+            }
+
+            function createSpaceEvent() {
+                return $.Event('keydown', {keyCode: 32});
+            }
+
             beforeEach(function () {
                 filterComponent.transform();
                 transformedSelects = fixture.find('select[data-select-a11y]');
             });
 
             function executeTests(index) {
+                var $transformedSelect;
                 var hiddenSelectId;
-                var a11yDiv;
-                var hiddenDiv;
+                var $a11ySelectContainer;
+                var $hiddenSelectContainer;
 
                 beforeEach(function () {
-                    var transformedSelect = $(transformedSelects[index]);
-                    hiddenSelectId = transformedSelect.attr('id');
-                    hiddenDiv = transformedSelect.parent();
-                    a11yDiv = hiddenDiv.prev();
+                    $transformedSelect = $(transformedSelects[index]);
+                    hiddenSelectId = $transformedSelect.attr('id');
+                    $hiddenSelectContainer = $transformedSelect.parent();
+                    $a11ySelectContainer = $hiddenSelectContainer.prev();
                 });
 
                 describe("for select[" + index + "]", function () {
 
-                    it("should hide the a11y selector", function () {
-                        expect(a11yDiv).toBeHidden();
+                    it("should add the a11y select container before the container of the select to transform", function () {
+                        expect($a11ySelectContainer).toExist();
+                        expect($a11ySelectContainer).toBeMatchedBy('div');
+                    });
+
+                    it("should hide the a11y select container", function () {
+                        expect($a11ySelectContainer).toBeHidden();
+                    });
+
+                    it("should hide the container of the select to transform", function () {
+                        expect($hiddenSelectContainer).toBeHidden();
                     });
 
                     it("should NOT hide the select I must not transform", function () {
-                        var divIMustNotTransform = fixture.find('#select-i-must-not-transform');
-                        expect(divIMustNotTransform).not.toBeHidden();
+                        var $selectIMustNotTransform = fixture.find('#select-i-must-not-transform');
+                        expect($selectIMustNotTransform).not.toBeHidden();
                     });
 
-                    describe("a new button permit to show the a11y selector", function () {
-                        var filterButton;
-                        var labels = ["Sélectionner une option", "Sélectionner un élément"];
+                    describe("a new button permit to show the a11y select container", function () {
+                        var $revealButton;
+                        var $hiddenSelectLabel;
 
                         beforeEach(function () {
-                            filterButton = a11yDiv.prev();
+                            $revealButton = $a11ySelectContainer.prev();
+                            $hiddenSelectLabel = $hiddenSelectContainer.find("label");
                         });
 
-                        it("should be before the a11y selector", function () {
-                            expect(filterButton).toExist();
-                            expect(filterButton).toBeMatchedBy('button');
-                            expect(filterButton).toHaveClass('btn');
+                        it("should be before the a11y select container", function () {
+                            expect($revealButton).toExist();
+                            expect($revealButton).toBeMatchedBy('button');
+                            expect($revealButton).toHaveClass('btn');
                         });
 
-                        it("should have aria-expanded to 'false' when a11y selector is hidden", function () {
-                            expect(a11yDiv).toBeHidden();
-                            expect(filterButton).toHaveAttr('aria-expanded', 'false');
+                        it("should have aria-expanded to 'false' when a11y select container is hidden", function () {
+                            expect($revealButton).toHaveAttr('aria-expanded', 'false');
                         });
 
                         it("should have the same text than the label of the hidden select", function () {
-                            expect(filterButton).toHaveText(labels[index]);
+                            expect($revealButton).toHaveText($hiddenSelectLabel.text());
                         });
 
                         describe("on click on the button", function () {
+                            var $input;
+                            var inputValues = ['Option', 'Element'];
+                            var suggestionsLength = [5, 3];
+
                             beforeEach(function () {
-                                filterButton.click();
+                                $revealButton.click();
+                                $input = $a11ySelectContainer.find('#a11y-' + hiddenSelectId + '-js');
                             });
 
-                            it("should show the a11y selector", function () {
-                                expect(a11yDiv).not.toBeHidden();
-                                expect(filterButton).toHaveAttr('aria-expanded', 'true');
+                            it("should still hide the container of the select to transform", function () {
+                                expect($hiddenSelectContainer).toBeHidden();
                             });
 
-                            it("should hide the inner div of the transformed form", function () {
-                                expect(hiddenDiv).toBeHidden();
+                            it("should have aria-expanded to 'true' when a11y select container is shown", function () {
+                                expect($revealButton).toHaveAttr('aria-expanded', 'true');
                             });
 
                             it("should change the focus to the input", function () {
-                                var input = a11yDiv.find(':text');
-                                expect(input).toBeFocused();
+                                expect($input).toBeFocused();
                             });
 
-                            describe("a new div contains the a11y selector", function () {
+                            describe("the a11y select container", function () {
 
-                                it("should add the div before the hidden div", function () {
-                                    expect(a11yDiv).toExist();
-                                    expect(a11yDiv).not.toBeHidden();
-                                    expect(a11yDiv).toBeMatchedBy('div');
+                                it("should have a class a11y-container", function () {
+                                    expect($a11ySelectContainer).toHaveClass('a11y-container');
                                 });
 
-                                it("should have a class row", function () {
-                                    expect(a11yDiv).toHaveClass('row');
-                                });
-
-                                it("should have the classes of the hidden div", function () {
-                                    var classList = hiddenDiv.attr('class').split(/\s+/);
+                                it("should have the classes of the container of the select to transform (except the hidden class)", function () {
+                                    var classList = $hiddenSelectContainer.attr('class').split(/\s+/);
 
                                     var indexOfTagHiddenClass = classList.indexOf('tag-hidden');
                                     classList.splice(indexOfTagHiddenClass, 1);
 
                                     classList.forEach(function (clazz) {
-                                        expect(a11yDiv).toHaveClass(clazz);
+                                        expect($a11ySelectContainer).toHaveClass(clazz);
                                     });
                                 });
 
-                                describe("the a11y input handles a datalist element", function () {
-                                    var input;
-
-                                    beforeEach(function () {
-                                        input = a11yDiv.find(':text');
-                                    });
-
+                                describe("the input handles suggestions", function () {
                                     it("should have an input text", function () {
-                                        expect(input).toExist();
+                                        expect($input).toExist();
                                     });
 
-                                    it("should have an id build with transformed select id", function () {
-                                        expect(input).toHaveId('a11y-' + hiddenSelectId + '-js');
-                                    });
-
-                                    it("should have a class js-combobox", function () {
-                                        expect(input).toHaveClass('js-combobox');
+                                    it("should have an id built with transformed select id", function () {
+                                        expect($input).toHaveId('a11y-' + hiddenSelectId + '-js');
                                     });
 
                                     it("should the classes of the hidden select", function () {
-                                        var hiddenSelect = hiddenDiv.find('select');
-                                        var classList = hiddenSelect.attr('class').split(/\s+/);
+                                        var classList = $transformedSelect.attr('class').split(/\s+/);
 
                                         classList.forEach(function (clazz) {
-                                            expect(input).toHaveClass(clazz);
+                                            expect($input).toHaveClass(clazz);
                                         });
-                                    });
-
-                                    it("should have an attribute 'list'", function () {
-                                        expect(input).toHaveAttr('list', 'a11y-' + hiddenSelectId + '-list');
                                     });
 
                                     it("should have an attribute 'autocomplete' to off", function () {
-                                        expect(input).toHaveAttr('autocomplete', 'off');
+                                        expect($input).toHaveAttr('autocomplete', 'off');
                                     });
 
                                     it("should have a label for sr only with the same text than the label of the hidden select", function () {
-                                        var label = a11yDiv.find('label');
-                                        expect(label).toExist();
-                                        expect(label).toHaveClass('sr-only');
-                                        expect(label).toHaveAttr('for', 'a11y-' + hiddenSelectId + '-js');
-                                        expect(label).toHaveText(labels[index]);
+                                        var $label = $a11ySelectContainer.find('label');
+                                        expect($label).toExist();
+                                        expect($label).toHaveClass('sr-only');
+                                        expect($label).toHaveAttr('for', 'a11y-' + hiddenSelectId + '-js');
+                                        expect($label).toHaveText($hiddenSelectLabel.text());
                                     });
 
-                                    describe("The datalist is filled with the hidden select options", function () {
-                                        var datalist;
+                                    describe("to show the suggestions", function () {
+                                        var $suggestions;
+                                        var $listbox;
 
                                         beforeEach(function () {
-                                            datalist = a11yDiv.find('datalist');
+                                            $suggestions = $a11ySelectContainer.find('div.a11y-suggestions');
+                                            $listbox = $suggestions.find('div');
                                         });
 
-                                        it("should have a datalist", function () {
-                                            expect(datalist).toExist();
+                                        it("should have a div as container", function () {
+                                            expect($suggestions).toExist();
+                                            expect($suggestions).toBeMatchedBy('div');
                                         });
 
-                                        it("should have an id", function () {
-                                            expect(datalist).toHaveId('a11y-' + hiddenSelectId + '-list');
+                                        it("should have an id built with transformed select id", function () {
+                                            expect($suggestions).toHaveId('a11y-' + hiddenSelectId + '-suggestions');
                                         });
 
-                                        describe("should be filled with the existing hidden select options", function () {
-                                            var datalistOptions;
-                                            var hiddenSelectOptions;
+                                        it("should contain a div with a 'listbox' role", function () {
+                                            expect($listbox).toExist();
+                                            expect($listbox).toHaveAttr('role', 'listbox');
+                                        });
+
+                                        describe("on input and keydown in a11y select container", function () {
+                                            var $selectedListItems;
 
                                             beforeEach(function () {
-                                                datalistOptions = datalist.find('option');
-                                                hiddenSelectOptions = hiddenDiv.find('select option');
+                                                var $ulSelection = $hiddenSelectContainer.next();
+
+                                                $input.val(inputValues[index]).trigger('input');
+                                                $selectedListItems = $ulSelection.find('li');
                                             });
 
-                                            it("should have the same length", function () {
-                                                expect(datalistOptions).toHaveLength(hiddenSelectOptions.length);
+                                            it("should NOT add a list item in the selected items list", function () {
+                                                expect($selectedListItems.length).toEqual(0);
                                             });
 
-                                            it("should contains the same values", function () {
-                                                var hiddenOptionValues = hiddenSelectOptions.map(function () {
-                                                    return $(this).val();
+                                            it("should add suggestions to the div", function () {
+                                                expect($listbox.find('.a11y-suggestion')).toHaveLength(suggestionsLength[index]);
+                                            });
+
+                                            it("should empty the suggestions when input is empty", function () {
+                                                $input.val('').trigger('input');
+                                                expect($listbox.find('.a11y-suggestion')).toHaveLength(0);
+                                            });
+
+                                            it("should empty the suggestions on 'esc' keydown", function () {
+                                                var escEvent = createEscEvent();
+                                                $input.trigger(escEvent);
+
+                                                expect($listbox.find('.a11y-suggestion')).toHaveLength(0);
+                                                expect(escEvent.isDefaultPrevented()).toBeTruthy();
+                                            });
+
+                                            it("should focus on first suggestion on 'tab' keydown", function () {
+                                                var tabEvent = createTabEvent();
+                                                $input.trigger(tabEvent);
+
+                                                expect($listbox.find('div:first')).toBeFocused();
+                                                expect(tabEvent.isDefaultPrevented()).toBeTruthy();
+                                            });
+
+                                            it("should not prevent 'tab' keydown if suggestions list is empty", function () {
+                                                var escEvent = createEscEvent(); // to empty suggestions
+                                                var tabEvent = createTabEvent();
+                                                $input.trigger(escEvent).trigger(tabEvent);
+
+                                                expect($listbox.find('.a11y-suggestion')).toHaveLength(0);
+                                                expect(tabEvent.isDefaultPrevented()).toBeFalsy();
+                                            });
+
+                                            it("should focus on first suggestion on 'down arrow' keydown", function () {
+                                                var downArrowEvent = createDownArrowEvent();
+                                                $input.trigger(downArrowEvent);
+                                                expect($listbox.find('div:first')).toBeFocused();
+                                                expect(downArrowEvent.isDefaultPrevented()).toBeTruthy();
+                                            });
+
+                                            describe("on keydown in the list of suggestions", function () {
+                                                var $currentSuggestion;
+                                                var $lastSuggestion;
+                                                var $firstSuggestion;
+
+                                                beforeEach(function () {
+                                                    $firstSuggestion = $listbox.find('div:first');
+                                                    $lastSuggestion = $listbox.find('div:last');
                                                 });
 
-                                                datalistOptions.each(function (index, datalistOption) {
-                                                    expect(hiddenOptionValues).toContain(datalistOption.value);
+                                                describe("on first suggestion", function () {
+                                                    var $nextSuggestion;
+
+                                                    beforeEach(function () {
+                                                        $firstSuggestion.focus();
+                                                        $currentSuggestion = $firstSuggestion;
+                                                        $nextSuggestion = $currentSuggestion.next();
+                                                    });
+
+                                                    it("it should focus on the next suggestion on 'tab' keydown", function () {
+                                                        var tabEvent = createTabEvent();
+                                                        $currentSuggestion.trigger(tabEvent);
+
+                                                        expect($nextSuggestion).toBeFocused();
+                                                        expect(tabEvent.isDefaultPrevented()).toBeTruthy();
+                                                    });
+
+                                                    it("it should focus on the next suggestion on 'down arrow' keydown", function () {
+                                                        var $nextSuggestion = $currentSuggestion.next();
+                                                        var downArrowEvent = createDownArrowEvent();
+                                                        $currentSuggestion.trigger(downArrowEvent);
+
+                                                        expect($nextSuggestion).toBeFocused();
+                                                        expect(downArrowEvent.isDefaultPrevented()).toBeTruthy();
+                                                    });
+
+                                                    it("it should focus on the last suggestion on 'up arrow' keydown", function () {
+                                                        var upArrowEvent = createUpArrowEvent();
+                                                        $currentSuggestion.trigger(upArrowEvent);
+
+                                                        expect($lastSuggestion).toBeFocused();
+                                                        expect(upArrowEvent.isDefaultPrevented()).toBeTruthy();
+                                                    });
+
+                                                    it("it should focus on the input on 'shift+tab' keydown", function () {
+                                                        var shiftTabEvent = createTabEvent('with shift');
+                                                        $currentSuggestion.trigger(shiftTabEvent);
+
+                                                        expect($input).toBeFocused();
+                                                        expect(shiftTabEvent.isDefaultPrevented()).toBeTruthy();
+                                                    });
+
+                                                    describe("on 'esc' keydown", function () {
+                                                        var escEvent;
+
+                                                        beforeEach(function () {
+                                                            escEvent = createEscEvent();
+                                                            $currentSuggestion.trigger(escEvent);
+                                                        });
+
+                                                        it("should empty the suggestions on 'esc' keydown", function () {
+                                                            expect($listbox.find('.a11y-suggestion')).toHaveLength(0);
+                                                            expect(escEvent.isDefaultPrevented()).toBeTruthy();
+                                                        });
+
+                                                        it("should focus on input on 'esc' keydown", function () {
+                                                            expect($input).toBeFocused();
+                                                            expect(escEvent.isDefaultPrevented()).toBeTruthy();
+                                                        });
+                                                    });
+
+                                                    describe("on 'enter' keydow", function () {
+                                                        var enterEvent;
+
+                                                        beforeEach(function () {
+                                                            enterEvent = createEnterEvent();
+                                                            $currentSuggestion.trigger(enterEvent);
+                                                        });
+
+                                                        it("should empty the input after selection", function () {
+                                                            expect($input).toHaveValue('');
+                                                            expect(enterEvent.isDefaultPrevented()).toBeTruthy();
+                                                        });
+
+                                                        it("should focus on input after selection", function () {
+                                                            expect($input).toBeFocused();
+                                                            expect(enterEvent.isDefaultPrevented()).toBeTruthy();
+                                                        });
+
+                                                        it("should empty suggestions", function () {
+                                                            expect($listbox.find('.a11y-suggestion')).toHaveLength(0);
+                                                            expect(enterEvent.isDefaultPrevented()).toBeTruthy();
+                                                        });
+                                                    });
+
+                                                    describe("on 'space' keydow", function () {
+                                                        var spaceEvent;
+
+                                                        beforeEach(function () {
+                                                            spaceEvent = createSpaceEvent();
+                                                            $currentSuggestion.trigger(spaceEvent);
+                                                        });
+
+                                                        it("should empty the input after selection", function () {
+                                                            expect($input).toHaveValue('');
+                                                            expect(spaceEvent.isDefaultPrevented()).toBeTruthy();
+                                                        });
+
+                                                        it("should focus on input after selection", function () {
+                                                            expect($input).toBeFocused();
+                                                            expect(spaceEvent.isDefaultPrevented()).toBeTruthy();
+                                                        });
+
+                                                        it("should empty suggestions", function () {
+                                                            expect($listbox.find('.a11y-suggestion')).toHaveLength(0);
+                                                            expect(spaceEvent.isDefaultPrevented()).toBeTruthy();
+                                                        });
+                                                    });
+                                                });
+
+                                                describe("on the last suggestion", function () {
+                                                    var tabEvent;
+                                                    var $previousSuggestion;
+
+                                                    beforeEach(function () {
+                                                        $lastSuggestion.focus();
+                                                        $currentSuggestion = $lastSuggestion;
+                                                        $previousSuggestion = $currentSuggestion.prev();
+                                                    });
+
+                                                    it("it should focus on the first suggestion on 'down arrow' keydown on the last suggestion", function () {
+                                                        var downArrowEvent = createDownArrowEvent();
+                                                        $currentSuggestion.trigger(downArrowEvent);
+
+                                                        expect($firstSuggestion).toBeFocused();
+                                                        expect(downArrowEvent.isDefaultPrevented()).toBeTruthy();
+                                                    });
+
+                                                    it("it should focus on the previous suggestion on 'shift+tab' keydown", function () {
+                                                        var shiftTabEvent = createTabEvent('with shift');
+                                                        $currentSuggestion.trigger(shiftTabEvent);
+
+                                                        expect($previousSuggestion).toBeFocused();
+                                                        expect(shiftTabEvent.isDefaultPrevented()).toBeTruthy();
+                                                    });
+
+                                                    it("it should focus on the previous suggestion on 'up arrow' keydown", function () {
+                                                        var upArrowEvent = createUpArrowEvent();
+                                                        $currentSuggestion.trigger(upArrowEvent);
+
+                                                        expect($previousSuggestion).toBeFocused();
+                                                        expect(upArrowEvent.isDefaultPrevented()).toBeTruthy();
+                                                    });
+
+                                                    describe("on tab keydown", function () {
+                                                        beforeEach(function () {
+                                                            tabEvent = createTabEvent();
+                                                            $currentSuggestion.trigger(tabEvent);
+                                                        });
+
+                                                        it("it should empty the suggestions ", function () {
+                                                            expect($listbox.find('.a11y-suggestion')).toHaveLength(0);
+                                                        });
+
+                                                        it("should not prevent 'tab' keydown on the last suggestion", function () {
+                                                            expect(tabEvent.isDefaultPrevented()).toBeFalsy();
+                                                        });
+
+                                                        it("should empty the input", function () {
+                                                            expect($input).toHaveValue('');
+                                                        });
+                                                    });
                                                 });
                                             });
 
-                                            it("should have data-id with the index of the hidden select option", function () {
-                                                datalistOptions.each(function (index, datalistOption) {
-                                                    expect(datalistOption).toHaveData('id', index);
+                                            describe("the descrition for a11y screen reader", function () {
+                                                var $screenReaderContainer;
+
+                                                beforeEach(function () {
+                                                    $screenReaderContainer = $a11ySelectContainer.prev().prev();
+                                                });
+
+                                                it("should add the div before the a11y select container", function () {
+                                                    expect($screenReaderContainer).toExist();
+                                                    expect($screenReaderContainer).toBeMatchedBy('div');
+                                                });
+
+                                                it("should have a class sr-only", function () {
+                                                    expect($screenReaderContainer).toHaveClass('sr-only');
+                                                });
+
+                                                it("should contain a paragraph", function () {
+                                                    expect($screenReaderContainer.find('p')).toExist();
+                                                });
+
+                                                it("should have an attribute 'aria-live'", function () {
+                                                    expect($screenReaderContainer).toHaveAttr('aria-live', 'polite');
+                                                });
+
+                                                describe("on input in a11y select container", function () {
+                                                    var $screenReaderDescription;
+
+                                                    beforeEach(function () {
+                                                        $screenReaderDescription = $screenReaderContainer.find('p');
+                                                    });
+
+                                                    it("should update the a11y screen reader with the number of filtered items", function () {
+                                                        expect($screenReaderDescription).toHaveText(suggestionsLength[index] + ' suggestions disponibles');
+                                                    });
+
+                                                    describe("on selection of an item in a11y select container", function () {
+                                                        var description;
+                                                        var expectedValues = ['Option 2', 'Element 2'];
+
+                                                        beforeEach(function () {
+                                                            var $secondSuggestion = $a11ySelectContainer.find('.a11y-suggestion:first').next();
+                                                            var enterEvent = createEnterEvent();
+                                                            $secondSuggestion.trigger(enterEvent);
+
+                                                            description = $screenReaderContainer.find('p');
+                                                        });
+
+                                                        it("should update the a11y screen reader with the selected item", function () {
+                                                            expect(description).toHaveText(expectedValues[index] + ' sélectionné');
+                                                        });
+                                                    });
                                                 });
                                             });
 
-                                        });
-                                    });
+                                            describe("a list contains the selected items", function () {
+                                                var $ulSelection;
 
-                                    describe("on selection of an item in a11y selector", function () {
-                                        var testInputValues = ['Option 2', 'Element 2'];
+                                                beforeEach(function () {
+                                                    $ulSelection = $hiddenSelectContainer.next();
+                                                });
 
-                                        beforeEach(function () {
-                                            a11yDiv.find('#a11y-' + hiddenSelectId + '-js').val(testInputValues[index]).trigger('input');
-                                        });
+                                                it("should add the ul after the container of the select to transform", function () {
+                                                    expect($ulSelection).toExist();
+                                                    expect($ulSelection).toBeMatchedBy('ul');
+                                                });
 
-                                        it("should empty the input after selection", function () {
-                                            expect(input).toHaveValue('');
+                                                it("should have a class list-inline", function () {
+                                                    expect($ulSelection).toHaveClass('list-inline');
+                                                });
+
+                                                describe("on selection of an item in a11y select container", function () {
+                                                    var $selectedListItems;
+                                                    var firstExpectedValues = ['Option 2', 'Element 2'];
+                                                    var secondExpectedValues = ['Option 3', 'Element 3'];
+
+                                                    beforeEach(function () {
+                                                        var $listbox = $a11ySelectContainer.find('div.a11y-suggestions div');
+                                                        var $secondSuggestion = $listbox.find('.a11y-suggestion:first').next();
+                                                        var enterEvent = createEnterEvent();
+                                                        $secondSuggestion.trigger(enterEvent);
+                                                    });
+
+                                                    describe("the added list item", function () {
+                                                        beforeEach(function () {
+                                                            $selectedListItems = $ulSelection.find('li');
+                                                        });
+
+                                                        it("should add a list item in the selected items list", function () {
+                                                            expect($selectedListItems.length).toEqual(1);
+                                                            expect($selectedListItems).toContainText(firstExpectedValues[index]);
+                                                        });
+
+                                                        it("should have a span which references the hidden selected option", function () {
+                                                            var span = $selectedListItems.find('span');
+                                                            expect(span).toExist();
+                                                            expect(span).toHaveId(hiddenSelectId + '-1');
+                                                            expect(span).toHaveClass('tag-item');
+                                                            expect(span).toHaveData('value', firstExpectedValues[index]);
+                                                        });
+
+                                                        it("should have a button to permit the deletion", function () {
+                                                            var button = $selectedListItems.find('span button');
+                                                            expect(button).toExist();
+                                                            expect(button).toHaveClass('tag-item-supp');
+                                                            expect(button).toHaveAttr('title', 'supprimer ' + firstExpectedValues[index]);
+                                                            expect(button).toHaveAttr('type', 'button');
+                                                        });
+
+                                                        it("should have a span in the button for the screen reader", function () {
+                                                            var innerSpan = $selectedListItems.find('span button span');
+                                                            expect(innerSpan).toExist();
+                                                            expect(innerSpan).toHaveClass('sr-only');
+                                                            expect(innerSpan).toHaveText('supprimer');
+                                                        });
+
+                                                        describe("when the selected element is already selected", function () {
+                                                            beforeEach(function () {
+                                                                var $listbox = $a11ySelectContainer.find('div.a11y-suggestions div');
+                                                                var $secondSuggestion = $listbox.find('.a11y-suggestion:first').next();
+                                                                var enterEvent = createEnterEvent();
+                                                                $secondSuggestion.trigger(enterEvent);
+                                                                $selectedListItems = $ulSelection.find('li');
+                                                            });
+
+                                                            it("should not add the item to the list", function () {
+                                                                expect($selectedListItems.length).toEqual(1);
+                                                                expect($selectedListItems).toContainText(firstExpectedValues[index]);
+                                                            });
+
+                                                        });
+                                                    });
+
+
+                                                    describe("on the hidden select", function () {
+                                                        var hiddenSelect;
+
+                                                        beforeEach(function () {
+                                                            hiddenSelect = $hiddenSelectContainer.find('select');
+                                                        });
+
+                                                        it("should select the option in the hidden select", function () {
+                                                            var selectedOptions = hiddenSelect.find('option:selected');
+                                                            expect(selectedOptions).toHaveLength(1);
+                                                            expect(selectedOptions[0]).toHaveText(firstExpectedValues[index]);
+                                                        });
+
+                                                        describe("with several selections", function () {
+
+                                                            beforeEach(function () {
+                                                                $input.val(inputValues[index]).trigger('input');
+                                                                var $listbox = $a11ySelectContainer.find('div.a11y-suggestions div');
+                                                                var $thirdSuggestion = $listbox.find('.a11y-suggestion:first').next().next();
+                                                                var enterEvent = createEnterEvent();
+                                                                $thirdSuggestion.trigger(enterEvent);
+                                                            });
+
+                                                            it("should select the multiple options in the hidden select", function () {
+                                                                var selectedOptions = hiddenSelect.find('option:selected');
+                                                                expect(selectedOptions).toHaveLength(2);
+                                                                expect(selectedOptions[0]).toHaveText(firstExpectedValues[index]);
+                                                                expect(selectedOptions[1]).toHaveText(secondExpectedValues[index]);
+                                                            });
+
+                                                            describe("on deletion of a list item", function () {
+
+                                                                beforeEach(function () {
+                                                                    $selectedListItems = $ulSelection.find('li');
+                                                                    $($selectedListItems[1]).find('span button').click();
+                                                                    $selectedListItems = $ulSelection.find('li');
+                                                                });
+
+                                                                it("should delete the list item", function () {
+                                                                    expect($selectedListItems.length).toEqual(1);
+                                                                    expect($selectedListItems[0]).toContainText(firstExpectedValues[index]);
+                                                                });
+
+                                                                it("should focus on the previous list item button", function () {
+                                                                    var previousDeleteButton = $($selectedListItems[0]).find('button');
+                                                                    expect(previousDeleteButton).toBeFocused();
+                                                                });
+
+                                                                describe("on the hidden select", function () {
+                                                                    var hiddenSelect;
+
+                                                                    beforeEach(function () {
+                                                                        hiddenSelect = $hiddenSelectContainer.find('select');
+                                                                    });
+
+                                                                    it("should unselect the option in the hidden select", function () {
+                                                                        var selectedOptions = hiddenSelect.find('option:selected');
+                                                                        expect(selectedOptions).toHaveLength(1);
+                                                                        expect(selectedOptions[0]).toHaveText(firstExpectedValues[index]);
+                                                                    });
+
+                                                                });
+
+                                                                describe("on the last item deletion", function () {
+                                                                    beforeEach(function () {
+                                                                        $($selectedListItems[0]).find('span button').click();
+                                                                        $selectedListItems = $ulSelection.find('li');
+                                                                    });
+
+                                                                    it("should focus on the input", function () {
+                                                                        expect($input).toBeFocused();
+                                                                    });
+                                                                });
+                                                            });
+                                                        });
+                                                    });
+                                                });
+                                            })
                                         });
                                     });
                                 });
                             });
-
-                            describe("a new div contains the descrition for a11y screen reader", function () {
-                                var srDiv;
-
-                                beforeEach(function () {
-                                    srDiv = a11yDiv.prev().prev();
-                                });
-
-                                it("should add the div before the a11y enhanced selector div", function () {
-                                    expect(srDiv).toExist();
-                                    expect(srDiv).toBeMatchedBy('div');
-                                });
-
-                                it("should have a class sr-only", function () {
-                                    expect(srDiv).toHaveClass('sr-only');
-                                });
-
-                                it("should contain a paragraph", function () {
-                                    expect(srDiv.find('p')).toExist();
-                                });
-
-                                it("should have an attribute 'aria-live'", function () {
-                                    expect(srDiv).toHaveAttr('aria-live', 'polite');
-                                });
-
-                                describe("on input in a11y selector", function () {
-                                    var listItem;
-                                    var description;
-                                    var testInputValues = ['Option', 'Element'];
-                                    var testInputListSize = [5, 3];
-
-                                    beforeEach(function () {
-                                        var ulSelection = hiddenDiv.next();
-
-                                        a11yDiv.find('#a11y-' + hiddenSelectId + '-js').val(testInputValues[index]).trigger('input');
-                                        listItem = ulSelection.find('li');
-                                        description = srDiv.find('p');
-                                    });
-
-                                    it("should NOT add a list item in the selected items list", function () {
-                                        expect(listItem.length).toEqual(0);
-                                    });
-
-                                    it("should update the a11y screen reader with the number of filtered items", function () {
-                                        expect(description).toHaveText(testInputListSize[index] + ' suggestions disponibles');
-                                    });
-                                });
-
-                                describe("on selection of an item in a11y selector", function () {
-                                    var description;
-                                    var testInputValues = ['Option 2', 'Element 2'];
-
-                                    beforeEach(function () {
-
-                                        a11yDiv.find('#a11y-' + hiddenSelectId + '-js').val(testInputValues[index]).trigger('input');
-                                        description = srDiv.find('p');
-                                    });
-
-                                    it("should update the a11y screen reader with the selected item", function () {
-                                        expect(description).toHaveText(testInputValues[index] + ' sélectionné');
-                                    });
-                                });
-
-                            });
-
-                            describe("a list contains the selected items", function () {
-                                var ulSelection;
-
-                                beforeEach(function () {
-                                    ulSelection = hiddenDiv.next();
-                                });
-
-                                it("should add the ul after the hidden div", function () {
-                                    expect(ulSelection).toExist();
-                                    expect(ulSelection).toBeMatchedBy('ul');
-                                });
-
-                                it("should have a class list-inline", function () {
-                                    expect(ulSelection).toHaveClass('list-inline');
-                                });
-
-                                describe("on selection of an item in a11y selector", function () {
-                                    var listItem;
-                                    var testFirstInputValues = ['Option 2', 'Element 2'];
-                                    var testSecondInputValues = ['Option 3', 'Element 3'];
-
-                                    beforeEach(function () {
-                                        a11yDiv.find('#a11y-' + hiddenSelectId + '-js').val(testFirstInputValues[index]).trigger('input');
-                                        listItem = ulSelection.find('li');
-                                    });
-
-                                    it("should add a list item in the selected items list", function () {
-                                        expect(listItem.length).toEqual(1);
-                                        expect(listItem).toContainText(testFirstInputValues[index]);
-                                    });
-
-                                    describe("the added list item", function () {
-                                        it("should have a span which references the hidden selected option", function () {
-                                            var span = listItem.find('span');
-                                            expect(span).toExist();
-                                            expect(span).toHaveId(hiddenSelectId + '-1');
-                                            expect(span).toHaveClass('tag-item');
-                                            expect(span).toHaveData('value', testFirstInputValues[index]);
-                                        });
-
-                                        it("should have a button to permit the deletion", function () {
-                                            var button = listItem.find('span button');
-                                            expect(button).toExist();
-                                            expect(button).toHaveClass('tag-item-supp');
-                                            expect(button).toHaveAttr('title', 'supprimer ' + testFirstInputValues[index]);
-                                            expect(button).toHaveAttr('type', 'button');
-                                        });
-
-                                        it("should have a span in the button for the screen reader", function () {
-                                            var innerSpan = listItem.find('span button span');
-                                            expect(innerSpan).toExist();
-                                            expect(innerSpan).toHaveClass('sr-only');
-                                            expect(innerSpan).toHaveText('supprimer');
-                                        });
-                                    });
-
-                                    describe("when the selected element is already selected", function () {
-                                        beforeEach(function () {
-                                            a11yDiv.find('#a11y-' + hiddenSelectId + '-js').val(testFirstInputValues[index]).trigger('input');
-                                            listItem = ulSelection.find('li');
-                                        });
-
-                                        it("should not add the item to the list", function () {
-                                            expect(listItem.length).toEqual(1);
-                                            expect(listItem).toContainText(testFirstInputValues[index]);
-                                        });
-
-                                    });
-
-                                    describe("on the hidden select", function () {
-                                        var hiddenSelect;
-
-                                        beforeEach(function () {
-                                            hiddenSelect = hiddenDiv.find('select');
-                                        });
-
-                                        it("should select the option in the hidden select", function () {
-                                            var selectedOptions = hiddenSelect.find('option:selected');
-                                            expect(selectedOptions).toHaveLength(1);
-                                            expect(selectedOptions[0]).toHaveText(testFirstInputValues[index]);
-                                        });
-
-                                        describe("with several selections", function () {
-
-                                            beforeEach(function () {
-                                                a11yDiv.find('#a11y-' + hiddenSelectId + '-js').val(testSecondInputValues[index]).trigger('input');
-                                            });
-
-                                            it("should select the multiple options in the hidden select", function () {
-                                                var selectedOptions = hiddenSelect.find('option:selected');
-                                                expect(selectedOptions).toHaveLength(2);
-                                                expect(selectedOptions[0]).toHaveText(testFirstInputValues[index]);
-                                                expect(selectedOptions[1]).toHaveText(testSecondInputValues[index]);
-                                            });
-                                        });
-
-                                    });
-
-                                    describe("on deletion of a list item", function () {
-
-                                        beforeEach(function () {
-                                            a11yDiv.find('#a11y-' + hiddenSelectId + '-js').val(testSecondInputValues[index]).trigger('input');
-                                            listItem = ulSelection.find('li');
-                                            $(listItem[1]).find('span button').click();
-                                            listItem = ulSelection.find('li');
-                                        });
-
-                                        it("should delete the list item", function () {
-                                            expect(listItem.length).toEqual(1);
-                                            expect(listItem[0]).toContainText(testFirstInputValues[index]);
-                                        });
-
-                                        it("should focus on the previous list item button", function () {
-                                            var previousDeleteButton = $(listItem[0]).find('button');
-                                            expect(previousDeleteButton).toBeFocused();
-                                        });
-
-                                        describe("on the hidden select", function () {
-                                            var hiddenSelect;
-
-                                            beforeEach(function () {
-                                                hiddenSelect = hiddenDiv.find('select');
-                                            });
-
-                                            it("should unselect the option in the hidden select", function () {
-                                                var selectedOptions = hiddenSelect.find('option:selected');
-                                                expect(selectedOptions).toHaveLength(1);
-                                                expect(selectedOptions[0]).toHaveText(testFirstInputValues[index]);
-                                            });
-
-                                        });
-
-                                        describe("on the last item deletion", function () {
-                                            beforeEach(function () {
-                                                $(listItem[0]).find('span button').click();
-                                                listItem = ulSelection.find('li');
-                                            });
-
-                                            it("should focus on the input", function () {
-                                                var input = a11yDiv.find(':text');
-                                                expect(input).toBeFocused();
-                                            });
-                                        });
-                                    });
-
-                                });
-                            })
                         });
                     });
                 });

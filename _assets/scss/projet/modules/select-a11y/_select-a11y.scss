@@ -21,5 +21,31 @@
   display: none;
 }
 
-
+.a11y-container {
+  position: relative;
+  margin: 0 auto;
+}
+.a11y-suggestions {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  background: #fff;
+}
+.a11y-suggestion {
+  color: #666;
+  border-left: 1px solid #666;
+  border-right: 1px solid #666;
+  cursor: pointer;
+  text-align: left;
+}
+.a11y-suggestion:first-child {
+  border-top: 1px solid #666;
+}
+.a11y-suggestion:last-child {
+  border-bottom: 1px solid #666;
+}
+.a11y-suggestion:hover,
+.a11y-suggestion:focus {
+  color: #000;
+}
 
