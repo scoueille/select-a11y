@@ -3,49 +3,71 @@
 
 
 
+.select-a11y {
 
-.tag-item {
-  border:1px solid $gray;
-  padding: 0.2em 0.5em;
-}
-.tag-item-supp {
-  background-color: transparent;
-  border:0;
-  &:before {
-    content :"\274c";
-    speak:none;
-    line-height:1;
+  .tag-item {
+    border:1px solid $gray;
+    padding: 0.2em 0 0.2em 0.5em;
   }
-}
-.tag-hidden {
-  display: none;
-}
+  .tag-item-supp {
+    background-color: transparent;
+    border:0;
+    &:before {
+      content :"\274c";
+      speak:none;
+      line-height:1;
+    }
+    &:focus{
+      outline:1px solid red;
+    }
+    &:hover {
+      color:red;
+    }
+  }
+  .tag-hidden {
+    display: none;
+  }
 
-.a11y-container {
-  position: relative;
-  margin: 0 auto;
-}
-.a11y-suggestions {
-  position: absolute;
-  left: 0;
-  width: 100%;
-  background: #fff;
-}
-.a11y-suggestion {
-  color: #666;
-  border-left: 1px solid #666;
-  border-right: 1px solid #666;
-  cursor: pointer;
-  text-align: left;
-}
-.a11y-suggestion:first-child {
-  border-top: 1px solid #666;
-}
-.a11y-suggestion:last-child {
-  border-bottom: 1px solid #666;
-}
-.a11y-suggestion:hover,
-.a11y-suggestion:focus {
-  color: #000;
-}
+  .a11y-container {
+    position: relative;
+    margin: 0 auto;
+  }
+  .a11y-suggestions {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    background: #fff;
+    z-index: 10; 
+  }
+  .a11y-suggestion {
+    color: #666;
+    border-left: 1px solid #666;
+    border-right: 1px solid #666;
+    cursor: pointer;
+    text-align: left;
+  }
+  .a11y-suggestion:first-child {
+    border-top: 1px solid #666;
+  }
+  .a11y-suggestion:last-child {
+    border-bottom: 1px solid #666;
+  }
+  .a11y-suggestion:hover,
+  .a11y-suggestion:focus {
+    color: #000;
+  }
 
+
+  .list-selected {
+    padding: 0.5em 0;
+    margin: 0;
+    li {
+      padding: 0;
+      margin-right: 0.3em;
+      &:before {
+        content:"";
+      }
+    }
+  }
+
+}
