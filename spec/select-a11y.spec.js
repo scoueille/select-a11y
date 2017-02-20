@@ -287,7 +287,27 @@ define(['../lib/select-a11y'], function (filterComponent) {
                                                 $input.trigger(escEvent);
 
                                                 expect($listbox.find('.a11y-suggestion')).toHaveLength(0);
-                                                expect(escEvent.isDefaultPrevented()).toBeTruthy();
+                                                expect(escEvent.isDefaultPrevented()).toBeFalsy();
+                                            });
+
+                                            it("should empty the suggestions on 'shift+tab' keydown", function () {
+                                                var shiftTabEvent = createTabEvent('with shift');
+                                                $input.trigger(shiftTabEvent);
+
+                                                expect($listbox.find('.a11y-suggestion')).toHaveLength(0);
+                                                expect(shiftTabEvent.isDefaultPrevented()).toBeFalsy();
+                                            });
+
+                                            it("should empty the suggestions on 'click' outside the input", function () {
+                                                $('body').click();
+
+                                                expect($listbox.find('.a11y-suggestion')).toHaveLength(0);
+                                            });
+
+                                            it("should NOT empty the suggestions on 'click' inside the input", function () {
+                                                $input.click();
+
+                                                expect($listbox.find('.a11y-suggestion')).not.toHaveLength(0);
                                             });
 
                                             it("should focus on first suggestion on 'tab' keydown", function () {
@@ -430,6 +450,25 @@ define(['../lib/select-a11y'], function (filterComponent) {
                                                         it("should empty suggestions", function () {
                                                             expect($listbox.find('.a11y-suggestion')).toHaveLength(0);
                                                             expect(spaceEvent.isDefaultPrevented()).toBeTruthy();
+                                                        });
+                                                    });
+
+                                                    describe("on 'click'", function () {
+
+                                                        beforeEach(function () {
+                                                            $currentSuggestion.click();
+                                                        });
+
+                                                        it("should empty the input after selection", function () {
+                                                            expect($input).toHaveValue('');
+                                                        });
+
+                                                        it("should focus on input after selection", function () {
+                                                            expect($input).toBeFocused();
+                                                        });
+
+                                                        it("should empty suggestions", function () {
+                                                            expect($listbox.find('.a11y-suggestion')).toHaveLength(0);
                                                         });
                                                     });
                                                 });
