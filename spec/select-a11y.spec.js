@@ -310,6 +310,18 @@ define(['../lib/select-a11y'], function (filterComponent) {
                                                 expect($listbox.find('.a11y-suggestion')).not.toHaveLength(0);
                                             });
 
+                                            it("should NOT empty the suggestions on 'click' inside the suggestions", function () {
+                                                $suggestions.click();
+
+                                                expect($listbox.find('.a11y-suggestion')).not.toHaveLength(0);
+                                            });
+
+                                            it("should NOT empty the suggestions on 'click' inside the listbox", function () {
+                                                $listbox.click();
+
+                                                expect($listbox.find('.a11y-suggestion')).not.toHaveLength(0);
+                                            });
+
                                             it("should focus on first suggestion on 'tab' keydown", function () {
                                                 var tabEvent = createTabEvent();
                                                 $input.trigger(tabEvent);
