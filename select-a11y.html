@@ -196,67 +196,112 @@
     <h3>Après transformation js</h3>
 
     <form action="" method="post">
-      <div class="">
-        <div aria-live="polite" class="sr-only">
-          <p>Ici le nombre de suggestions et autres actions partinentes à vocaliser</p>
-        </div>
-
-        <button type="button" class="btn" aria-expanded="true">
-          Ajouter un filtre
-        </button>
-        <!-- au click sur le bouton, on affiche champs de recherche ainsi que le "select" -->
-        <div class="form-group row">
-          <label for="select-js" class="sr-only">Chercher dans les filtres</label>
-          <input type="text" id="select-js" class="form-control js-combobox" list="option-list">
-          <datalist id="option-list">
-            <option value="option 1">
-            <option value="option 2">
-            <option value="option 3">
-            <option value="option 4">
-            <option value="option 5">
-            <option value="option 6">
-            <option value="truc 1">
-          </datalist>
-        </div>
-
-        <div class="form-group" hidden> <!-- caché et stocke l'information, reçoit les élements clavier ? -->
-          <label for="select-after">Options de choix</label>
-          <select name="select-after" class="form-control" id="select-after" multiple>
-            <option>Option 1</option>
-            <option>Option 2</option>
-            <option>Option 3</option>
-            <option>Option 4</option>
-            <option>Option 5</option>
-          </select>
-        </div>
-
-        <ul class="list-inline">
-          <li>
-            <span id="selected-option-1" class="tag-item">
-              option 1
-              <button class="tag-item-supp" title="supprimer la selection" aria-labelledby="selected-option-1"
-                      type="button">
-                <span class="sr-only">supprimer</span>
-              </button>
-            </span>
-          </li>
-
-          <li>
-            <span id="selected-option-2" class="tag-item">
-              option 2
-              <button class="tag-item-supp" title="supprimer la selection" aria-labelledby="selected-option-2"
-                      type="button">
-                <span class="sr-only">supprimer</span>
-              </button>
-            </span>
-          </li>
-        </ul>
+    <div class="select-a11y is-open">
+      <p class="sr-only">Utilisez la tabulation (ou la touche flèche du bas) pour naviguer dans la liste des suggestions. Confirmez votre choix avec la touche Entrée ou utilisez la touche Esc pour fermer la la liste de suggestions.</p>
+      <div aria-live="polite" class="sr-only">
+        <p>Albanie sélectionné</p>
       </div>
+      <button type="button" class="btn btn-select-a11y" aria-expanded="true">Ajouter un pays européen</button>
+      <div class="a11y-container form-group">
+      <div class="a11y-container-inner">
+        <label for="a11y-select-europe-js" class="sr-only">Ajouter un pays européen</label>
+        
+        <input id="a11y-select-europe-js" autocomplete="off" class="form-control" type="text">
+        <div id="a11y-select-europe-suggestions" class="a11y-suggestions">
+          
+          <div role="listbox">
+            <div data-id="0" class="a11y-suggestion" tabindex="-1" role="option">Albanie</div>
+            <div data-id="5" class="a11y-suggestion" tabindex="-1" role="option">Azerbaïdjan</div>
+            <div data-id="6" class="a11y-suggestion" tabindex="-1" role="option">Belgique</div>
+            <div data-id="7" class="a11y-suggestion" tabindex="-1" role="option">Biélorussie</div>
+            <div data-id="8" class="a11y-suggestion" tabindex="-1" role="option">Bosnie-Herzégovine</div>
+            <div data-id="9" class="a11y-suggestion" tabindex="-1" role="option">Bulgarie</div>
+            <div data-id="28" class="a11y-suggestion" tabindex="-1" role="option">Luxembourg</div>
+            <div data-id="35" class="a11y-suggestion" tabindex="-1" role="option">Pays-Bas</div>
+            <div data-id="38" class="a11y-suggestion" tabindex="-1" role="option">République tchèque</div>
+            <div data-id="43" class="a11y-suggestion" tabindex="-1" role="option">Serbie</div>
+          </div>
+
+        </div>
+
+      </div>
+      </div>
+    <!--
+       <div class="form-group tag-hidden">
+        <label for="select-europe">Ajouter un pays européen</label>
+        <select name="select-europe" class="form-control" id="select-europe" multiple="" data-select-a11y="">
+          <option>Albanie</option>
+          <option>Allemagne</option>
+          <option>Andorre</option>
+          <option>Arménie</option>
+          <option>Autriche</option>
+          <option>Azerbaïdjan</option>
+          <option>Belgique</option>
+          <option>Biélorussie</option>
+          <option>Bosnie-Herzégovine</option>
+          <option>Bulgarie</option>
+          <option>Chypre</option>
+          <option>Croatie</option>
+          <option>Danemark</option>
+          <option>Espagne</option>
+          <option>Estonie</option>
+          <option>Finlande</option>
+          <option>France</option>
+          <option>Géorgie</option>
+          <option>Grèce</option>
+          <option>Hongrie</option>
+          <option>Irlande</option>
+          <option>Islande</option>
+          <option>Italie</option>
+          <option>Kazakhstan</option>
+          <option>Kosovo</option>
+          <option>Lettonie</option>
+          <option>Liechtenstein</option>
+          <option>Lituanie</option>
+          <option>Luxembourg</option>
+          <option>Macédoine</option>
+          <option>Malte</option>
+          <option>Moldavie</option>
+          <option>Monaco</option>
+          <option>Monténégro</option>
+          <option>Norvège</option>
+          <option>Pays-Bas</option>
+          <option>Pologne</option>
+          <option>Portugal</option>
+          <option>République tchèque</option>
+          <option>Roumanie</option>
+          <option>Royaume-Uni</option>
+          <option>Russie</option>
+          <option>Saint-Marin</option>
+          <option>Serbie</option>
+          <option>Slovaquie</option>
+          <option>Slovénie</option>
+          <option>Suède</option>
+          <option>Suisse</option>
+          <option>Turquie</option>
+          <option>Ukraine</option>
+          <option>Vatican</option>
+        </select>
+      </div> 
+    -->
+      <ul class="list-inline list-selected">
+        <li>
+          <span id="select-europe-0" class="tag-item" data-value="Albanie">Albanie    
+            <button class="tag-item-supp" title="supprimer Albanie" type="button">
+              <span class="sr-only">supprimer</span>
+              <span class="icon-delete" aria-hidden="true"></span>
+            </button>
+          </span>
+        </li>
+      </ul>
+    </div>
 
       <p>
         <button class="btn btn-primary" type="submit">Filtrer</button>
       </p>
     </form>
+
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 
   </div>
 </main>
