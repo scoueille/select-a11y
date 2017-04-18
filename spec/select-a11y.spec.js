@@ -540,7 +540,7 @@ define(['../lib/select-a11y'], function (filterComponent) {
                                                 });
                                             });
 
-                                            describe("the descrition for a11y screen reader", function () {
+                                            describe("the description for a11y screen reader", function () {
                                                 var $screenReaderContainer;
 
                                                 beforeEach(function () {
@@ -562,6 +562,13 @@ define(['../lib/select-a11y'], function (filterComponent) {
 
                                                 it("should have an attribute 'aria-live'", function () {
                                                     expect($screenReaderContainer).toHaveAttr('aria-live', 'polite');
+                                                });
+
+                                                it("should be after a paragraph describing the usage of the a11y-select", function () {
+                                                    var $usageParagraph = $screenReaderContainer.prev();
+                                                    expect($usageParagraph).toBeMatchedBy('p');
+                                                    expect($usageParagraph).toHaveClass('sr-only');
+                                                    expect($usageParagraph.text()).toEqual('Utilisez la tabulation (ou la touche flèche du bas) pour naviguer dans la liste des suggestions. Confirmez votre choix avec la touche Entrée ou utilisez la touche Esc pour fermer la liste de suggestions.');
                                                 });
 
                                                 describe("on input in a11y select container", function () {
