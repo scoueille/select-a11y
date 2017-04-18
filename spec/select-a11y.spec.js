@@ -281,12 +281,29 @@ define(['../lib/select-a11y'], function (filterComponent) {
                                                 expect($listbox.find('.a11y-suggestion')).toHaveLength(suggestionsLength[index]);
                                             });
 
-                                            it("should empty the suggestions on 'esc' keydown", function () {
-                                                var escEvent = createEscEvent();
-                                                $input.trigger(escEvent);
+                                            describe("on esc keydown", function () {
+                                                var escEvent;
 
-                                                expect($listbox.find('.a11y-suggestion')).toHaveLength(0);
-                                                expect(escEvent.isDefaultPrevented()).toBeFalsy();
+                                                beforeEach(function () {
+                                                    escEvent = createEscEvent();
+                                                    $input.trigger(escEvent);
+                                                });
+
+                                                it("should not prevent 'esc' event", function () {
+                                                    expect(escEvent.isDefaultPrevented()).toBeFalsy();
+                                                });
+
+                                                it("should empty the suggestions on 'esc' keydown", function () {
+                                                    expect($listbox.find('.a11y-suggestion')).toHaveLength(0);
+                                                });
+
+                                                it("should focus on reveal button on 'esc' keydown", function () {
+                                                    expect($revealButton).toBeFocused();
+                                                });
+
+                                                it("should hide a11y select container on 'esc' keydown", function () {
+                                                    expect($a11ySelectContainer).toBeHidden();
+                                                });
                                             });
 
                                             it("should empty the suggestions on 'shift+tab' keydown", function () {
@@ -301,6 +318,13 @@ define(['../lib/select-a11y'], function (filterComponent) {
                                                 $('body').click();
 
                                                 expect($listbox.find('.a11y-suggestion')).toHaveLength(0);
+                                            });
+
+                                            it("should hide a11y select container on 'click' outside the input", function () {
+                                                $('body').click();
+
+                                                expect($a11ySelectContainer).toBeHidden();
+                                                expect($revealButton).toHaveAttr('aria-expanded', 'false');
                                             });
 
                                             it("should NOT empty the suggestions on 'click' inside the input", function () {
@@ -411,18 +435,25 @@ define(['../lib/select-a11y'], function (filterComponent) {
                                                             $currentSuggestion.trigger(escEvent);
                                                         });
 
-                                                        it("should empty the suggestions on 'esc' keydown", function () {
-                                                            expect($listbox.find('.a11y-suggestion')).toHaveLength(0);
+                                                        it("should prevent 'esc' event", function () {
                                                             expect(escEvent.isDefaultPrevented()).toBeTruthy();
                                                         });
 
-                                                        it("should focus on input on 'esc' keydown", function () {
-                                                            expect($input).toBeFocused();
-                                                            expect(escEvent.isDefaultPrevented()).toBeTruthy();
+                                                        it("should empty the suggestions on 'esc' keydown", function () {
+                                                            expect($listbox.find('.a11y-suggestion')).toHaveLength(0);
+                                                        });
+
+                                                        it("should focus on reveal button on 'esc' keydown", function () {
+                                                            expect($revealButton).toBeFocused();
+                                                        });
+
+                                                        it("should hide the a11y select container after selection", function () {
+                                                            expect($a11ySelectContainer).toBeHidden();
+                                                            expect($revealButton).toHaveAttr('aria-expanded', 'false');
                                                         });
                                                     });
 
-                                                    describe("on 'enter' keydow", function () {
+                                                    describe("on 'enter' keydown", function () {
                                                         var enterEvent;
 
                                                         beforeEach(function () {
@@ -430,19 +461,25 @@ define(['../lib/select-a11y'], function (filterComponent) {
                                                             $currentSuggestion.trigger(enterEvent);
                                                         });
 
-                                                        it("should empty the input after selection", function () {
-                                                            expect($input).toHaveValue('');
+                                                        it("should prevent 'enter' event", function () {
                                                             expect(enterEvent.isDefaultPrevented()).toBeTruthy();
                                                         });
 
-                                                        it("should focus on input after selection", function () {
-                                                            expect($input).toBeFocused();
-                                                            expect(enterEvent.isDefaultPrevented()).toBeTruthy();
+                                                        it("should empty the input after selection", function () {
+                                                            expect($input).toHaveValue('');
+                                                        });
+
+                                                        it("should hide the a11y select container after selection", function () {
+                                                            expect($a11ySelectContainer).toBeHidden();
+                                                            expect($revealButton).toHaveAttr('aria-expanded', 'false');
+                                                        });
+
+                                                        it("should focus on reveal button after selection", function () {
+                                                            expect($revealButton).toBeFocused();
                                                         });
 
                                                         it("should empty suggestions", function () {
                                                             expect($listbox.find('.a11y-suggestion')).toHaveLength(0);
-                                                            expect(enterEvent.isDefaultPrevented()).toBeTruthy();
                                                         });
                                                     });
 
@@ -454,19 +491,25 @@ define(['../lib/select-a11y'], function (filterComponent) {
                                                             $currentSuggestion.trigger(spaceEvent);
                                                         });
 
-                                                        it("should empty the input after selection", function () {
-                                                            expect($input).toHaveValue('');
+                                                        it("should prevent 'space' event", function () {
                                                             expect(spaceEvent.isDefaultPrevented()).toBeTruthy();
                                                         });
 
-                                                        it("should focus on input after selection", function () {
-                                                            expect($input).toBeFocused();
-                                                            expect(spaceEvent.isDefaultPrevented()).toBeTruthy();
+                                                        it("should empty the input after selection", function () {
+                                                            expect($input).toHaveValue('');
+                                                        });
+
+                                                        it("should hide the a11y select container after selection", function () {
+                                                            expect($a11ySelectContainer).toBeHidden();
+                                                            expect($revealButton).toHaveAttr('aria-expanded', 'false');
+                                                        });
+
+                                                        it("should focus on reveal button after selection", function () {
+                                                            expect($revealButton).toBeFocused();
                                                         });
 
                                                         it("should empty suggestions", function () {
                                                             expect($listbox.find('.a11y-suggestion')).toHaveLength(0);
-                                                            expect(spaceEvent.isDefaultPrevented()).toBeTruthy();
                                                         });
                                                     });
 
@@ -480,8 +523,13 @@ define(['../lib/select-a11y'], function (filterComponent) {
                                                             expect($input).toHaveValue('');
                                                         });
 
-                                                        it("should focus on input after selection", function () {
-                                                            expect($input).toBeFocused();
+                                                        it("should hide the a11y select container after selection", function () {
+                                                            expect($a11ySelectContainer).toBeHidden();
+                                                            expect($revealButton).toHaveAttr('aria-expanded', 'false');
+                                                        });
+
+                                                        it("should focus on reveal button after selection", function () {
+                                                            expect($revealButton).toBeFocused();
                                                         });
 
                                                         it("should empty suggestions", function () {
@@ -754,8 +802,8 @@ define(['../lib/select-a11y'], function (filterComponent) {
                                                                         $selectedListItems = $ulSelection.find('li');
                                                                     });
 
-                                                                    it("should focus on the input", function () {
-                                                                        expect($input).toBeFocused();
+                                                                    it("should focus on the reveal button", function () {
+                                                                        expect($revealButton).toBeFocused();
                                                                     });
                                                                 });
                                                             });
