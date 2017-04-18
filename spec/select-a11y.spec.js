@@ -46,29 +46,29 @@ define(['../lib/select-a11y'], function (filterComponent) {
             });
 
             function executeTests(index) {
-                var selectToTransform;
+                var $selectToTransform;
 
                 beforeEach(function () {
-                    selectToTransform = $(selectsToTransform[index]);
+                    $selectToTransform = $(selectsToTransform[index]);
                 });
 
                 describe("for select[" + index + "]", function () {
                     var ids = ['select-option', 'select-element'];
 
                     it("should have a data-select-a11y", function () {
-                        expect(selectToTransform).toExist();
+                        expect($selectToTransform).toExist();
                     });
 
                     it("should have a div as parent", function () {
-                        expect(selectToTransform.parent()).toBeMatchedBy('div');
+                        expect($selectToTransform.parent()).toBeMatchedBy('div');
                     });
 
                     it("should have an id", function () {
-                        expect(selectToTransform).toHaveId(ids[index]);
+                        expect($selectToTransform).toHaveId(ids[index]);
                     });
 
                     it("should have a label", function () {
-                        var label = selectToTransform.parent().find('label');
+                        var label = $selectToTransform.parent().find('label');
                         expect(label).toHaveAttr('for', ids[index]);
                     });
                 });
@@ -117,15 +117,23 @@ define(['../lib/select-a11y'], function (filterComponent) {
                 var hiddenSelectId;
                 var $a11ySelectContainer;
                 var $hiddenSelectContainer;
+                var $wrappedContainer;
 
                 beforeEach(function () {
                     $transformedSelect = $(transformedSelects[index]);
                     hiddenSelectId = $transformedSelect.attr('id');
                     $hiddenSelectContainer = $transformedSelect.parent();
                     $a11ySelectContainer = $hiddenSelectContainer.prev();
+                    $wrappedContainer = $hiddenSelectContainer.parent();
                 });
 
                 describe("for select[" + index + "]", function () {
+
+                    it("should add a div to wrap all the elements", function () {
+                        expect($wrappedContainer).toExist();
+                        expect($wrappedContainer).toBeMatchedBy('div');
+                        expect($wrappedContainer).toHaveClass('select-a11y');
+                    });
 
                     it("should add the a11y select container before the container of the select to transform", function () {
                         expect($a11ySelectContainer).toExist();
@@ -180,6 +188,10 @@ define(['../lib/select-a11y'], function (filterComponent) {
 
                             it("should still hide the container of the select to transform", function () {
                                 expect($hiddenSelectContainer).toBeHidden();
+                            });
+
+                            it("should add a class is-open on the wrapped container", function () {
+                                expect($wrappedContainer).toHaveClass('is-open');
                             });
 
                             it("should have aria-expanded to 'true' when a11y select container is shown", function () {
@@ -301,6 +313,10 @@ define(['../lib/select-a11y'], function (filterComponent) {
                                                     expect($revealButton).toBeFocused();
                                                 });
 
+                                                it("should remove class is-open on the wrapped container", function () {
+                                                    expect($wrappedContainer).not.toHaveClass('is-open');
+                                                });
+
                                                 it("should hide a11y select container on 'esc' keydown", function () {
                                                     expect($a11ySelectContainer).toBeHidden();
                                                 });
@@ -327,6 +343,11 @@ define(['../lib/select-a11y'], function (filterComponent) {
                                                 expect($revealButton).toHaveAttr('aria-expanded', 'false');
                                             });
 
+                                            it("should remove class is-open on the wrapped container on 'click' outside the input", function () {
+                                                $('body').click();
+                                                expect($wrappedContainer).not.toHaveClass('is-open');
+                                            });
+
                                             it("should NOT empty the suggestions on 'click' inside the input", function () {
                                                 $input.click();
 
@@ -341,6 +362,12 @@ define(['../lib/select-a11y'], function (filterComponent) {
 
                                             it("should NOT empty the suggestions on 'click' inside the listbox", function () {
                                                 $listbox.click();
+
+                                                expect($listbox.find('.a11y-suggestion')).not.toHaveLength(0);
+                                            });
+
+                                            it("should NOT empty the suggestions on 'click' on reveal button", function () {
+                                                $revealButton.click();
 
                                                 expect($listbox.find('.a11y-suggestion')).not.toHaveLength(0);
                                             });
@@ -419,11 +446,11 @@ define(['../lib/select-a11y'], function (filterComponent) {
                                                         expect(upArrowEvent.isDefaultPrevented()).toBeTruthy();
                                                     });
 
-                                                    it("it should focus on the input on 'shift+tab' keydown", function () {
+                                                    it("it should focus on the reveal button on 'shift+tab' keydown", function () {
                                                         var shiftTabEvent = createTabEvent('with shift');
                                                         $currentSuggestion.trigger(shiftTabEvent);
 
-                                                        expect($input).toBeFocused();
+                                                        expect($revealButton).toBeFocused();
                                                         expect(shiftTabEvent.isDefaultPrevented()).toBeTruthy();
                                                     });
 
@@ -445,6 +472,10 @@ define(['../lib/select-a11y'], function (filterComponent) {
 
                                                         it("should focus on reveal button on 'esc' keydown", function () {
                                                             expect($revealButton).toBeFocused();
+                                                        });
+
+                                                        it("should remove class is-open on the wrapped container", function () {
+                                                            expect($wrappedContainer).not.toHaveClass('is-open');
                                                         });
 
                                                         it("should hide the a11y select container after selection", function () {
@@ -478,6 +509,10 @@ define(['../lib/select-a11y'], function (filterComponent) {
                                                             expect($revealButton).toBeFocused();
                                                         });
 
+                                                        it("should remove class is-open on the wrapped container", function () {
+                                                            expect($wrappedContainer).not.toHaveClass('is-open');
+                                                        });
+
                                                         it("should empty suggestions", function () {
                                                             expect($listbox.find('.a11y-suggestion')).toHaveLength(0);
                                                         });
@@ -508,6 +543,10 @@ define(['../lib/select-a11y'], function (filterComponent) {
                                                             expect($revealButton).toBeFocused();
                                                         });
 
+                                                        it("should remove class is-open on the wrapped container", function () {
+                                                            expect($wrappedContainer).not.toHaveClass('is-open');
+                                                        });
+
                                                         it("should empty suggestions", function () {
                                                             expect($listbox.find('.a11y-suggestion')).toHaveLength(0);
                                                         });
@@ -530,6 +569,10 @@ define(['../lib/select-a11y'], function (filterComponent) {
 
                                                         it("should focus on reveal button after selection", function () {
                                                             expect($revealButton).toBeFocused();
+                                                        });
+
+                                                        it("should remove class is-open on the wrapped container", function () {
+                                                            expect($wrappedContainer).not.toHaveClass('is-open');
                                                         });
 
                                                         it("should empty suggestions", function () {
