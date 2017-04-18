@@ -259,6 +259,10 @@ define(['../lib/select-a11y'], function (filterComponent) {
                                             expect($listbox).toHaveAttr('role', 'listbox');
                                         });
 
+                                        it("should add suggestions to the div", function () {
+                                            expect($listbox.find('.a11y-suggestion')).toHaveLength(suggestionsLength[index]);
+                                        });
+
                                         describe("on input and keydown in a11y select container", function () {
                                             var $selectedListItems;
 
@@ -275,11 +279,6 @@ define(['../lib/select-a11y'], function (filterComponent) {
 
                                             it("should add suggestions to the div", function () {
                                                 expect($listbox.find('.a11y-suggestion')).toHaveLength(suggestionsLength[index]);
-                                            });
-
-                                            it("should empty the suggestions when input is empty", function () {
-                                                $input.val('').trigger('input');
-                                                expect($listbox.find('.a11y-suggestion')).toHaveLength(0);
                                             });
 
                                             it("should empty the suggestions on 'esc' keydown", function () {
@@ -318,6 +317,12 @@ define(['../lib/select-a11y'], function (filterComponent) {
 
                                             it("should NOT empty the suggestions on 'click' inside the listbox", function () {
                                                 $listbox.click();
+
+                                                expect($listbox.find('.a11y-suggestion')).not.toHaveLength(0);
+                                            });
+
+                                            it("should NOT empty the suggestions on 'click' on reveal button", function () {
+                                                $revealButton.click();
 
                                                 expect($listbox.find('.a11y-suggestion')).not.toHaveLength(0);
                                             });
