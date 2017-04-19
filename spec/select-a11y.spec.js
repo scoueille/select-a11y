@@ -487,7 +487,7 @@ define(['../lib/select-a11y'], function (filterComponent) {
                                                         var shiftTabEvent = createTabEvent('with shift');
                                                         $currentSuggestion.trigger(shiftTabEvent);
 
-                                                        expect($revealButton).toBeFocused();
+                                                        expect($input).toBeFocused();
                                                         expect(shiftTabEvent.isDefaultPrevented()).toBeTruthy();
                                                     });
 
