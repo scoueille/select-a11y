@@ -240,12 +240,12 @@ define(['../lib/select-a11y'], function (filterComponent) {
                                         expect($input).toHaveAttr('autocomplete', 'off');
                                     });
 
-                                    it("should have a label for sr only with the same text than the label of the hidden select", function () {
+                                    it("should have a label for sr only with the same text than the label of the hidden select and the explaination of the keys", function () {
                                         var $label = $a11ySelectContainer.find('label');
                                         expect($label).toExist();
                                         expect($label).toHaveClass('sr-only');
                                         expect($label).toHaveAttr('for', 'a11y-' + hiddenSelectId + '-js');
-                                        expect($label).toHaveText($hiddenSelectLabel.text());
+                                        expect($label).toHaveText($hiddenSelectLabel.text() + '. Utilisez la tabulation (ou la touche flèche du bas) pour naviguer dans la liste des suggestions');
                                     });
 
                                     describe("to show the suggestions", function () {
@@ -361,28 +361,27 @@ define(['../lib/select-a11y'], function (filterComponent) {
                                                 });
                                             });
 
-                                            it("should empty the suggestions on 'click' outside the input", function () {
-                                                $('body').click();
+                                            describe("on 'click' outside the input", function () {
+                                                beforeEach(function () {
+                                                    $('body').click();
+                                                });
 
-                                                expect($listbox.find('.a11y-suggestion')).toHaveLength(0);
-                                            });
+                                                it("should empty the suggestions", function () {
+                                                    expect($listbox.find('.a11y-suggestion')).toHaveLength(0);
+                                                });
 
-                                            it("should hide a11y select container on 'click' outside the input", function () {
-                                                $('body').click();
+                                                it("should hide a11y select container on 'click' outside the input", function () {
+                                                    expect($a11ySelectContainer).toBeHidden();
+                                                    expect($revealButton).toHaveAttr('aria-expanded', 'false');
+                                                });
 
-                                                expect($a11ySelectContainer).toBeHidden();
-                                                expect($revealButton).toHaveAttr('aria-expanded', 'false');
-                                            });
+                                                it("should empty the input on 'click' outside the input", function () {
+                                                    expect($input).toHaveValue('');
+                                                });
 
-                                            it("should empty the input on 'click' outside the input", function () {
-                                                $('body').click();
-
-                                                expect($input).toHaveValue('');
-                                            });
-
-                                            it("should remove class is-open on the wrapped container on 'click' outside the input", function () {
-                                                $('body').click();
-                                                expect($wrappedContainer).not.toHaveClass('is-open');
+                                                it("should remove class is-open on the wrapped container on 'click' outside the input", function () {
+                                                    expect($wrappedContainer).not.toHaveClass('is-open');
+                                                });
                                             });
 
                                             it("should NOT empty the suggestions on 'click' inside the input", function () {
@@ -399,12 +398,6 @@ define(['../lib/select-a11y'], function (filterComponent) {
 
                                             it("should NOT empty the suggestions on 'click' inside the listbox", function () {
                                                 $listbox.click();
-
-                                                expect($listbox.find('.a11y-suggestion')).not.toHaveLength(0);
-                                            });
-
-                                            it("should NOT empty the suggestions on 'click' on reveal button", function () {
-                                                $revealButton.click();
 
                                                 expect($listbox.find('.a11y-suggestion')).not.toHaveLength(0);
                                             });
@@ -708,13 +701,6 @@ define(['../lib/select-a11y'], function (filterComponent) {
 
                                                 it("should have an attribute 'aria-live'", function () {
                                                     expect($screenReaderContainer).toHaveAttr('aria-live', 'polite');
-                                                });
-
-                                                it("should be after a paragraph describing the usage of the a11y-select", function () {
-                                                    var $usageParagraph = $screenReaderContainer.prev();
-                                                    expect($usageParagraph).toBeMatchedBy('p');
-                                                    expect($usageParagraph).toHaveClass('sr-only');
-                                                    expect($usageParagraph.text()).toEqual('Utilisez la tabulation (ou la touche flèche du bas) pour naviguer dans la liste des suggestions. Confirmez votre choix avec la touche Entrée ou utilisez la touche Esc pour fermer la liste de suggestions.');
                                                 });
 
                                                 describe("on input in a11y select container", function () {
