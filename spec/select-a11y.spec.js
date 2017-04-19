@@ -416,13 +416,42 @@ define(['../lib/select-a11y'], function (filterComponent) {
                                                 expect(tabEvent.isDefaultPrevented()).toBeTruthy();
                                             });
 
-                                            it("should not prevent 'tab' keydown if suggestions list is empty", function () {
-                                                var escEvent = createEscEvent(); // to empty suggestions
-                                                var tabEvent = createTabEvent();
-                                                $input.trigger(escEvent).trigger(tabEvent);
+                                            describe("on empty suggestions", function () {
 
-                                                expect($listbox.find('.a11y-suggestion')).toHaveLength(0);
-                                                expect(tabEvent.isDefaultPrevented()).toBeFalsy();
+                                                beforeEach(function () {
+                                                    $listbox.empty();
+                                                });
+
+                                                describe("on tab keydown", function () {
+                                                    var tabEvent;
+
+                                                    beforeEach(function () {
+                                                        tabEvent = createTabEvent();
+                                                        $input.trigger(tabEvent);
+                                                    });
+
+                                                    it("should not prevent 'tab' keydown", function () {
+                                                        expect(tabEvent.isDefaultPrevented()).toBeFalsy();
+                                                    });
+
+                                                    it("should empty the suggestions", function () {
+                                                        expect($listbox.find('.a11y-suggestion')).toHaveLength(0);
+                                                    });
+
+                                                    it("should empty the input", function () {
+                                                        expect($input).toHaveValue('');
+                                                    });
+
+                                                    it("should remove class is-open on the wrapped container", function () {
+                                                        expect($wrappedContainer).not.toHaveClass('is-open');
+                                                    });
+
+                                                    it("should hide the a11y select container", function () {
+                                                        expect($a11ySelectContainer).toBeHidden();
+                                                        expect($revealButton).toHaveAttr('aria-expanded', 'false');
+                                                    });
+
+                                                });
                                             });
 
                                             it("should focus on first suggestion on 'down arrow' keydown", function () {
@@ -500,7 +529,7 @@ define(['../lib/select-a11y'], function (filterComponent) {
                                                             expect($listbox.find('.a11y-suggestion')).toHaveLength(0);
                                                         });
 
-                                                        it("should empty the input after selection", function () {
+                                                        it("should empty the input", function () {
                                                             expect($input).toHaveValue('');
                                                         });
 
