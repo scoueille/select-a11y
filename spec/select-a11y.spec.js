@@ -8,7 +8,7 @@ define(['../lib/select-a11y'], function (filterComponent) {
                 '<form action="">' +
                 '  <div class="form-group">' +
                 '    <label for="select-option">Sélectionner une option</label>' +
-                '    <select class="form-control" id="select-option" multiple data-select-a11y>' +
+                '    <select class="form-control" id="select-option" multiple data-select-a11y data-placeholder="Choisissez une option">' +
                 '        <option>Option 1</option>' +
                 '        <option>Option 2</option>' +
                 '        <option>Option 3</option>' +
@@ -18,7 +18,7 @@ define(['../lib/select-a11y'], function (filterComponent) {
                 '  </div>' +
                 '  <div class="form-group">' +
                 '    <label for="select-element">Sélectionner un élément</label>' +
-                '    <select class="form-control" id="select-element" multiple data-select-a11y>' +
+                '    <select class="form-control" id="select-element" multiple data-select-a11y data-placeholder="Choisissez un élément">' +
                 '        <option>Element 1</option>' +
                 '        <option>Element 2</option>' +
                 '        <option>Element 3</option>' +
@@ -54,6 +54,7 @@ define(['../lib/select-a11y'], function (filterComponent) {
 
                 describe("for select[" + index + "]", function () {
                     var ids = ['select-option', 'select-element'];
+                    var placeholders = ['Choisissez une option', 'Choisissez un élément'];
 
                     it("should have a data-select-a11y", function () {
                         expect($selectToTransform).toExist();
@@ -71,6 +72,11 @@ define(['../lib/select-a11y'], function (filterComponent) {
                         var label = $selectToTransform.parent().find('label');
                         expect(label).toHaveAttr('for', ids[index]);
                     });
+
+                    it("should have a data-placeholder", function () {
+                        expect($selectToTransform).toHaveData('placeholder', placeholders[index]);
+                    });
+
                 });
 
             }
@@ -148,6 +154,14 @@ define(['../lib/select-a11y'], function (filterComponent) {
                         expect($hiddenSelectContainer).toBeHidden();
                     });
 
+                    it("should add an attribut aria-hidden to true to the container of the select to transform", function () {
+                        expect($hiddenSelectContainer).toHaveAttr('aria-hidden', 'true');
+                    });
+
+                    it("should add an attribut tabindex to -1 to the select to transform", function () {
+                        expect($transformedSelect).toHaveAttr('tabindex', '-1');
+                    });
+
                     it("should NOT hide the select I must not transform", function () {
                         var $selectIMustNotTransform = fixture.find('#select-i-must-not-transform');
                         expect($selectIMustNotTransform).not.toBeHidden();
@@ -178,6 +192,7 @@ define(['../lib/select-a11y'], function (filterComponent) {
 
                         describe("on click on the button", function () {
                             var $input;
+                            var placeholders = ['Choisissez une option', 'Choisissez un élément'];
                             var inputValues = ['Option', 'Element'];
                             var suggestionsLength = [5, 3];
 
@@ -240,12 +255,24 @@ define(['../lib/select-a11y'], function (filterComponent) {
                                         expect($input).toHaveAttr('autocomplete', 'off');
                                     });
 
-                                    it("should have a label for sr only with the same text than the label of the hidden select and the explaination of the keys", function () {
+                                    it("should have autocapitalize to 'off'", function () {
+                                        expect($input).toHaveAttr('autocapitalize', 'off');
+                                    });
+
+                                    it("should have spellcheck to 'false'", function () {
+                                        expect($input).toHaveAttr('spellcheck', 'false');
+                                    });
+
+                                    it("should have a placeholder", function () {
+                                        expect($input).toHaveAttr('placeholder', placeholders[index]);
+                                    });
+
+                                    it("should have a label for sr only with the placeholder", function () {
                                         var $label = $a11ySelectContainer.find('label');
                                         expect($label).toExist();
                                         expect($label).toHaveClass('sr-only');
                                         expect($label).toHaveAttr('for', 'a11y-' + hiddenSelectId + '-js');
-                                        expect($label).toHaveText($hiddenSelectLabel.text() + '. Utilisez la tabulation (ou la touche flèche du bas) pour naviguer dans la liste des suggestions');
+                                        expect($label).toHaveText(placeholders[index]);
                                     });
 
                                     describe("to show the suggestions", function () {
