@@ -314,6 +314,35 @@ define(['../lib/select-a11y'], function (filterComponent) {
                                             expect($listbox.find('.a11y-suggestion')).toHaveLength(suggestionsLength[index]);
                                         });
 
+                                        describe('on second click on the button', function () {
+
+                                            beforeEach(function () {
+                                                $revealButton.click();
+                                            });
+
+                                            it("should empty the suggestions", function () {
+                                                expect($listbox.find('.a11y-suggestion')).toHaveLength(0);
+                                            });
+
+                                            it("should empty the input", function () {
+                                                expect($input).toHaveValue('');
+                                            });
+
+                                            it("should focus on reveal button", function () {
+                                                expect($revealButton).toBeFocused();
+                                            });
+
+                                            it("should remove class is-open on the wrapped container", function () {
+                                                expect($wrappedContainer).not.toHaveClass('is-open');
+                                            });
+
+                                            it("should hide a11y select container", function () {
+                                                expect($a11ySelectContainer).toBeHidden();
+                                                expect($revealButton).toHaveAttr('aria-expanded', 'false');
+                                            });
+
+                                        });
+
                                         describe("on input and keydown in a11y select container", function () {
                                             var $selectedListItems;
 
@@ -437,12 +466,6 @@ define(['../lib/select-a11y'], function (filterComponent) {
 
                                             it("should NOT empty the suggestions on 'click' inside the listbox", function () {
                                                 $listbox.click();
-
-                                                expect($listbox.find('.a11y-suggestion')).not.toHaveLength(0);
-                                            });
-
-                                            it("should NOT empty the suggestions on 'click' on reveal button", function () {
-                                                $revealButton.click();
 
                                                 expect($listbox.find('.a11y-suggestion')).not.toHaveLength(0);
                                             });
