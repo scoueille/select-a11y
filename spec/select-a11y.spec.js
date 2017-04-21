@@ -251,20 +251,24 @@ define(['../lib/select-a11y'], function (filterComponent) {
                                         });
                                     });
 
-                                    it("should have an attribute 'autocomplete' to off", function () {
+                                    it("should have 'autocomplete' to off", function () {
                                         expect($input).toHaveAttr('autocomplete', 'off');
                                     });
 
-                                    it("should have autocapitalize to 'off'", function () {
+                                    it("should have 'autocapitalize' to 'off'", function () {
                                         expect($input).toHaveAttr('autocapitalize', 'off');
                                     });
 
-                                    it("should have spellcheck to 'false'", function () {
+                                    it("should have 'spellcheck' to 'false'", function () {
                                         expect($input).toHaveAttr('spellcheck', 'false');
                                     });
 
                                     it("should have a placeholder", function () {
                                         expect($input).toHaveAttr('placeholder', placeholders[index]);
+                                    });
+
+                                    it("should have a 'aria-describedby'", function () {
+                                        expect($input).toHaveAttr('aria-describedby', 'a11y-usage' + hiddenSelectId + '-js');
                                     });
 
                                     it("should have a label for sr only with the placeholder", function () {
@@ -273,6 +277,14 @@ define(['../lib/select-a11y'], function (filterComponent) {
                                         expect($label).toHaveClass('sr-only');
                                         expect($label).toHaveAttr('for', 'a11y-' + hiddenSelectId + '-js');
                                         expect($label).toHaveText(placeholders[index]);
+                                    });
+
+                                    it("should have a paragraph for sr only with the explaination of the keys", function () {
+                                        var $p = $a11ySelectContainer.find('p');
+                                        expect($p).toExist();
+                                        expect($p).toHaveClass('sr-only');
+                                        expect($p).toHaveAttr('id', 'a11y-usage' + hiddenSelectId + '-js');
+                                        expect($p).toHaveText('Utilisez la tabulation (ou la touche flèche du bas) pour naviguer dans la liste des suggestions');
                                     });
 
                                     describe("to show the suggestions", function () {
