@@ -9,11 +9,10 @@ $tag-item-border:        $gray-1;
 $tag-item-supp-symbol:   "\274c"; // X
 $tag-item-supp-border:   red;
 
-$a11y-suggestions-bg:          #fff;
+$a11y-suggestions-bg:          #ededed;
 $a11y-suggestion-color:        #666;
 $a11y-suggestion-color-hover:  #000;
 $a11y-suggestion-border:       #666;
 
 
 @import "style-select-a11y";
-

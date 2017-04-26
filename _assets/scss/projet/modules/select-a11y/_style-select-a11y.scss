@@ -9,19 +9,23 @@
     width: 100%;
     text-align: left;
     background-color: $btn-select-a11y-bg;
-    &:after {
-      content :$btn-select-a11y-symbol;
+    .icon-select {
       position: absolute;
+      background-color: red;
       top:50%;
       right: 0.5em;
       line-height: 0;
       speak:none;
+      &::before {
+        content :$btn-select-a11y-symbol;
+      }
     }
   }
+
   &.is-open .btn-select-a11y {
     border-bottom-right-radius: 0;
     border-bottom-left-radius: 0;
-    &:after {
+    .icon-select {
       transform: rotate(180deg);
     }
   }
@@ -30,6 +34,7 @@
     border:1px solid $tag-item-border;
     padding: 0.2em 0 0.2em 0.5em;
   }
+
   .tag-item-supp {
     background-color: transparent;
     border:0;
@@ -46,6 +51,7 @@
       color: $tag-item-supp-border;
     }
   }
+
   .tag-hidden {
     display: none;
   }
@@ -56,10 +62,10 @@
     padding: 0.5em;
 
   }
+
   &.is-open .a11y-container {
     display: block;
   }
-
 
   .a11y-container-inner {
     position: absolute;
@@ -70,7 +76,6 @@
     background: $a11y-suggestions-bg;
     z-index: 10;
     border: 1px solid $btn-select-a11y-bg;
-
   }
 
   // fix safari pour cacher l'autocompletion native
@@ -88,9 +93,8 @@
     overflow-y: auto;
     border: 1px solid $a11y-suggestion-border;
     margin-top: 0.5em;
+    background-color: #fff;
   }
-
-
 
   .a11y-suggestion {
     padding: 0 0.5em;
