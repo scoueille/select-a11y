@@ -290,10 +290,14 @@ define(['../lib/select-a11y'], function (filterComponent) {
                                     describe("to show the suggestions", function () {
                                         var $suggestions;
                                         var $listbox;
+                                        var $screenReaderContainer;
+                                        var $ariaLiveZone;
 
                                         beforeEach(function () {
                                             $suggestions = $a11ySelectContainer.find('div.a11y-suggestions');
                                             $listbox = $suggestions.find('div');
+                                            $screenReaderContainer = $a11ySelectContainer.prev().prev();
+                                            $ariaLiveZone = $screenReaderContainer.find('p');
                                         });
 
                                         it("should have a div as container", function () {
@@ -312,6 +316,10 @@ define(['../lib/select-a11y'], function (filterComponent) {
 
                                         it("should add suggestions to the div", function () {
                                             expect($listbox.find('.a11y-suggestion')).toHaveLength(suggestionsLength[index]);
+                                        });
+
+                                        it("should update the 'aria-live' zone with the number of filtered items", function () {
+                                            expect($ariaLiveZone).toHaveText(suggestionsLength[index] + ' suggestions disponibles');
                                         });
 
                                         describe('on second click on the button', function () {
@@ -341,6 +349,9 @@ define(['../lib/select-a11y'], function (filterComponent) {
                                                 expect($revealButton).toHaveAttr('aria-expanded', 'false');
                                             });
 
+                                            it('should empty the "aria-live" zone', function () {
+                                                expect($ariaLiveZone).toBeEmpty();
+                                            });
                                         });
 
                                         describe("on input and keydown in a11y select container", function () {
@@ -359,6 +370,31 @@ define(['../lib/select-a11y'], function (filterComponent) {
 
                                             it("should add suggestions to the div", function () {
                                                 expect($listbox.find('.a11y-suggestion')).toHaveLength(suggestionsLength[index]);
+                                            });
+
+                                            describe("the description for a11y screen reader", function () {
+
+                                                it("should add the div before the a11y select container", function () {
+                                                    expect($screenReaderContainer).toExist();
+                                                    expect($screenReaderContainer).toBeMatchedBy('div');
+                                                });
+
+                                                it("should have a class sr-only", function () {
+                                                    expect($screenReaderContainer).toHaveClass('sr-only');
+                                                });
+
+                                                it("should contain a paragraph", function () {
+                                                    expect($screenReaderContainer.find('p')).toExist();
+                                                });
+
+                                                it("should have an attribute 'aria-live'", function () {
+                                                    expect($screenReaderContainer).toHaveAttr('aria-live', 'polite');
+                                                });
+
+                                                it("should update the 'aria-live' zone with the number of filtered items", function () {
+                                                    expect($ariaLiveZone).toHaveText(suggestionsLength[index] + ' suggestions disponibles');
+                                                });
+
                                             });
 
                                             describe("on esc keydown", function () {
@@ -392,6 +428,10 @@ define(['../lib/select-a11y'], function (filterComponent) {
                                                 it("should hide a11y select container", function () {
                                                     expect($a11ySelectContainer).toBeHidden();
                                                     expect($revealButton).toHaveAttr('aria-expanded', 'false');
+                                                });
+
+                                                it("should empty the 'aria-live' zone ", function () {
+                                                    expect($ariaLiveZone).toBeEmpty();
                                                 });
                                             });
 
@@ -427,6 +467,10 @@ define(['../lib/select-a11y'], function (filterComponent) {
                                                     expect($a11ySelectContainer).toBeHidden();
                                                     expect($revealButton).toHaveAttr('aria-expanded', 'false');
                                                 });
+
+                                                it("should empty the 'aria-live' zone ", function () {
+                                                    expect($ariaLiveZone).toBeEmpty();
+                                                });
                                             });
 
                                             describe("on 'click' outside the input", function () {
@@ -449,6 +493,23 @@ define(['../lib/select-a11y'], function (filterComponent) {
 
                                                 it("should remove class is-open on the wrapped container on 'click' outside the input", function () {
                                                     expect($wrappedContainer).not.toHaveClass('is-open');
+                                                });
+
+                                                it("should empty the 'aria-live' zone ", function () {
+                                                    expect($ariaLiveZone).toBeEmpty();
+                                                });
+                                            });
+
+                                            describe('on "focusout" of the select-a11y component', function () {
+                                                beforeEach(function () {
+                                                    $('#select-i-must-not-transform').focus();
+                                                });
+
+                                                it("should empty the 'aria-live' zone ", function (done) {
+                                                    setTimeout(function() {
+                                                        expect($ariaLiveZone).toBeEmpty();
+                                                        done();
+                                                    }, 100);
                                                 });
                                             });
 
@@ -478,44 +539,6 @@ define(['../lib/select-a11y'], function (filterComponent) {
                                                 expect(tabEvent.isDefaultPrevented()).toBeTruthy();
                                             });
 
-                                            describe("on empty suggestions", function () {
-
-                                                beforeEach(function () {
-                                                    $listbox.empty();
-                                                });
-
-                                                describe("on tab keydown", function () {
-                                                    var tabEvent;
-
-                                                    beforeEach(function () {
-                                                        tabEvent = createTabEvent();
-                                                        $input.trigger(tabEvent);
-                                                    });
-
-                                                    it("should not prevent 'tab' keydown", function () {
-                                                        expect(tabEvent.isDefaultPrevented()).toBeFalsy();
-                                                    });
-
-                                                    it("should empty the suggestions", function () {
-                                                        expect($listbox.find('.a11y-suggestion')).toHaveLength(0);
-                                                    });
-
-                                                    it("should empty the input", function () {
-                                                        expect($input).toHaveValue('');
-                                                    });
-
-                                                    it("should remove class is-open on the wrapped container", function () {
-                                                        expect($wrappedContainer).not.toHaveClass('is-open');
-                                                    });
-
-                                                    it("should hide the a11y select container", function () {
-                                                        expect($a11ySelectContainer).toBeHidden();
-                                                        expect($revealButton).toHaveAttr('aria-expanded', 'false');
-                                                    });
-
-                                                });
-                                            });
-
                                             it("should focus on first suggestion on 'down arrow' keydown", function () {
                                                 var downArrowEvent = createDownArrowEvent();
                                                 $input.trigger(downArrowEvent);
@@ -535,6 +558,7 @@ define(['../lib/select-a11y'], function (filterComponent) {
 
                                                 describe("on first suggestion", function () {
                                                     var $nextSuggestion;
+                                                    var expectedValues = ['Option 1', 'Element 1'];
 
                                                     beforeEach(function () {
                                                         $firstSuggestion.focus();
@@ -607,6 +631,10 @@ define(['../lib/select-a11y'], function (filterComponent) {
                                                             expect($a11ySelectContainer).toBeHidden();
                                                             expect($revealButton).toHaveAttr('aria-expanded', 'false');
                                                         });
+
+                                                        it("should empty the 'aria-live' zone", function () {
+                                                            expect($ariaLiveZone).toBeEmpty();
+                                                        });
                                                     });
 
                                                     describe("on 'enter' keydown", function () {
@@ -640,6 +668,10 @@ define(['../lib/select-a11y'], function (filterComponent) {
 
                                                         it("should empty suggestions", function () {
                                                             expect($listbox.find('.a11y-suggestion')).toHaveLength(0);
+                                                        });
+
+                                                        it("should update the 'aria-live' zone with the selected item", function () {
+                                                            expect($ariaLiveZone).toHaveText(expectedValues[index] + ' sélectionné');
                                                         });
                                                     });
 
@@ -675,6 +707,10 @@ define(['../lib/select-a11y'], function (filterComponent) {
                                                         it("should empty suggestions", function () {
                                                             expect($listbox.find('.a11y-suggestion')).toHaveLength(0);
                                                         });
+
+                                                        it("should update the 'aria-live' zone with the selected item", function () {
+                                                            expect($ariaLiveZone).toHaveText(expectedValues[index] + ' sélectionné');
+                                                        });
                                                     });
 
                                                     describe("on 'click'", function () {
@@ -702,6 +738,10 @@ define(['../lib/select-a11y'], function (filterComponent) {
 
                                                         it("should empty suggestions", function () {
                                                             expect($listbox.find('.a11y-suggestion')).toHaveLength(0);
+                                                        });
+
+                                                        it("should update the 'aria-live' zone with the selected item", function () {
+                                                            expect($ariaLiveZone).toHaveText(expectedValues[index] + ' sélectionné');
                                                         });
                                                     });
                                                 });
@@ -766,61 +806,49 @@ define(['../lib/select-a11y'], function (filterComponent) {
                                                         it("should empty suggestions", function () {
                                                             expect($listbox.find('.a11y-suggestion')).toHaveLength(0);
                                                         });
+
+                                                        it("should empty the 'aria-live' zone ", function () {
+                                                            expect($ariaLiveZone).toBeEmpty();
+                                                        });
                                                     });
                                                 });
                                             });
 
-                                            describe("the description for a11y screen reader", function () {
-                                                var $screenReaderContainer;
+                                            describe("on empty suggestions", function () {
 
                                                 beforeEach(function () {
-                                                    $screenReaderContainer = $a11ySelectContainer.prev().prev();
+                                                    $listbox.empty();
                                                 });
 
-                                                it("should add the div before the a11y select container", function () {
-                                                    expect($screenReaderContainer).toExist();
-                                                    expect($screenReaderContainer).toBeMatchedBy('div');
-                                                });
-
-                                                it("should have a class sr-only", function () {
-                                                    expect($screenReaderContainer).toHaveClass('sr-only');
-                                                });
-
-                                                it("should contain a paragraph", function () {
-                                                    expect($screenReaderContainer.find('p')).toExist();
-                                                });
-
-                                                it("should have an attribute 'aria-live'", function () {
-                                                    expect($screenReaderContainer).toHaveAttr('aria-live', 'polite');
-                                                });
-
-                                                describe("on input in a11y select container", function () {
-                                                    var $screenReaderDescription;
+                                                describe("on tab keydown", function () {
+                                                    var tabEvent;
 
                                                     beforeEach(function () {
-                                                        $screenReaderDescription = $screenReaderContainer.find('p');
+                                                        tabEvent = createTabEvent();
+                                                        $input.trigger(tabEvent);
                                                     });
 
-                                                    it("should update the a11y screen reader with the number of filtered items", function () {
-                                                        expect($screenReaderDescription).toHaveText(suggestionsLength[index] + ' suggestions disponibles');
+                                                    it("should not prevent 'tab' keydown", function () {
+                                                        expect(tabEvent.isDefaultPrevented()).toBeFalsy();
                                                     });
 
-                                                    describe("on selection of an item in a11y select container", function () {
-                                                        var description;
-                                                        var expectedValues = ['Option 2', 'Element 2'];
-
-                                                        beforeEach(function () {
-                                                            var $secondSuggestion = $a11ySelectContainer.find('.a11y-suggestion:first').next();
-                                                            var enterEvent = createEnterEvent();
-                                                            $secondSuggestion.trigger(enterEvent);
-
-                                                            description = $screenReaderContainer.find('p');
-                                                        });
-
-                                                        it("should update the a11y screen reader with the selected item", function () {
-                                                            expect(description).toHaveText(expectedValues[index] + ' sélectionné');
-                                                        });
+                                                    it("should empty the suggestions", function () {
+                                                        expect($listbox.find('.a11y-suggestion')).toHaveLength(0);
                                                     });
+
+                                                    it("should empty the input", function () {
+                                                        expect($input).toHaveValue('');
+                                                    });
+
+                                                    it("should remove class is-open on the wrapped container", function () {
+                                                        expect($wrappedContainer).not.toHaveClass('is-open');
+                                                    });
+
+                                                    it("should hide the a11y select container", function () {
+                                                        expect($a11ySelectContainer).toBeHidden();
+                                                        expect($revealButton).toHaveAttr('aria-expanded', 'false');
+                                                    });
+
                                                 });
                                             });
 
@@ -948,6 +976,10 @@ define(['../lib/select-a11y'], function (filterComponent) {
                                                                 it("should focus on the previous list item button", function () {
                                                                     var previousDeleteButton = $($selectedListItems[0]).find('button');
                                                                     expect(previousDeleteButton).toBeFocused();
+                                                                });
+
+                                                                it("should empty the 'aria-live' zone", function () {
+                                                                    expect($ariaLiveZone).toBeEmpty();
                                                                 });
 
                                                                 describe("on the hidden select", function () {
