@@ -1,4 +1,4 @@
-/* global describe, expect, it, beforeEach */
+/* global describe, expect, it, beforeEach, afterEach, jasmine, $ */
 define(['../lib/select-a11y'], function (filterComponent) {
     describe("An accessybility select", function () {
         var fixture;
@@ -502,14 +502,17 @@ define(['../lib/select-a11y'], function (filterComponent) {
 
                                             describe('on "focusout" of the select-a11y component', function () {
                                                 beforeEach(function () {
+                                                    jasmine.clock().install();
                                                     $('#select-i-must-not-transform').focus();
                                                 });
 
-                                                it("should empty the 'aria-live' zone ", function (done) {
-                                                    setTimeout(function() {
-                                                        expect($ariaLiveZone).toBeEmpty();
-                                                        done();
-                                                    }, 100);
+                                                afterEach(function () {
+                                                    jasmine.clock().uninstall();
+                                                });
+
+                                                it("should empty the 'aria-live' zone ", function () {
+                                                    jasmine.clock().tick(10);
+                                                    expect($ariaLiveZone).toBeEmpty();
                                                 });
                                             });
 
