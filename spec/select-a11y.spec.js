@@ -817,7 +817,19 @@ define(['../lib/select-a11y'], function (filterComponent) {
                                             describe("on empty suggestions", function () {
 
                                                 beforeEach(function () {
-                                                    $listbox.empty();
+                                                    $input.val('zzz').trigger('input');
+                                                });
+
+                                                it("should update the 'aria-live' zone ", function () {
+                                                    expect($ariaLiveZone).toHaveText('aucun résultat');
+                                                });
+
+                                                it("should have 'aucun résultat' in suggestions", function () {
+                                                    expect($listbox.find('div')).toHaveLength(1);
+                                                    var $noResult = $listbox.find('div:first');
+                                                    expect($noResult).toExist();
+                                                    expect($noResult).toHaveClass('a11y-no-suggestion');
+                                                    expect($noResult).toHaveText('aucun résultat');
                                                 });
 
                                                 describe("on tab keydown", function () {
