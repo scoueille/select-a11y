@@ -13,7 +13,7 @@ define(['../lib/select-a11y'], function (filterComponent) {
                 '        <option>Option 2</option>' +
                 '        <option>Option 3</option>' +
                 '        <option>Option 4</option>' +
-                '        <option>Option 5</option>' +
+                '        <option selected>Option 5</option>' +
                 '    </select>' +
                 '  </div>' +
                 '  <div class="form-group">' +
@@ -22,6 +22,7 @@ define(['../lib/select-a11y'], function (filterComponent) {
                 '        <option>Element 1</option>' +
                 '        <option>Element 2</option>' +
                 '        <option>Element 3</option>' +
+                '        <option selected>Element 4</option>' +
                 '    </select>' +
                 '  </div>' +
                 '  <div class="form-group">' +
@@ -194,7 +195,7 @@ define(['../lib/select-a11y'], function (filterComponent) {
                             var $input;
                             var placeholders = ['Choisissez une option', 'Choisissez un élément'];
                             var inputValues = ['Option', 'Element'];
-                            var suggestionsLength = [5, 3];
+                            var suggestionsLength = [5, 4];
 
                             beforeEach(function () {
                                 $revealButton.click();
@@ -356,16 +357,18 @@ define(['../lib/select-a11y'], function (filterComponent) {
 
                                         describe("on input and keydown in a11y select container", function () {
                                             var $selectedListItems;
+                                            var numberOfAlreadySelectedOption;
 
                                             beforeEach(function () {
                                                 var $ulSelection = $hiddenSelectContainer.next();
+                                                numberOfAlreadySelectedOption = $hiddenSelectContainer.find(':selected').length;
 
                                                 $input.val(inputValues[index]).trigger('input');
                                                 $selectedListItems = $ulSelection.find('li');
                                             });
 
                                             it("should NOT add a list item in the selected items list", function () {
-                                                expect($selectedListItems.length).toEqual(0);
+                                                expect($selectedListItems.length).toEqual(numberOfAlreadySelectedOption);
                                             });
 
                                             it("should add suggestions to the div", function () {
@@ -869,9 +872,12 @@ define(['../lib/select-a11y'], function (filterComponent) {
 
                                             describe("a list contains the selected items", function () {
                                                 var $ulSelection;
+                                                var $selectedListItems;
+                                                var alreadySelectedValues = ['Option 5', 'Element 4'];
 
                                                 beforeEach(function () {
                                                     $ulSelection = $hiddenSelectContainer.next();
+                                                    $selectedListItems = $ulSelection.find('li');
                                                 });
 
                                                 it("should add the ul after the container of the select to transform", function () {
@@ -883,12 +889,17 @@ define(['../lib/select-a11y'], function (filterComponent) {
                                                     expect($ulSelection).toHaveClass('list-inline');
                                                 });
 
+                                                it("should add selected items when option is selected in transformed select", function () {
+                                                    expect($selectedListItems.length).toEqual(1);
+                                                    expect($selectedListItems).toContainText(alreadySelectedValues[index]);
+                                                });
+
                                                 describe("on selection of an item in a11y select container", function () {
-                                                    var $selectedListItems;
                                                     var firstExpectedValues = ['Option 2', 'Element 2'];
                                                     var secondExpectedValues = ['Option 3', 'Element 3'];
 
                                                     beforeEach(function () {
+                                                        numberOfAlreadySelectedOption = $hiddenSelectContainer.find(':selected').length;
                                                         var $listbox = $a11ySelectContainer.find('div.a11y-suggestions div');
                                                         var $secondSuggestion = $listbox.find('.a11y-suggestion:first').next();
                                                         var enterEvent = createEnterEvent();
@@ -901,12 +912,12 @@ define(['../lib/select-a11y'], function (filterComponent) {
                                                         });
 
                                                         it("should add a list item in the selected items list", function () {
-                                                            expect($selectedListItems.length).toEqual(1);
+                                                            expect($selectedListItems.length).toEqual(numberOfAlreadySelectedOption + 1);
                                                             expect($selectedListItems).toContainText(firstExpectedValues[index]);
                                                         });
 
                                                         it("should have a span which references the hidden selected option", function () {
-                                                            var span = $selectedListItems.find('span');
+                                                            var span = $selectedListItems.last().find('span');
                                                             expect(span).toExist();
                                                             expect(span).toHaveId(hiddenSelectId + '-1');
                                                             expect(span).toHaveClass('tag-item');
@@ -914,7 +925,7 @@ define(['../lib/select-a11y'], function (filterComponent) {
                                                         });
 
                                                         it("should have a button to permit the deletion", function () {
-                                                            var button = $selectedListItems.find('span button');
+                                                            var button = $selectedListItems.last().find('span button');
                                                             expect(button).toExist();
                                                             expect(button).toHaveClass('tag-item-supp');
                                                             expect(button).toHaveAttr('title', 'supprimer ' + firstExpectedValues[index]);
@@ -922,7 +933,7 @@ define(['../lib/select-a11y'], function (filterComponent) {
                                                         });
 
                                                         it("should have a span in the button for the screen reader", function () {
-                                                            var innerSpan = $selectedListItems.find('span button span');
+                                                            var innerSpan = $selectedListItems.last().find('span button span');
                                                             expect(innerSpan).toExist();
                                                             expect(innerSpan).toHaveClass('sr-only');
                                                             expect(innerSpan).toHaveText('supprimer');
@@ -930,6 +941,7 @@ define(['../lib/select-a11y'], function (filterComponent) {
 
                                                         describe("when the selected element is already selected", function () {
                                                             beforeEach(function () {
+                                                                numberOfAlreadySelectedOption = $hiddenSelectContainer.find(':selected').length;
                                                                 $revealButton.click();
                                                                 var $listbox = $a11ySelectContainer.find('div.a11y-suggestions div');
                                                                 var $secondSuggestion = $listbox.find('.a11y-suggestion:first').next();
@@ -939,7 +951,7 @@ define(['../lib/select-a11y'], function (filterComponent) {
                                                             });
 
                                                             it("should not add the item to the list", function () {
-                                                                expect($selectedListItems.length).toEqual(1);
+                                                                expect($selectedListItems.length).toEqual(numberOfAlreadySelectedOption);
                                                                 expect($selectedListItems).toContainText(firstExpectedValues[index]);
                                                             });
 
@@ -953,12 +965,13 @@ define(['../lib/select-a11y'], function (filterComponent) {
                                                         var hiddenSelect;
 
                                                         beforeEach(function () {
+                                                            numberOfAlreadySelectedOption = $hiddenSelectContainer.find(':selected').length;
                                                             hiddenSelect = $hiddenSelectContainer.find('select');
                                                         });
 
                                                         it("should select the option in the hidden select", function () {
                                                             var selectedOptions = hiddenSelect.find('option:selected');
-                                                            expect(selectedOptions).toHaveLength(1);
+                                                            expect(selectedOptions).toHaveLength(numberOfAlreadySelectedOption);
                                                             expect(selectedOptions[0]).toHaveText(firstExpectedValues[index]);
                                                         });
 
@@ -974,7 +987,7 @@ define(['../lib/select-a11y'], function (filterComponent) {
 
                                                             it("should select the multiple options in the hidden select", function () {
                                                                 var selectedOptions = hiddenSelect.find('option:selected');
-                                                                expect(selectedOptions).toHaveLength(2);
+                                                                expect(selectedOptions).toHaveLength(numberOfAlreadySelectedOption + 1);
                                                                 expect(selectedOptions[0]).toHaveText(firstExpectedValues[index]);
                                                                 expect(selectedOptions[1]).toHaveText(secondExpectedValues[index]);
                                                             });
@@ -983,17 +996,17 @@ define(['../lib/select-a11y'], function (filterComponent) {
 
                                                                 beforeEach(function () {
                                                                     $selectedListItems = $ulSelection.find('li');
-                                                                    $($selectedListItems[1]).find('span button').click();
+                                                                    $selectedListItems.last().find('span button').click();
                                                                     $selectedListItems = $ulSelection.find('li');
                                                                 });
 
                                                                 it("should delete the list item", function () {
-                                                                    expect($selectedListItems.length).toEqual(1);
-                                                                    expect($selectedListItems[0]).toContainText(firstExpectedValues[index]);
+                                                                    expect($selectedListItems.length).toEqual(numberOfAlreadySelectedOption);
+                                                                    expect($selectedListItems.last()).toContainText(firstExpectedValues[index]);
                                                                 });
 
                                                                 it("should focus on the previous list item button", function () {
-                                                                    var previousDeleteButton = $($selectedListItems[0]).find('button');
+                                                                    var previousDeleteButton = $selectedListItems.last().find('button');
                                                                     expect(previousDeleteButton).toBeFocused();
                                                                 });
 
@@ -1010,16 +1023,17 @@ define(['../lib/select-a11y'], function (filterComponent) {
 
                                                                     it("should unselect the option in the hidden select", function () {
                                                                         var selectedOptions = hiddenSelect.find('option:selected');
-                                                                        expect(selectedOptions).toHaveLength(1);
-                                                                        expect(selectedOptions[0]).toHaveText(firstExpectedValues[index]);
+                                                                        expect(selectedOptions).toHaveLength(numberOfAlreadySelectedOption);
+                                                                        expect(selectedOptions.text()).toContain(firstExpectedValues[index]);
                                                                     });
 
                                                                 });
 
                                                                 describe("on the last item deletion", function () {
                                                                     beforeEach(function () {
-                                                                        $($selectedListItems[0]).find('span button').click();
-                                                                        $selectedListItems = $ulSelection.find('li');
+                                                                        $selectedListItems.each(function(index, selectedItem){
+                                                                            $(selectedItem).find('span button').click();
+                                                                        });
                                                                     });
 
                                                                     it("should focus on the reveal button", function () {
