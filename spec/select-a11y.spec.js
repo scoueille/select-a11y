@@ -666,44 +666,6 @@ define(['../lib/select-a11y'], function (filterComponent) {
                                                 });
                                             });
 
-                                            describe("on 'space' keydow", function () {
-                                                var spaceEvent;
-
-                                                beforeEach(function () {
-                                                    spaceEvent = createSpaceEvent();
-                                                    $currentSuggestion.trigger(spaceEvent);
-                                                });
-
-                                                it("should prevent event", function () {
-                                                    expect(spaceEvent.isDefaultPrevented()).toBeTruthy();
-                                                });
-
-                                                it("should empty the input", function () {
-                                                    expect($input).toHaveValue('');
-                                                });
-
-                                                it("should hide the a11y select container after selection", function () {
-                                                    expect($a11ySelectContainer).toBeHidden();
-                                                    expect($revealButton).toHaveAttr('aria-expanded', 'false');
-                                                });
-
-                                                it("should focus on reveal button", function () {
-                                                    expect($revealButton).toBeFocused();
-                                                });
-
-                                                it("should remove class is-open on the wrapped container", function () {
-                                                    expect($wrappedContainer).not.toHaveClass('is-open');
-                                                });
-
-                                                it("should empty suggestions", function () {
-                                                    expect($listbox.find('.a11y-suggestion')).toHaveLength(0);
-                                                });
-
-                                                it("should update the 'aria-live' zone with the selected item", function () {
-                                                    expect($ariaLiveDescription).toHaveText('Option 1 sélectionné');
-                                                });
-                                            });
-
                                             describe("on 'click'", function () {
 
                                                 beforeEach(function () {
