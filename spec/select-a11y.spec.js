@@ -113,8 +113,8 @@ define(['../lib/select-a11y'], function (filterComponent) {
                 return $.Event('keydown', {keyCode: 13});
             }
 
-            function createSpaceEvent() {
-                return $.Event('keydown', {keyCode: 32});
+            function createLetterEvent(letter) {
+                return $.Event('keyup', {keyCode: letter.charCodeAt(0)});
             }
 
             beforeEach(function () {
@@ -343,13 +343,13 @@ define(['../lib/select-a11y'], function (filterComponent) {
                                     });
                                 });
 
-                                describe("on input and keydown in a11y select container", function () {
+                                describe("on keydown and keyup in a11y select container", function () {
                                     var numberOfAlreadySelectedOption;
 
                                     beforeEach(function () {
                                         numberOfAlreadySelectedOption = $hiddenSelectContainer.find(':selected').length;
 
-                                        $input.val('Option').trigger('input');
+                                        $input.val('Option').trigger(createLetterEvent('n'));
                                     });
 
                                     it("should NOT add a list item in the selected items list", function () {
@@ -359,6 +359,12 @@ define(['../lib/select-a11y'], function (filterComponent) {
 
                                     it("should add suggestions to the div", function () {
                                         expect($listbox.find('.a11y-suggestion')).toHaveLength(5);
+                                    });
+
+                                    it("should filter the suggestions on keydown", function () {
+                                        $input.val('Option 2').trigger(createLetterEvent('2'));
+
+                                        expect($listbox.find('.a11y-suggestion')).toHaveLength(1);
                                     });
 
                                     describe("the description for a11y screen reader", function () {
@@ -770,7 +776,7 @@ define(['../lib/select-a11y'], function (filterComponent) {
                                     describe("on empty suggestions", function () {
 
                                         beforeEach(function () {
-                                            $input.val('zzz').trigger('input');
+                                            $input.val('zzz').trigger(createLetterEvent('z'));
                                         });
 
                                         it("should update the 'aria-live' zone ", function () {
@@ -922,7 +928,7 @@ define(['../lib/select-a11y'], function (filterComponent) {
                                                 describe("with several selections", function () {
 
                                                     beforeEach(function () {
-                                                        $input.val('Option').trigger('input');
+                                                        $input.val('Option').trigger(createLetterEvent('n'));
                                                         var $listbox = $a11ySelectContainer.find('div.a11y-suggestions div');
                                                         var $thirdSuggestion = $listbox.find('.a11y-suggestion:first').next().next();
                                                         var enterEvent = createEnterEvent();
