@@ -103,9 +103,9 @@
     text-align: left;
   }
   .a11y-suggestion:focus,
-  .a11y-suggestion:hover,
-   {
+  .a11y-suggestion:hover {
     color: $a11y-suggestion-color-hover;
+    background-color: $a11y-suggestion-bg-hover;
   }
   .a11y-suggestion:focus {
     outline: 1px dotted $a11y-suggestion-color-hover !important;
