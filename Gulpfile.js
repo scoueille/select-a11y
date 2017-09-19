@@ -72,7 +72,7 @@ gulp.task('watch:test', ['connect'], function () {
 
 // `gulp serve` task loading the URL in your browser
 gulp.task('serve:test', ['watch:test'], function () {
-    opn('http://localhost:' + config.servingPort + '/spec/SpecRunner.html', {app: 'google chrome'});
+    opn('http://localhost:' + config.servingPort + '/spec/SpecRunner.html');
 });
 
 // `gulp connect` task starting your server
