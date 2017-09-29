@@ -5,13 +5,13 @@ Un module pour gérer des filtres
 
 ## Pré-requis
 
-NodeJs + npm
+NodeJs + npm + Gulp
 
 
 ## Installation
 
 ```$ npm install``` pour installer de quoi compiler les css.
-
+```$ npm install gulp -g``` pour installer Gulp en global
 
 ## Commandes usuelles
 
