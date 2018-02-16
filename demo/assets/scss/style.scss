@@ -1,0 +1,31 @@
+@charset "UTF-8";
+/*!
+   ___                     _
+  / __| __ __ _ _ __  _ __(_)
+  \__ \/ _/ _` | '  \| '_ \ |
+  |___/\__\__,_|_|_|_| .__/_|
+                     |_|
+  https://gitlab.com/pidila/scampi
+*/
+$primary-color: #058857;
+$btn-primary-bg: #058857;
+$btn-border-radius: 3px;
+$code-color: #058857;
+$gray-base: #4d4d49;
+
+@import "scampi/core/version";
+@import "scampi/core/core-scampi-settings";
+@import "scampi/core/core-scampi-mixins";
+
+// css core
+@import "scampi/core/core-scampi-basics";
+
+// css modules
+@import "scampi/modules/browsehappy/browsehappy";
+@import "scampi/modules/buttons/buttons";
+@import "scampi/modules/forms/forms";
+@import "scampi/modules/svg-icons/svg-icons";
+@import "demo";
+@import "select-a11y.scss";
+
+@import "scampi/core/core-scampi-helpers";

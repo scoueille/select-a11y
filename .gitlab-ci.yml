@@ -1,0 +1,18 @@
+image: node
+
+cache:
+  paths:
+    - node_modules/
+
+pages:
+  stage: deploy
+  script:
+  - npm install
+  - ./node_modules/.bin/gulp prepare:demo
+  - ./node_modules/.bin/gulp make:css-demo
+  - ./node_modules/.bin/gulp build:gitlab
+  artifacts:
+    paths:
+    - public
+  only:
+  - prepare_release

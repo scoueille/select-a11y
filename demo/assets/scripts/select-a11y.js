@@ -1,0 +1,336 @@
+define(['jquery'], function ($) {
+    function transform() {
+        var $selectsToTransform = $('select[data-select-a11y]');
+
+        $selectsToTransform.each(function (index, selectToTransform) {
+            transform($(selectToTransform));
+        });
+
+        function transform($selectToTransform) {
+            var selectId = $selectToTransform.attr('id');
+            var $selectContainer = hideSelectToTransform();
+            var $wrappedContainer = createWrappedContainer();
+            var $a11ySelectContainer = insertA11ySelect();
+            var $revealButton = insertRevealButton();
+            var $ariaLiveZone = insertAriaLiveZone();
+            var $ariaLiveDescription = $ariaLiveZone.find('p');
+            insertListSelection();
+            handleEvents();
+
+
+            function hideSelectToTransform() {
+                var $selectToTransformContainer = $selectToTransform.parent();
+                $selectToTransformContainer.addClass('tag-hidden');
+                $selectToTransformContainer.attr('aria-hidden', 'true');
+                $selectToTransformContainer.find('select').attr('tabindex', '-1');
+                return $selectToTransformContainer;
+            }
+
+            function createWrappedContainer() {
+                $selectContainer.wrap('<div class="select-a11y"></div>');
+                return $selectContainer.parent();
+            }
+
+            function insertA11ySelect() {
+                var placeholder = $selectToTransform.data('placeholder');
+                var helpUsage = 'Utilisez la tabulation (ou la touche flèche du bas) pour naviguer dans la liste des suggestions';
+                var $container = $('' +
+                    '<div class="a11y-container">' +
+                    '  <div class="a11y-container-inner">' +
+                    '    <p id="a11y-usage' + selectId + '-js" class="sr-only">' + helpUsage + '</p>' +
+                    '    <label for="a11y-' + selectId + '-js" class="sr-only">' + placeholder + '</label>' +
+                    '    <input type="text" id="a11y-' + selectId + '-js" autocomplete="off" autocapitalize="off" spellcheck="false" ' +
+                    '         placeholder="' + placeholder + '" aria-describedby="a11y-usage' + selectId + '-js">' +
+                    '    <div id="a11y-' + selectId + '-suggestions" class="a11y-suggestions">' +
+                    '      <div role="listbox">' +
+                    '      </div>' +
+                    '    </div>' +
+                    '  </div>' +
+                    '</div>');
+                var $input = $container.find('#a11y-' + selectId + '-js');
+
+                addClassesTo($container, $selectContainer.attr('class'));
+                addClassesTo($input, $selectToTransform.attr('class'));
+
+                $container.insertBefore($selectContainer);
+
+                return $container;
+
+
+                function addClassesTo($element, classes) {
+                    var classList = classes.split(/\s+/);
+                    classList.forEach(function (cssClass) {
+                        $element.addClass(cssClass);
+                    });
+                }
+            }
+
+            function insertRevealButton() {
+                var $label = $selectContainer.find('label');
+                var $revealButton = $('<button type="button" class="btn btn-select-a11y" aria-expanded="false">' + $label.text() + '<span class="icon-select" aria-hidden="true"></span></button>');
+
+                $revealButton.insertBefore($a11ySelectContainer);
+
+                $a11ySelectContainer.addClass('tag-hidden');
+
+                return $revealButton;
+            }
+
+            function insertAriaLiveZone() {
+                var $ariaLiveZone = $('' +
+                    '<div aria-live="polite" class="sr-only">' +
+                    '  <p></p>' +
+                    '</div>');
+
+                $ariaLiveZone.insertBefore($revealButton);
+
+                return $ariaLiveZone;
+            }
+
+            function insertListSelection() {
+                var ulToInsert = $('<ul class="list-inline list-selected"></ul>');
+                ulToInsert.insertAfter($selectContainer);
+
+                var alreadySelectedOptions = $selectToTransform.find(':selected');
+                if (alreadySelectedOptions.length > 0) {
+                    alreadySelectedOptions.each(function (index, hiddenOption) {
+                        appendListItem(hiddenOption.index, hiddenOption.value);
+                    });
+                }
+                return ulToInsert;
+            }
+
+            function appendListItem(index, value) {
+                var $listSelection = $a11ySelectContainer.next().next();
+                var $listItem = $('' +
+                    '<li>' +
+                    '  <span id="' + selectId + '-' + index + '" class="tag-item" data-value="' + value + '">' + value +
+                    '    <button class="tag-item-supp" title="supprimer ' + value + '" type="button">' +
+                    '      <span class="sr-only">supprimer</span>' +
+                    '      <span class="icon-delete" aria-hidden="true"></span>' +
+                    '    </button>' +
+                    '  </span>' +
+                    '</li>');
+
+                $listSelection.append($listItem);
+
+                $listItem.find('button').on('click', onClick);
+
+                function onClick(event) {
+                    var $deleteButton = $(event.currentTarget);
+                    var listItem = $deleteButton.parent().parent();
+
+                    unselectInHiddenSelect($deleteButton);
+
+                    var $previousListItem = listItem.prev();
+                    if ($previousListItem.length > 0) {
+                        $previousListItem.find('button').focus();
+                    } else {
+                        $revealButton.focus();
+                    }
+
+                    $ariaLiveDescription.empty();
+
+                    listItem.remove();
+                }
+
+                function unselectInHiddenSelect($deleteButton) {
+                    var optionsSelected = $selectToTransform.val() || [];
+                    var selectedValue = $deleteButton.parent().data("value");
+                    var indexOfSelectedOption = optionsSelected.indexOf(selectedValue);
+                    optionsSelected.splice(indexOfSelectedOption, 1);
+                    $selectToTransform.val(optionsSelected);
+                }
+            }
+
+            function handleEvents() {
+                var $suggestionsContainer = $('#a11y-' + selectId + '-suggestions div');
+                var $input = $a11ySelectContainer.find('#a11y-' + selectId + '-js');
+
+                $('body').on('click', function (event) {
+                    var $target = $(event.target);
+                    if (!$target.is($input) && !$target.is($suggestionsContainer.parent()) && !$target.is($suggestionsContainer) && !$target.is('.a11y-suggestion') && !$target.is($revealButton)) {
+                        abort();
+                        $ariaLiveDescription.empty();
+                    }
+                });
+
+                $wrappedContainer.on('focusout', function () {
+                    var $elem = $(this);
+                    setTimeout(function () {
+                        if ($elem.find(':focus').length === 0) {
+                            $ariaLiveDescription.empty();
+                        }
+                    }, 10);
+                });
+
+                $revealButton.on('click', function (event) {
+                    if ($wrappedContainer.hasClass('is-open')) {
+                        abort(event);
+                        $ariaLiveDescription.empty();
+                    } else {
+                        $wrappedContainer.addClass('is-open');
+                        $a11ySelectContainer.removeClass('tag-hidden');
+                        $a11ySelectContainer.find(':text').focus();
+                        $revealButton.attr('aria-expanded', 'true');
+                        fillSuggestions();
+                    }
+                });
+
+                $input.on('keyup', fillSuggestions)
+                    .on('keydown', onKeydownInInput);
+
+                $suggestionsContainer.on('keydown', '.a11y-suggestion', onEventInSuggestions);
+                $suggestionsContainer.on('click', '.a11y-suggestion', onEventInSuggestions);
+
+                function fillSuggestions() {
+                    var filteredItems = $selectToTransform.find('option').filter(function (index, option) {
+                        return option.value.toLowerCase().indexOf($input.val().toLowerCase()) > -1;
+                    });
+
+                    $suggestionsContainer.empty();
+                    if (filteredItems.length === 0) {
+                        var noResult = 'aucun résultat';
+                        $ariaLiveDescription.text(noResult);
+                        var $noResult = $('<div ' +
+                            '  class="a11y-no-suggestion">' +
+                            noResult + '</div>');
+                        $suggestionsContainer.append($noResult);
+                    } else {
+                        filteredItems.each(function (index, hiddenOption) {
+                            var $suggestion = $('<div ' +
+                                '  data-id=' + hiddenOption.index +
+                                '  class="a11y-suggestion"' +
+                                '  tabindex="-1"' +
+                                '  role="option">' +
+                                hiddenOption.value + '</div>');
+                            $suggestionsContainer.append($suggestion);
+                        });
+                        $ariaLiveDescription.text(filteredItems.length + ' suggestions disponibles');
+                    }
+                }
+
+                function abort(event) {
+                    $suggestionsContainer.empty();
+                    $a11ySelectContainer.addClass('tag-hidden');
+                    $revealButton.attr('aria-expanded', 'false');
+                    $wrappedContainer.removeClass('is-open');
+                    $input.val('');
+                    if (event) {
+                        $revealButton.focus();
+                        event.preventDefault();
+                    }
+                }
+
+                function onKeydownInInput(event) {
+                    var $suggestionsList = $suggestionsContainer.find('.a11y-suggestion');
+                    var nonShiftTab = (!event.shiftKey && event.keyCode === 9);
+                    var shiftTab = (event.shiftKey && event.keyCode === 9);
+                    var downArrow = event.keyCode === 40;
+                    var esc = event.keyCode === 27;
+
+                    if ((nonShiftTab || downArrow) && $suggestionsList.length > 0) {
+                        $suggestionsList.first().focus();
+                        event.preventDefault();
+                    }
+                    if (nonShiftTab && $suggestionsList.length === 0) {
+                        abort();
+                    }
+                    if (esc || shiftTab) {
+                        abort(event);
+                        $ariaLiveDescription.empty();
+                    }
+                }
+
+                function onEventInSuggestions(event) {
+                    var $firstSuggestion = $suggestionsContainer.find('.a11y-suggestion').first();
+                    var $lastSuggestion = $suggestionsContainer.find('.a11y-suggestion').last();
+                    var $currentSuggestion = $(event.currentTarget);
+                    var $previousSuggestion = $currentSuggestion.prev();
+                    var $nextSuggestion = $currentSuggestion.next();
+
+                    onTab();
+                    onDownArrow();
+                    onUpArrow();
+                    onShiftTab();
+                    onEsc();
+                    onClickOrEnter();
+
+                    function onTab() {
+                        if (!event.shiftKey && event.keyCode === 9) {
+                            if ($nextSuggestion.length > 0) {
+                                $nextSuggestion.focus();
+                                event.preventDefault();
+                            } else {
+                                abort();
+                                $ariaLiveDescription.empty();
+                            }
+                        }
+                    }
+
+                    function onDownArrow() {
+                        if (event.keyCode === 40) {
+                            focusOn_Or($nextSuggestion, $firstSuggestion);
+                            event.preventDefault();
+                        }
+                    }
+
+                    function onUpArrow() {
+                        if (event.keyCode === 38) {
+                            focusOn_Or($previousSuggestion, $lastSuggestion);
+                            event.preventDefault();
+                        }
+                    }
+
+                    function onShiftTab() {
+                        if (event.shiftKey && event.keyCode === 9) {
+                            focusOn_Or($previousSuggestion, $input);
+                            event.preventDefault();
+                        }
+                    }
+
+                    function onEsc() {
+                        if (event.keyCode === 27) {
+                            abort(event);
+                            $ariaLiveDescription.empty();
+                        }
+                    }
+
+                    function onClickOrEnter() {
+                        if (event.type === 'click' || event.keyCode === 13) {
+                            var alreadySelected = $('#' + selectId + '-' + $currentSuggestion.data('id')).length > 0;
+                            if (!alreadySelected) {
+                                appendListItem($currentSuggestion.data('id'), $currentSuggestion.text());
+                                selectInHiddenSelect($currentSuggestion.text());
+                                $ariaLiveDescription.text($currentSuggestion.text() + ' sélectionné');
+                            } else {
+                                $ariaLiveDescription.text($currentSuggestion.text() + ' déjà sélectionné');
+                            }
+                            abort(event);
+                        }
+                    }
+
+                    function focusOn_Or($target, $defaultTarget) {
+                        if ($target.length > 0) {
+                            $target.focus();
+                        } else {
+                            $defaultTarget.focus();
+                        }
+                    }
+
+                }
+
+                function selectInHiddenSelect($selectedValue) {
+                    var optionsSelected = $selectToTransform.val() || [];
+                    optionsSelected.push($selectedValue);
+                    $selectToTransform.val(optionsSelected);
+                }
+            }
+        }
+
+    }
+
+    return {
+        transform: transform
+    }
+});

@@ -1,93 +1,129 @@
-// //////////////////////////////////////// //
-//
-//    compiler sass     :   gulp make:css
-//    watch html et css :   gulp
-//
-// //////////////////////////////////////// //
-
-
-//  Installation de sass et prérequis
-// ======================================== */
-
 var gulp = require('gulp');
-var sass = require('gulp-sass');
-var autoprefixer = require('gulp-autoprefixer');
-var sourcemaps = require('gulp-sourcemaps');
 var connect = require('connect');
 var connectLivereload = require('connect-livereload');
 var opn = require('opn');
 var gulpLivereload = require('gulp-livereload');
 var serveStatic = require('serve-static');
+var sass = require('gulp-sass');
+var autoprefixer = require('gulp-autoprefixer');
+var sourcemaps = require('gulp-sourcemaps');
+var uglify = require('gulp-uglify');
+var rename = require('gulp-rename');
 
-// variables de chemins
+
+// Run tests in tests/ with jasmine default task)
 // ======================================== */
-var config = {
-    paths: {
-        srcStylesCss: '_assets/scss/**/*.scss',
-        destStylesCss: '_assets/css/'
-    },
 
-    // this is your local directory to become served as root,
-    // e.g. `localhost:8080` should point to show `index.html` in that directory
-    rootDir: __dirname,
-
-    // any port to use for your local server
-    servingPort: 8080,
-
-    // the files you want to watch for changes for live reload
-    // replace by any glob pattern matching your files
-    filesToWatch: ['lib/**/*.js', 'spec/**/*.js', '!Gulpfile.js', '!config.js']
-};
-
-// 1. Sass > Css
-// ===========================================================
-
-// Compilation scss et génération sourcemaps
-gulp.task('make:css', function () {
-    return gulp.src(config.paths.srcStylesCss)
-        .pipe(sourcemaps.init())
+// build specific css rules for select-a11y.js
+gulp.task('make:css-src', function () {
+    return gulp.src('./src/select-a11y.scss')
         .pipe(sass({outputStyle: 'expanded'}).on('error', sass.logError))
         .pipe(autoprefixer('last 2 version'))
-        .pipe(sourcemaps.write('maps'))
-        .pipe(gulp.dest(config.paths.destStylesCss))
-        ;
+        .pipe(gulp.dest('./src'))
 });
 
-// css
-gulp.task('watch:css', function () {
-    console.log(">>>>> compilation continue des fichiers sass");
-    return gulp.watch(config.paths.srcStylesCss, ['make:css']);
+// tests paths
+var config = {
+    paths: {
+        filesToWatch: ['./tests/**/*.js','./src/select-a11y.scss']
+    },
+    rootDir: __dirname,
+    servingPort: 8080,
+    filesToWatch: ['./tests/**/*.js','./src/select-a11y.scss']
+};
+
+
+// connect, watch and serve
+gulp.task('connect', function(){
+    connect()
+        .use(connectLivereload())
+        .use(serveStatic(config.rootDir))
+        .listen(config.servingPort);
 });
 
-gulp.task('watch', ['watch:css']);
-
-gulp.task('watch:test', ['connect'], function () {
+gulp.task('watch:tests', ['make:css-src','connect'], function () {
     gulpLivereload.listen();
-
     gulp.watch(config.filesToWatch, function(file) {
         gulp.src(file.path)
             .pipe(gulpLivereload());
     });
 });
 
-// `gulp serve` task loading the URL in your browser
-gulp.task('serve:test', ['watch:test'], function () {
-    opn('http://localhost:' + config.servingPort + '/spec/SpecRunner.html');
+// you must set {app: value} for your OS :
+//      - windows:  {app: 'chrome'}
+//      - linux:    {app: 'google-chrome'}
+//      - mac:      {app: 'google chrome'}
+
+gulp.task('serve:tests', ['watch:tests'], function () {
+    opn('http://localhost:' + config.servingPort + '/tests/SpecRunner.html', {app: 'google chrome'});
 });
 
-// `gulp connect` task starting your server
-gulp.task('connect', function(){
-    connect()
-    // inject JavaScript into our page with `index.html` to listen for change notifications:
-    //   <script src="//localhost:35729/livereload.js?snipver=1"></script>
-        .use(connectLivereload())
-        .use(serveStatic(config.rootDir))
-        .listen(config.servingPort);
+gulp.task('default',['serve:tests']);
+
+
+// Build dist repository
+// ======================================== */
+gulp.task('copy:src', function() {
+  gulp.src('./src/**/*')
+    .pipe(gulp.dest('./dist'));
 });
 
-// 2. Tâche par défaut
+gulp.task('compress:js', function () {
+  gulp.src('./src/*.js')
+    .pipe(uglify())
+    .pipe(rename({ suffix: '.min' }))
+    .pipe(gulp.dest('./dist'))
+});
+
+gulp.task('compress:css', function () {
+    return gulp.src('./src/select-a11y.scss')
+        .pipe(sass({outputStyle: 'compressed'}).on('error', sass.logError))
+        .pipe(autoprefixer('last 2 version'))
+        .pipe(rename({ suffix: '.min' }))
+        .pipe(gulp.dest('./dist'))
+});
+
+gulp.task('build:dist',['copy:src','compress:js','compress:css']);
+
+
+// Build demo / public
 // ===========================================================
 
-// la plupart du temps en cours de dev
-// on a juste besoin de surveiller les css et le html
-gulp.task('default', ['watch', 'serve:test']);
+// Add scampi in demo files
+gulp.task('copy:scampi', function() {
+  gulp.src('node_modules/scampi/**/*')
+    .pipe(gulp.dest('./demo/assets/scss/scampi'));
+});
+
+// Add script select-a11y.js in demo files
+gulp.task('copy:script', function() {
+  gulp.src('./src/*.js')
+    .pipe(gulp.dest('./demo/assets/scripts'));
+});
+
+// Add partial select-a11y.scss in demo files
+gulp.task('copy:scss', function() {
+  gulp.src('./src/select-a11y.scss')
+    .pipe(rename('_select-a11y.scss'))
+    .pipe(gulp.dest('./demo/assets/scss'));
+});
+
+gulp.task('prepare:demo',['copy:scampi','copy:script','copy:scss']);
+
+// Compilation css
+gulp.task('make:css-demo', function () {
+    return gulp.src(['./demo/assets/scss/style.scss','./demo/assets/scss/print.scss'])
+        .pipe(sourcemaps.init())
+            .pipe(sass({outputStyle: 'expanded'}).on('error', sass.logError))
+            .pipe(autoprefixer('last 2 version'))
+        .pipe(sourcemaps.write())
+        .pipe(gulp.dest('./demo/assets/css/'));
+});
+
+gulp.task('build:demo',['prepare:demo','make:css-demo']);
+
+// gitlab pages needs a folder named "public" to deploy
+gulp.task('build:gitlab', function () {
+    gulp.src(['./demo/**/*','!./demo/assets/{scss,scss/**}'])
+    .pipe(gulp.dest('./public'));
+});

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <title>Select a11y - demo</title>
+
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <meta name="description" content="Filter component: multi select transformed to suggestions list with search input. WCAG and RGAA compliant.">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.5/require.min.js" data-main="assets/scripts/main"></script>
+
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" media="print" href="assets/css/print.css">
+  <!--   <link rel="stylesheet" href="../src/select-a11y.css"> -->
+</head>
+
+<body class="scampi-stuff">
+  <noscript>
+    <p class="js-off">Javascript is disabled in your browser.</p>
+  </noscript>
+  <!--[if lt IE 9]>
+  <div class="browsehappy">
+    <div class="container">
+      <p>Your Internet Explorer web browser is out of date and cannot display the web page you are visiting correctly because it is not compatible with modern Web standards.</p>
+      <p>To view this site and to browse the Internet safely you need to <a
+      href="http://windows.microsoft.com/en/internet-explorer/download-ie">update Internet Explorer</a> to the most recent version available for your computer. Alternatively, you can install <a href="http://browsehappy.com/">one of the several excellent free standards-compliant browsers</a>.</p>
+    </div>
+  </div>
+  <![endif]-->
+
+  <header role="banner" class="banner">
+    <div class="container">
+      <h1 class="banner-title">select-a11y - demo</h1>
+      <p class="baseline">Filter component: multi select transformed to suggestions list with search input. <abbr title="Web Content Accessibility Guidelines">WCAG</abbr> and <abbr lang="fr" title="Référentiel général d'accessibilité pour les administrations">RGAA</abbr> compliant.</p>
+    </div>
+  </header>
+
+  <main role="main" id="main" class="main">
+    <div class="container main-container">
+
+      <p>select-a11y transforms multi select into suggestions list with search input. It is compliant with Web Content Accessibility Guidelines (WCAG) and General Accessibility Framework for Administrations (Référentiel général d'accessibilité pour les administrations - RGAA).</p>
+      <p><a href="article_sur_blog_sp">Read more about why and how [fr]</a>.</p>
+
+      <h2 class="sr-only">Demo</h2>
+      <form action="#" method="post">
+        <h3>Example 1</h3>
+        <div class="form-group">
+          <label for="select-option">Is your website…</label>
+          <select class="form-control" id="select-option" multiple data-select-a11y data-placeholder="Search in list">
+              <option>Perceivable</option>
+              <option>Operable</option>
+              <option>Understandable</option>
+              <option>Robust</option>
+          </select>
+        </div>
+
+        <h3>Example 2</h3>
+        <p>As seen in this second example, one or more <code>option</code> may have already an attribute <code>selected</code> in source.</p>
+        <div class="form-group">
+          <label for="select-element">What do you want to do today?</label>
+          <select class="form-control" id="select-element" multiple data-select-a11y data-placeholder="Search in list">
+              <option>Sleeping</option>
+              <option>Climbing trees</option>
+              <option>Knitting</option>
+              <option selected>Dancing with unicorns</option>
+              <option>Dreaming</option>
+          </select>
+        </div>
+
+        <p class="form-buttons">
+          <!-- <button class="btn btn-secondary" type="reset">Reset filters</button> -->
+          <button class="btn btn-primary" type="submit">Submit button</button>
+        </p>
+      </form>
+
+      <p>To be transformed by select-a11y.js, the <code>select</code> element:</p>
+        <ul>
+           <li>must contain the attribute <code>data-select-a11y</code>;</li>
+           <li>must contain an attribute <code>data-placeholder="Text of the placeholder"</code>;</li>
+           <li>must contain a <code>class</code> attribute with any value.</li>
+         </ul>
+    </div>
+  </main>
+
+  <footer class="footer" role="contentinfo">
+    <div class="pidila-footer">
+      <div class="container">
+        <div class="footer-content">
+          <p><strong>select-a11y</strong> is part of the <abbr title="Pôle intégration html de la Direction de l'information légale et administrative" lang="fr">PiDILA</abbr>’s accessible and responsive UI components library <svg class="svg-icon" viewBox="0 0 20 20" focusable="false" aria-hidden="true"><image xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="assets/img/scampi.svg" x="0" y="0" width="100%" height="100%"></image></svg> <a href="https://pidila.gitlab.io/scampi">Scampi</a>.
+          It was primarily developed for <a href="https://service-public.fr">service-public.fr</a> : see filter boxes on <a href="https://www.service-public.fr/demarches-silence-vaut-accord/recherche">this page</a>.</p>
+          <p>Licence: MIT - CeCILL-B. Feel free to use it or contribute: <a href="https://gitlab.com/pidila/select-a11y">Gitlab repository</a>.</p>
+        </div>
+        <div class="pidila-logo">
+          <a href="https://pidila.gitlab.io">
+            <svg class="svg-logo" width="100" height="40" viewBox="0 0 100 40" aria-describedby="title" focusable="false">
+              <title id="title">Pidila website</title>
+              <image xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="assets/img/pidila.svg" x="0" y="0" width="100%" height="100%"></image>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </footer>
+<!-- <script src="assets/scripts/anchor_focus.js"></script> -->
+</body>
+</html>

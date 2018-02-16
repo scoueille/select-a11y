@@ -1,3 +1,4 @@
 # directories
 node_modules
-_assets/css
+public
+demo/assets/scss/scampi

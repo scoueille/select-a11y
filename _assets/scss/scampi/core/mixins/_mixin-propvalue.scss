@@ -1,9 +1,0 @@
-// Propvalue mixin
-// ------------------------------------------------------
-// Boucle sur une map et output chaque key/value en propriété/valeur css
-
-@mixin propValue($map) {
-    @each $prop, $value in $map {
-        #{$prop}: #{$value};
-    }
-}
