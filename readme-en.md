@@ -5,7 +5,7 @@
 
 **select-a11y** transforms multi select into suggestions list with search input. It is compliant with [Web Content Accessibility Guidelines (WCAG)](https://www.w3.org/WAI/intro/wcag) and [General Accessibility Framework for Administrations](https://disic.github.io/rgaa_referentiel_en/introduction-RGAA.html) (Référentiel général d'accessibilité pour les administrations - RGAA).
 
-To see the demo, download or clone this repository, then open the file /demo/select-a11y.html.
+To see the demo, download or clone this repository, then open the file /demo/index.html.
 
 **select-a11y** is part of the DILA’s accessible and responsive UI components library [Scampi (fr)](https://gitlab.com/pidila/scampi). It was primarily developed and is currently used in production on service-public.fr, official website of the french administration. See filter boxes on [this page (fr)](https://www.service-public.fr/demarches-silence-vaut-accord/recherche).
 
@@ -22,7 +22,7 @@ jquery 3.1.1 or higher.
 
 All you need is ~~love~~ the files in the dist/ directory. Add the script in the bottom of your page, just before the body end tag (and jquery if it's not here already) and the css or scss in your style files.
 
-To be transformed by select-a11y.js, the multi select tag:
+To be transformed by select-a11y.js, the multi select element:
 
 - must contain the attribute data-select-a11y;
 - must contain an attribute data-placeholder="Text of the placeholder";
@@ -64,13 +64,13 @@ and run tests in Chrome:
 
 ### Build the demo
 
-At first time, the Scampi library must be copied in public/styles/scss :
+At first time, the Scampi library, the select-a11y script and the select-a11y scss must be copied in public/styles/scss :
 
-```$ gulp copy:scampi```
+```$ gulp prepare:demo```
 
 Then you just have to launch build as often as necessary:
 
-```$ gulp build:public```
+```$ gulp build:demo```
 
 ### Build the dist directory
 

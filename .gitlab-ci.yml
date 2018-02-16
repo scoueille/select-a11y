@@ -15,4 +15,4 @@ pages:
     paths:
     - public
   only:
-  - prepare_release
+  - prepare_v1.0.0

@@ -4,7 +4,7 @@
 
 **select-a11y** est un script javascript associé à des css qui transforme un select multiple en liste de suggestions avec champ de recherche à l'intérieur de cette liste. Il est conforme aux [Web Content Accessibility Guidelines (WCAG) (en)](https://www.w3.org/WAI/intro/wcag) et au [Référentiel général d'accessibilité pour les administrations (RGAA)](https://references.modernisation.gouv.fr/rgaa-accessibilite/).
 
-Pour voir la démo, télécharger ou cloner ce dépôt et ouvrir le fichier demo/select-a11y.html.
+Pour voir la démo, télécharger ou cloner ce dépôt et ouvrir le fichier demo/index.html.
 
 **select-a11y** fait partie de [Scampi](https://gitlab.com/pidila/scampi), la bibliothèque de composants accessibles développée par le Pôle intégration html de la Direction de l'information légale et administrative (DILA). Il a été initialement développé pour le site service-public.fr, le site officiel de l'administration française. On peut le voir en action les filtres de recherche de [cette page](https://www.service-public.fr/demarches-silence-vaut-accord/recherche).
 
@@ -19,7 +19,7 @@ jquery 3.1.1 ou supérieure.
 
 ## Utilisation 
 
-Les fichiers nécessaires à la mise en oeuvre sont ceux du répertoire dist/. Ajoutez le script en pied de page, juste avant le tag de fermeture du body (ainsi que jquery s'il n'est pas déjà prévu) et les css or scss dans vos fichiers de style.
+Les fichiers nécessaires à la mise en œuvre sont ceux du répertoire dist/. Ajoutez le script en pied de page, juste avant le tag de fermeture du body (ainsi que jquery s'il n'est pas déjà prévu) et les css ou scss dans vos fichiers de style.
 
 Pour être pris en compte et transformé par le script select-a11y.js le tag select multiple :
 

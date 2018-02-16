@@ -15,7 +15,7 @@
     "test": "./node_modules/.bin/gulp serve:test"
   },
   "author": "DILA - DPSN - Pidila",
-  "license": "(MIT OR CeCILL-B)",
+  "license": "(MIT OR CECILL-B)",
   "devDependencies": {
     "connect": "^3.6.6",
     "connect-livereload": "^0.6.0",
