@@ -72,7 +72,7 @@ Toutes les ressources nécessaires à la démo se trouvent dans le répertoire *
 Au premier usage, on installe la dépendance Scampi dans les fichiers de style de la démo et on récupère la dernière version du script et du partial scss de select-a11y :
 
 ```
-$ npm prepare:demo
+$ gulp prepare:demo
 ```
 
 Ensuite la commande de build de démo pourra être lancée à chaque fois que nécessaire.
