@@ -1,336 +1,463 @@
-define(['jquery'], function ($) {
-    function transform() {
-        var $selectsToTransform = $('select[data-select-a11y]');
+const allowedKeyCodes = [ 13, 27, 32, 35, 36, 37, 38, 39, 40 ];
 
-        $selectsToTransform.each(function (index, selectToTransform) {
-            transform($(selectToTransform));
-        });
+const text = {
+  help: 'Utilisez la tabulation (ou la touche flèche du bas) pour naviguer dans la liste des suggestions',
+  placeholder: 'Rechercher dans la liste',
+  noResult: 'aucun résultat',
+  results: '{x} suggestion(s) disponibles',
+  deleteItem: 'supprimer {t}',
+  delete: 'supprimer'
+};
 
-        function transform($selectToTransform) {
-            var selectId = $selectToTransform.attr('id');
-            var $selectContainer = hideSelectToTransform();
-            var $wrappedContainer = createWrappedContainer();
-            var $a11ySelectContainer = insertA11ySelect();
-            var $revealButton = insertRevealButton();
-            var $ariaLiveZone = insertAriaLiveZone();
-            var $ariaLiveDescription = $ariaLiveZone.find('p');
-            insertListSelection();
-            handleEvents();
+const matches = Element.prototype.matches || Element.prototype.msMatchesSelector || Element.prototype.webkitMatchesSelector;
+const closest = Element.prototype.closest;
 
+if (!closest) {
+  closest = function(s) {
+    var el = this;
 
-            function hideSelectToTransform() {
-                var $selectToTransformContainer = $selectToTransform.parent();
-                $selectToTransformContainer.addClass('tag-hidden');
-                $selectToTransformContainer.attr('aria-hidden', 'true');
-                $selectToTransformContainer.find('select').attr('tabindex', '-1');
-                return $selectToTransformContainer;
-            }
+    do {
+      if (matches.call(el, s)) return el;
+      el = el.parentElement || el.parentNode;
+    } while (el !== null && el.nodeType === 1);
+    return null;
+  };
+}
 
-            function createWrappedContainer() {
-                $selectContainer.wrap('<div class="select-a11y"></div>');
-                return $selectContainer.parent();
-            }
+class Select{
+  constructor( el, options ){
+    this.el = el;
+    this.label = document.querySelector(`label[for=${el.id}]`);
+    this.id = el.id;
+    this.open = false;
+    this.multiple = this.el.multiple;
+    this.search = '';
+    this.suggestions = [];
+    this.focusIndex = null;
 
-            function insertA11ySelect() {
-                var placeholder = $selectToTransform.data('placeholder');
-                var helpUsage = 'Utilisez la tabulation (ou la touche flèche du bas) pour naviguer dans la liste des suggestions';
-                var $container = $('' +
-                    '<div class="a11y-container">' +
-                    '  <div class="a11y-container-inner">' +
-                    '    <p id="a11y-usage' + selectId + '-js" class="sr-only">' + helpUsage + '</p>' +
-                    '    <label for="a11y-' + selectId + '-js" class="sr-only">' + placeholder + '</label>' +
-                    '    <input type="text" id="a11y-' + selectId + '-js" autocomplete="off" autocapitalize="off" spellcheck="false" ' +
-                    '         placeholder="' + placeholder + '" aria-describedby="a11y-usage' + selectId + '-js">' +
-                    '    <div id="a11y-' + selectId + '-suggestions" class="a11y-suggestions">' +
-                    '      <div role="listbox">' +
-                    '      </div>' +
-                    '    </div>' +
-                    '  </div>' +
-                    '</div>');
-                var $input = $container.find('#a11y-' + selectId + '-js');
+    const passedOptions = Object.assign({}, options);
+    const textOptions = Object.assign(text, passedOptions.text);
+    delete passedOptions.text;
 
-                addClassesTo($container, $selectContainer.attr('class'));
-                addClassesTo($input, $selectToTransform.attr('class'));
+    this._options = Object.assign({
+      text: textOptions,
+      showSelected: true
+    }, passedOptions );
 
-                $container.insertBefore($selectContainer);
+    this._handleFocus = this._handleFocus.bind(this);
+    this._handleInput = this._handleInput.bind(this);
+    this._handleKeyboard = this._handleKeyboard.bind(this);
+    this._handleOpener = this._handleOpener.bind(this);
+    this._handleReset = this._handleReset.bind(this);
+    this._handleSuggestionClick = this._handleSuggestionClick.bind(this);
+    this._removeOption = this._removeOption.bind(this);
 
-                return $container;
+    this._disable();
 
+    this.button = this._createButton();
+    this.liveZone = this._createLiveZone();
+    this.overlay = this._createOverlay();
+    this.wrap = this._wrap();
 
-                function addClassesTo($element, classes) {
-                    var classList = classes.split(/\s+/);
-                    classList.forEach(function (cssClass) {
-                        $element.addClass(cssClass);
-                    });
-                }
-            }
+    if(this.multiple && this._options.showSelected){
+      this.selectedList = this._createSelectedList();
+      this._updateSelectedList();
 
-            function insertRevealButton() {
-                var $label = $selectContainer.find('label');
-                var $revealButton = $('<button type="button" class="btn btn-select-a11y" aria-expanded="false">' + $label.text() + '<span class="icon-select" aria-hidden="true"></span></button>');
+      this.selectedList.addEventListener('click', this._removeOption);
+    }
 
-                $revealButton.insertBefore($a11ySelectContainer);
+    this.button.addEventListener('click', this._handleOpener);
+    this.input.addEventListener('input', this._handleInput);
+    this.list.addEventListener('click', this._handleSuggestionClick);
+    this.wrap.addEventListener('keydown', this._handleKeyboard);
+    document.addEventListener('blur', this._handleFocus, true);
 
-                $a11ySelectContainer.addClass('tag-hidden');
+    this.el.form.addEventListener('reset', this._handleReset);
+  }
 
-                return $revealButton;
-            }
+  _createButton(){
+    const button = document.createElement('button');
+    button.setAttribute('type', 'button');
+    button.setAttribute('aria-expanded', this.open);
+    button.className = 'btn btn-select-a11y';
 
-            function insertAriaLiveZone() {
-                var $ariaLiveZone = $('' +
-                    '<div aria-live="polite" class="sr-only">' +
-                    '  <p></p>' +
-                    '</div>');
+    const text = document.createElement('span');
 
-                $ariaLiveZone.insertBefore($revealButton);
+    if(this.multiple){
+      text.innerText = this.label.innerText;
+    }
+    else {
+      const selectedOption = this.el.item(this.el.selectedIndex);
+      text.innerText = selectedOption.label || selectedOption.value;
+    }
 
-                return $ariaLiveZone;
-            }
+    button.appendChild(text);
 
-            function insertListSelection() {
-                var ulToInsert = $('<ul class="list-inline list-selected"></ul>');
-                ulToInsert.insertAfter($selectContainer);
+    button.insertAdjacentHTML('beforeend', '<span class="icon-select" aria-hidden="true"></span>');
 
-                var alreadySelectedOptions = $selectToTransform.find(':selected');
-                if (alreadySelectedOptions.length > 0) {
-                    alreadySelectedOptions.each(function (index, hiddenOption) {
-                        appendListItem(hiddenOption.index, hiddenOption.value);
-                    });
-                }
-                return ulToInsert;
-            }
+    return button;
+  }
 
-            function appendListItem(index, value) {
-                var $listSelection = $a11ySelectContainer.next().next();
-                var $listItem = $('' +
-                    '<li>' +
-                    '  <span id="' + selectId + '-' + index + '" class="tag-item" data-value="' + value + '">' + value +
-                    '    <button class="tag-item-supp" title="supprimer ' + value + '" type="button">' +
-                    '      <span class="sr-only">supprimer</span>' +
-                    '      <span class="icon-delete" aria-hidden="true"></span>' +
-                    '    </button>' +
-                    '  </span>' +
-                    '</li>');
+  _createLiveZone(){
+    const live = document.createElement('p');
+    live.setAttribute('aria-live', 'polite');
+    live.classList.add('sr-only');
 
-                $listSelection.append($listItem);
+    return live;
+  }
 
-                $listItem.find('button').on('click', onClick);
+  _createOverlay(){
+    const container = document.createElement('div');
+    container.classList.add('a11y-container');
 
-                function onClick(event) {
-                    var $deleteButton = $(event.currentTarget);
-                    var listItem = $deleteButton.parent().parent();
+    const suggestions = document.createElement('div');
+    suggestions.classList.add('a11y-suggestions');
+    suggestions.id = `a11y-${this.id}-suggestions`;
 
-                    unselectInHiddenSelect($deleteButton);
+    container.innerHTML = `
+      <p id="a11y-usage$${this.id}-js" class="sr-only">${this._options.text.help}</p>
+      <label for="a11y-${this.id}-js" class="sr-only">${this._options.text.placeholder}</label>
+      <input type="text" id="a11y-${this.id}-js" class="${this.el.className}" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${this._options.text.placeholder}" aria-describedby="a11y-usage${this.id}-js">
+    `;
 
-                    var $previousListItem = listItem.prev();
-                    if ($previousListItem.length > 0) {
-                        $previousListItem.find('button').focus();
-                    } else {
-                        $revealButton.focus();
-                    }
+    container.appendChild(suggestions);
 
-                    $ariaLiveDescription.empty();
+    this.list = suggestions;
+    this.input = container.querySelector('input');
 
-                    listItem.remove();
-                }
+    return container;
+  }
 
-                function unselectInHiddenSelect($deleteButton) {
-                    var optionsSelected = $selectToTransform.val() || [];
-                    var selectedValue = $deleteButton.parent().data("value");
-                    var indexOfSelectedOption = optionsSelected.indexOf(selectedValue);
-                    optionsSelected.splice(indexOfSelectedOption, 1);
-                    $selectToTransform.val(optionsSelected);
-                }
-            }
+  _createSelectedList() {
+    const list = document.createElement('ul');
+    list.className = 'list-inline list-selected';
 
-            function handleEvents() {
-                var $suggestionsContainer = $('#a11y-' + selectId + '-suggestions div');
-                var $input = $a11ySelectContainer.find('#a11y-' + selectId + '-js');
+    return list;
+  }
 
-                $('body').on('click', function (event) {
-                    var $target = $(event.target);
-                    if (!$target.is($input) && !$target.is($suggestionsContainer.parent()) && !$target.is($suggestionsContainer) && !$target.is('.a11y-suggestion') && !$target.is($revealButton)) {
-                        abort();
-                        $ariaLiveDescription.empty();
-                    }
-                });
+  _disable() {
+    this.el.setAttribute('tabindex', -1);
+  }
 
-                $wrappedContainer.on('focusout', function () {
-                    var $elem = $(this);
-                    setTimeout(function () {
-                        if ($elem.find(':focus').length === 0) {
-                            $ariaLiveDescription.empty();
-                        }
-                    }, 10);
-                });
+  _fillSuggestions(){
+    const search = this.search.toLowerCase();
 
-                $revealButton.on('click', function (event) {
-                    if ($wrappedContainer.hasClass('is-open')) {
-                        abort(event);
-                        $ariaLiveDescription.empty();
-                    } else {
-                        $wrappedContainer.addClass('is-open');
-                        $a11ySelectContainer.removeClass('tag-hidden');
-                        $a11ySelectContainer.find(':text').focus();
-                        $revealButton.attr('aria-expanded', 'true');
-                        fillSuggestions();
-                    }
-                });
+    // loop over the
+    this.suggestions = Array.prototype.map.call(this.el.options, function(option, index){
+      const text = option.label || option.value;
+      const formatedText = text.toLowerCase();
 
-                $input.on('keyup', fillSuggestions)
-                    .on('keydown', onKeydownInInput);
+      // test if search text match the current option
+      if(formatedText.indexOf(search) === -1){
+        return;
+      }
 
-                $suggestionsContainer.on('keydown', '.a11y-suggestion', onEventInSuggestions);
-                $suggestionsContainer.on('click', '.a11y-suggestion', onEventInSuggestions);
+      // create the option
+      const suggestion = document.createElement('div');
+      suggestion.setAttribute('role', 'option');
+      suggestion.setAttribute('tabindex', 0);
+      suggestion.setAttribute('data-index', index)
+      suggestion.classList.add('a11y-suggestion');
 
-                function fillSuggestions() {
-                    var filteredItems = $selectToTransform.find('option').filter(function (index, option) {
-                        return option.value.toLowerCase().indexOf($input.val().toLowerCase()) > -1;
-                    });
+      // check if the option is selected
+      const selected = Array.prototype.indexOf.call(this.el.selectedOptions, option) !== -1;
 
-                    $suggestionsContainer.empty();
-                    if (filteredItems.length === 0) {
-                        var noResult = 'aucun résultat';
-                        $ariaLiveDescription.text(noResult);
-                        var $noResult = $('<div ' +
-                            '  class="a11y-no-suggestion">' +
-                            noResult + '</div>');
-                        $suggestionsContainer.append($noResult);
-                    } else {
-                        filteredItems.each(function (index, hiddenOption) {
-                            var $suggestion = $('<div ' +
-                                '  data-id=' + hiddenOption.index +
-                                '  class="a11y-suggestion"' +
-                                '  tabindex="-1"' +
-                                '  role="option">' +
-                                hiddenOption.value + '</div>');
-                            $suggestionsContainer.append($suggestion);
-                        });
-                        $ariaLiveDescription.text(filteredItems.length + ' suggestions disponibles');
-                    }
-                }
+      if(selected){
+        suggestion.setAttribute('aria-selected', 'true');
+      }
 
-                function abort(event) {
-                    $suggestionsContainer.empty();
-                    $a11ySelectContainer.addClass('tag-hidden');
-                    $revealButton.attr('aria-expanded', 'false');
-                    $wrappedContainer.removeClass('is-open');
-                    $input.val('');
-                    if (event) {
-                        $revealButton.focus();
-                        event.preventDefault();
-                    }
-                }
+      suggestion.innerText = option.label || option.value;
 
-                function onKeydownInInput(event) {
-                    var $suggestionsList = $suggestionsContainer.find('.a11y-suggestion');
-                    var nonShiftTab = (!event.shiftKey && event.keyCode === 9);
-                    var shiftTab = (event.shiftKey && event.keyCode === 9);
-                    var downArrow = event.keyCode === 40;
-                    var esc = event.keyCode === 27;
+      return suggestion;
+    }.bind(this)).filter(Boolean);
 
-                    if ((nonShiftTab || downArrow) && $suggestionsList.length > 0) {
-                        $suggestionsList.first().focus();
-                        event.preventDefault();
-                    }
-                    if (nonShiftTab && $suggestionsList.length === 0) {
-                        abort();
-                    }
-                    if (esc || shiftTab) {
-                        abort(event);
-                        $ariaLiveDescription.empty();
-                    }
-                }
+    if(!this.suggestions.length){
+      this.list.innerHTML = `<p class="a11y-no-suggestion">${this._options.text.noResult}</p>`;
+    }
+    else {
+      this.list.innerHTML = `<div role="listbox"><div>`;
 
-                function onEventInSuggestions(event) {
-                    var $firstSuggestion = $suggestionsContainer.find('.a11y-suggestion').first();
-                    var $lastSuggestion = $suggestionsContainer.find('.a11y-suggestion').last();
-                    var $currentSuggestion = $(event.currentTarget);
-                    var $previousSuggestion = $currentSuggestion.prev();
-                    var $nextSuggestion = $currentSuggestion.next();
+      this.suggestions.forEach(function(suggestion){
+        this.list.firstElementChild.appendChild(suggestion);
+      }.bind(this));
+    }
 
-                    onTab();
-                    onDownArrow();
-                    onUpArrow();
-                    onShiftTab();
-                    onEsc();
-                    onClickOrEnter();
+    this._setLiveZone();
+  }
 
-                    function onTab() {
-                        if (!event.shiftKey && event.keyCode === 9) {
-                            if ($nextSuggestion.length > 0) {
-                                $nextSuggestion.focus();
-                                event.preventDefault();
-                            } else {
-                                abort();
-                                $ariaLiveDescription.empty();
-                            }
-                        }
-                    }
+  _handleOpener(event){
+    this._toggleOverlay();
+  }
 
-                    function onDownArrow() {
-                        if (event.keyCode === 40) {
-                            focusOn_Or($nextSuggestion, $firstSuggestion);
-                            event.preventDefault();
-                        }
-                    }
+  _handleFocus(){
+    if(!this.open){
+      return;
+    }
 
-                    function onUpArrow() {
-                        if (event.keyCode === 38) {
-                            focusOn_Or($previousSuggestion, $lastSuggestion);
-                            event.preventDefault();
-                        }
-                    }
+    clearTimeout(this._focusTimeout);
 
-                    function onShiftTab() {
-                        if (event.shiftKey && event.keyCode === 9) {
-                            focusOn_Or($previousSuggestion, $input);
-                            event.preventDefault();
-                        }
-                    }
+    this._focusTimeout = setTimeout(function(){
+      if(!this.wrap.contains(document.activeElement)){
+        this._toggleOverlay(false);
+      }
+      else if(document.activeElement === this.input){
+        // reset the focus index
+        this.focusIndex =  null;
+      }
+      else {
+        const optionIndex = this.suggestions.indexOf(document.activeElement);
 
-                    function onEsc() {
-                        if (event.keyCode === 27) {
-                            abort(event);
-                            $ariaLiveDescription.empty();
-                        }
-                    }
-
-                    function onClickOrEnter() {
-                        if (event.type === 'click' || event.keyCode === 13) {
-                            var alreadySelected = $('#' + selectId + '-' + $currentSuggestion.data('id')).length > 0;
-                            if (!alreadySelected) {
-                                appendListItem($currentSuggestion.data('id'), $currentSuggestion.text());
-                                selectInHiddenSelect($currentSuggestion.text());
-                                $ariaLiveDescription.text($currentSuggestion.text() + ' sélectionné');
-                            } else {
-                                $ariaLiveDescription.text($currentSuggestion.text() + ' déjà sélectionné');
-                            }
-                            abort(event);
-                        }
-                    }
-
-                    function focusOn_Or($target, $defaultTarget) {
-                        if ($target.length > 0) {
-                            $target.focus();
-                        } else {
-                            $defaultTarget.focus();
-                        }
-                    }
-
-                }
-
-                function selectInHiddenSelect($selectedValue) {
-                    var optionsSelected = $selectToTransform.val() || [];
-                    optionsSelected.push($selectedValue);
-                    $selectToTransform.val(optionsSelected);
-                }
-            }
+        if(optionIndex !== -1){
+          this.focusIndex = optionIndex;
         }
+      }
+    }.bind(this), 10);
+  }
 
+  _handleReset(){
+    clearTimeout(this._resetTimeout);
+
+    this._resetTimeout = setTimeout(function(){
+      this._fillSuggestions();
+      if(this.multiple && this._options.showSelected){
+        this._updateSelectedList();
+      }
+    }.bind(this), 10);
+  }
+
+  _handleSuggestionClick(event){
+    const option = closest.call(event.target, '[role="option"]');
+
+    if(!option){
+      return;
     }
 
-    return {
-        transform: transform
+    this._toggleSelection(parseInt(option.getAttribute('data-index'), 10));
+  }
+
+  _handleInput(){
+    this.search = this.input.value;
+    this._fillSuggestions();
+  }
+
+  _handleKeyboard(event){
+    const option = closest.call(event.target, '[role="option"]');
+    const input = closest.call(event.target, 'input');
+
+    // event.preventDefault();
+
+    if(event.keyCode === 27){
+
+      this._toggleOverlay();
+      return;
     }
-});
+
+    if(input && event.keyCode === 13){
+      event.preventDefault();
+      return;
+    }
+
+    if(event.keyCode === 39 || event.keyCode === 40){
+      this._moveIndex(1);
+      return
+    }
+
+    if(!option){
+      return;
+    }
+
+    if(event.keyCode === 37 || event.keyCode === 38){
+      this._moveIndex(-1);
+      return;
+    }
+
+    if(event.keyCode === 13 || event.keyCode === 32){
+      this._toggleSelection(parseInt(option.getAttribute('data-index'), 10));
+    }
+  }
+
+  _moveIndex(step){
+    if(this.focusIndex === null){
+      this.focusIndex = 0;
+    }
+    else {
+      const nextIndex = this.focusIndex + step;
+      const selectionItems = this.suggestions.length - 1;
+
+      if(nextIndex > selectionItems){
+        this.focusIndex = 0;
+      }
+      else if(nextIndex < 0){
+        this.focusIndex = selectionItems;
+      }
+      else {
+        this.focusIndex = nextIndex;
+      }
+    }
+
+    this.suggestions[this.focusIndex].focus();
+  }
+
+  _removeOption(event){
+    const button = closest.call(event.target, 'button');
+
+    if(!button){
+      return;
+    }
+
+    const optionIndex = parseInt( button.getAttribute('data-index'), 10);
+
+    this._toggleSelection(optionIndex);
+
+    if(this.selectedList.parentElement){
+      const button = this.selectedList.querySelector('button');
+
+      if(button){
+        button.focus();
+      }
+      else {
+        this.button.focus();
+      }
+    }
+    else {
+      this.button.focus();
+    }
+  }
+
+  _setButtonText(text){
+    this.button.firstElementChild.innerText = text;
+  }
+
+  _setLiveZone(){
+    const suggestions = this.suggestions.length;
+    let text = '';
+
+    if(this.open){
+      if(!suggestions){
+        text = this._options.text.noResult;
+      }
+      else {
+        text = this._options.text.results.replace('{x}', suggestions);
+      }
+    }
+
+    this.liveZone.innerText = text;
+  }
+
+  _toggleOverlay(state){
+    this.open = state !== undefined ? state : !this.open;
+    this.button.setAttribute('aria-expanded', this.open);
+
+    if(this.open){
+      this._fillSuggestions();
+      this.button.insertAdjacentElement('afterend', this.overlay);
+      this.input.focus();
+    }
+    else if(this.wrap.contains(this.overlay)){
+      this.wrap.removeChild(this.overlay);
+
+      // reset the focus index
+      this.focusIndex =  null;
+
+      // reset search values
+      this.input.value = '';
+      this.search = '';
+
+
+      // reset aria-live
+      this._setLiveZone();
+
+      if(state === undefined){
+        // fix bug that will trigger a click on the button when focusing directly
+        setTimeout(function(){
+          this.button.focus();
+        }.bind(this))
+      }
+    }
+  }
+
+  _toggleSelection(optionIndex){
+    const option = this.el.item(optionIndex);
+
+    if(this.multiple){
+      this.el.item(optionIndex).selected = !this.el.item(optionIndex).selected;
+    }
+    else {
+      this.el.selectedIndex = optionIndex;
+    }
+
+    this.suggestions.forEach(function(suggestion){
+      const index = parseInt(suggestion.getAttribute('data-index'), 10);
+
+      if(this.el.item(index).selected){
+        suggestion.setAttribute('aria-selected', 'true');
+      }
+      else{
+        suggestion.removeAttribute('aria-selected');
+      }
+    }.bind(this));
+
+    if(!this.multiple){
+      this._setButtonText(option.label || option.value);
+      this._toggleOverlay();
+    }
+    else if(this._options.showSelected){
+      this._updateSelectedList();
+    }
+  }
+
+  _updateSelectedList(){
+    const items = Array.prototype.map.call(this.el.options, function(option, index){
+      if(!option.selected){
+        return;
+      }
+
+      const text = option.label || option.value;
+
+      console.log(text)
+
+      return `
+        <li class="tag-item">
+          <span>${text}</span>
+          <button class="tag-item-supp" title="${this._options.text.deleteItem.replace('{t}', text)}" type="button" data-index="${index}">
+            <span class="sr-only">${this._options.text.delete}</span>
+            <span class="icon-delete" aria-hidden="true"></span>
+          </button>
+        </li>`;
+    }.bind(this)).filter(Boolean);
+
+    this.selectedList.innerHTML = items.join('');
+
+    if(items.length){
+      if(!this.selectedList.parentElement){
+        this.wrap.appendChild(this.selectedList);
+      }
+    }
+    else {
+      this.wrap.removeChild(this.selectedList);
+    }
+
+
+  }
+
+  _wrap(){
+    const wrapper = document.createElement('div');
+    wrapper.classList.add('select-a11y');
+    this.el.parentElement.appendChild(wrapper);
+
+    const tagHidden = document.createElement('div');
+    tagHidden.classList.add('tag-hidden');
+    tagHidden.setAttribute('aria-hidden', true);
+
+    if(this.multiple){
+      tagHidden.appendChild(this.label);
+    }
+    tagHidden.appendChild(this.el);
+
+    wrapper.appendChild(tagHidden);
+    wrapper.appendChild(this.liveZone);
+    wrapper.appendChild(this.button);
+
+    return wrapper;
+  }
+}

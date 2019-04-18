@@ -83,17 +83,11 @@ select {
   display: none;
 }
 
-.select-a11y .a11y-container {
-  position: relative;
-  margin: 0 auto;
-  padding: 0.5em;
-}
-
 .select-a11y.is-open .a11y-container {
   display: block;
 }
 
-.select-a11y .a11y-container-inner {
+.select-a11y .a11y-container {
   position: absolute;
   top: 0;
   left: 0;

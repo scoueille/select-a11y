@@ -8,7 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <meta name="description" content="Filter component: multi select transformed to suggestions list with search input. WCAG and RGAA compliant.">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.5/require.min.js" data-main="assets/scripts/main"></script>
+  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.5/require.min.js" data-main="assets/scripts/main"></script> -->
 
   <link rel="stylesheet" href="assets/css/style.css">
   <link rel="stylesheet" media="print" href="assets/css/print.css">
@@ -47,7 +47,7 @@
         <h3>Example 1</h3>
         <div class="form-group">
           <label for="select-option">Is your website…</label>
-          <select class="form-control" id="select-option" multiple data-select-a11y data-placeholder="Search in list">
+          <select class="form-control" id="select-option" data-select-a11y data-placeholder="Search in list">
               <option>Perceivable</option>
               <option>Operable</option>
               <option>Understandable</option>
@@ -103,5 +103,14 @@
     </div>
   </footer>
 <!-- <script src="assets/scripts/anchor_focus.js"></script> -->
+
+  <script src="../src/select-a11y.js"></script>
+  <script>
+    var selects = document.querySelectorAll('select[data-select-a11y]');
+
+    var selectA11ys = Array.prototype.map.call(selects, function(select){
+      return new Select(select);
+    });
+  </script>
 </body>
 </html>

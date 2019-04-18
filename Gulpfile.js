@@ -17,7 +17,10 @@ var rename = require('gulp-rename');
 // build specific css rules for select-a11y.js
 gulp.task('make:css-src', function () {
     return gulp.src('./src/select-a11y.scss')
-        .pipe(sass({outputStyle: 'expanded'}).on('error', sass.logError))
+        .pipe(sass({
+          outputStyle: 'expanded',
+          includePaths: ['node_modules']
+        }).on('error', sass.logError))
         .pipe(autoprefixer('last 2 version'))
         .pipe(gulp.dest('./src'))
 });
@@ -46,6 +49,15 @@ gulp.task('watch:tests', ['make:css-src','connect'], function () {
     gulp.watch(config.filesToWatch, function(file) {
         gulp.src(file.path)
             .pipe(gulpLivereload());
+    });
+});
+
+gulp.task('watch:demo', ['make:css-demo','connect'], function () {
+    gulpLivereload.listen();
+    gulp.watch('./src/select-a11y.scss', function(file) {
+        gulp.start(['copy:scss', 'make:css-demo'], function(){
+          gulpLivereload()
+        })
     });
 });
 
@@ -89,12 +101,6 @@ gulp.task('build:dist',['copy:src','compress:js','compress:css']);
 // Build demo / public
 // ===========================================================
 
-// Add scampi in demo files
-gulp.task('copy:scampi', function() {
-  gulp.src('node_modules/scampi/**/*')
-    .pipe(gulp.dest('./demo/assets/scss/scampi'));
-});
-
 // Add script select-a11y.js in demo files
 gulp.task('copy:script', function() {
   gulp.src('./src/*.js')
@@ -114,7 +120,10 @@ gulp.task('prepare:demo',['copy:scampi','copy:script','copy:scss']);
 gulp.task('make:css-demo', function () {
     return gulp.src(['./demo/assets/scss/style.scss','./demo/assets/scss/print.scss'])
         .pipe(sourcemaps.init())
-            .pipe(sass({outputStyle: 'expanded'}).on('error', sass.logError))
+            .pipe(sass({
+              outputStyle: 'expanded',
+              includePaths: ['node_modules']
+            }).on('error', sass.logError))
             .pipe(autoprefixer('last 2 version'))
         .pipe(sourcemaps.write())
         .pipe(gulp.dest('./demo/assets/css/'));

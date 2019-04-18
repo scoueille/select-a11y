@@ -13,19 +13,19 @@ $btn-border-radius: 3px;
 $code-color: #058857;
 $gray-base: #4d4d49;
 
-@import "scampi/core/version";
-@import "scampi/core/core-scampi-settings";
-@import "scampi/core/core-scampi-mixins";
+@import "@pidila/scampi/core/version";
+@import "@pidila/scampi/core/settings";
+@import "@pidila/scampi/core/mixins";
 
 // css core
-@import "scampi/core/core-scampi-basics";
+@import "@pidila/scampi/core/basics";
 
 // css modules
-@import "scampi/modules/browsehappy/browsehappy";
-@import "scampi/modules/buttons/buttons";
-@import "scampi/modules/forms/forms";
-@import "scampi/modules/svg-icons/svg-icons";
+@import "@pidila/scampi/modules/browsehappy/index";
+@import "@pidila/scampi/modules/buttons/index";
+@import "@pidila/scampi/modules/forms/index";
+@import "@pidila/scampi/modules/svg-icons/index";
 @import "demo";
 @import "select-a11y.scss";
 
-@import "scampi/core/core-scampi-helpers";
+@import "@pidila/scampi/core/helpers";
