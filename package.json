@@ -11,7 +11,7 @@
     "url": "https://gitlab.com/pidila/select-a11y.git"
   },
   "scripts": {
-    "test": "./node_modules/.bin/gulp serve:tests"
+    "test": "tape tests/index.js | tap-diff"
   },
   "author": "DILA - PiDILA",
   "license": "(MIT OR CeCILL-B)",
@@ -19,16 +19,19 @@
     "@babel/core": "^7.4.3",
     "@babel/preset-env": "^7.4.3",
     "browser-sync": "^2.26.4",
-    "gulp": "^3.9.1",
+    "gulp-autoprefixer": "^6.0.0",
     "gulp-rename": "^1.4.0",
+    "gulp-sass": "^3.1.0",
+    "gulp-sourcemaps": "^2.6.4",
     "gulp-watch": "^5.0.1",
-    "rollup": "^1.10.1",
+    "gulp": "^3.9.1",
+    "puppeteer": "^1.14.0",
     "rollup-plugin-babel": "^4.3.2",
     "rollup-plugin-commonjs": "^9.3.4",
     "rollup-plugin-node-resolve": "^4.2.3",
     "rollup-plugin-uglify": "^6.0.2",
-    "gulp-autoprefixer": "^6.0.0",
-    "gulp-sass": "^3.1.0",
-    "gulp-sourcemaps": "^2.6.4"
+    "rollup": "^1.10.1",
+    "tap-diff": "^0.1.1",
+    "tape": "^4.10.1"
   }
 }
