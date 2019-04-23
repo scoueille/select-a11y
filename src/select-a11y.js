@@ -1,5 +1,3 @@
-const allowedKeyCodes = [ 13, 27, 32, 35, 36, 37, 38, 39, 40 ];
-
 const text = {
   help: 'Utilisez la tabulation (ou la touche flèche du bas) pour naviguer dans la liste des suggestions',
   placeholder: 'Rechercher dans la liste',
@@ -414,8 +412,6 @@ class Select{
 
       const text = option.label || option.value;
 
-      console.log(text)
-
       return `
         <li class="tag-item">
           <span>${text}</span>
@@ -436,8 +432,6 @@ class Select{
     else {
       this.wrap.removeChild(this.selectedList);
     }
-
-
   }
 
   _wrap(){
@@ -461,3 +455,5 @@ class Select{
     return wrapper;
   }
 }
+
+export default Select;

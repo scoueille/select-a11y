@@ -16,6 +16,7 @@ $gray-base: #4d4d49;
 @import "@pidila/scampi/core/version";
 @import "@pidila/scampi/core/settings";
 @import "@pidila/scampi/core/mixins";
+@import "@pidila/scampi/core/helpers";
 
 // css core
 @import "@pidila/scampi/core/basics";
@@ -26,6 +27,4 @@ $gray-base: #4d4d49;
 @import "@pidila/scampi/modules/forms/index";
 @import "@pidila/scampi/modules/svg-icons/index";
 @import "demo";
-@import "select-a11y.scss";
-
-@import "@pidila/scampi/core/helpers";
+@import "../../src/select-a11y.scss";

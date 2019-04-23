@@ -1,4 +1,5 @@
 # directories
 node_modules
-public
-demo/assets/scss/scampi
+*.js.map
+public/assets/scripts/select-a11y.js
+public/assets/css
