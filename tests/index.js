@@ -181,7 +181,7 @@ test( 'État par défaut', async t => {
   t.end();
 });
 
-test( 'Création de la liste lors de l’ouverture', async t => {
+test( 'Création de la liste lors de l’ouverture du select simple', async t => {
   const [ browser, page ] = await createBrowser();
 
   await page.click('.form-group button');
@@ -194,6 +194,8 @@ test( 'Création de la liste lors de l’ouverture', async t => {
     const label = container.querySelector('label');
     const input = container.querySelector('input');
     const options = container.querySelectorAll('[role="option"]');
+
+    const listBox = container.querySelector('[role="listbox"]');
 
     return {
       hasContainer: wrapper.contains(container),
@@ -213,7 +215,10 @@ test( 'Création de la liste lors de l’ouverture', async t => {
       },
       options: {
         length: select.options.length
-      }
+      },
+      listBox: {
+        multiple: listBox.hasAttribute('aria-multiselectable')
+      },
     }
   });
 
@@ -222,6 +227,60 @@ test( 'Création de la liste lors de l’ouverture', async t => {
   t.same(data.help.id, data.input.describedby, 'Le texte explicatif est lié au champ de recherche via l’attribut « aria-describedby »');
   t.same(data.label.for, data.input.id, 'Le label est lié au champ de recherche via l’attribut « for »');
   t.same(data.list.length, data.options.length, 'La liste crée contient le même nombre d’options que le select');
+  t.false(data.listBox.multiple, 'La liste pour le select ne contient pas d’attribut « aria-multiselectable »');
+
+  await browser.close();
+
+  t.end();
+});
+
+test( 'Création de la liste lors de l’ouverture du select multiple', async t => {
+  const [ browser, page ] = await createBrowser();
+
+  await page.click('.multiple button');
+
+  const data = await page.evaluate(() => {
+    const wrapper = document.querySelector('.multiple .select-a11y');
+    const select = wrapper.querySelector('select');
+    const container = document.querySelector('.multiple .a11y-container');
+    const help = container.firstElementChild;
+    const label = container.querySelector('label');
+    const input = container.querySelector('input');
+    const options = container.querySelectorAll('[role="option"]');
+
+    const listBox = container.querySelector('[role="listbox"]');
+
+    return {
+      hasContainer: wrapper.contains(container),
+      help: {
+        isParagraph: help.tagName === 'P',
+        id: help.id
+      },
+      label: {
+        for: label.getAttribute('for')
+      },
+      input: {
+        id: input.id,
+        describedby: input.getAttribute('aria-describedby')
+      },
+      list: {
+        length: options.length
+      },
+      options: {
+        length: select.options.length
+      },
+      listBox: {
+        multiple: listBox.getAttribute('aria-multiselectable')
+      },
+    }
+  });
+
+  t.true(data.hasContainer, 'La liste est créée lors de l’activation du bouton');
+  t.true(data.help.isParagraph, 'Le texte explicatif est présent');
+  t.same(data.help.id, data.input.describedby, 'Le texte explicatif est lié au champ de recherche via l’attribut « aria-describedby »');
+  t.same(data.label.for, data.input.id, 'Le label est lié au champ de recherche via l’attribut « for »');
+  t.same(data.list.length, data.options.length, 'La liste crée contient le même nombre d’options que le select');
+  t.same(data.listBox.multiple, 'true', 'La liste pour le select contient l’attribut « aria-multiselectable »');
 
   await browser.close();
 

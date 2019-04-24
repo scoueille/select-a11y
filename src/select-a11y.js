@@ -180,11 +180,20 @@ class Select{
       this.list.innerHTML = `<p class="a11y-no-suggestion">${this._options.text.noResult}</p>`;
     }
     else {
-      this.list.innerHTML = `<div role="listbox"></div>`;
+      const listBox = document.createElement('div');
+      listBox.setAttribute('role', 'listbox');
+
+      if(this.multiple){
+        listBox.setAttribute('aria-multiselectable', 'true');
+      }
+
 
       this.suggestions.forEach(function(suggestion){
-        this.list.firstElementChild.appendChild(suggestion);
+        listBox.appendChild(suggestion);
       }.bind(this));
+
+      this.list.innerHTML = '';
+      this.list.appendChild(listBox);
     }
 
     this._setLiveZone();
