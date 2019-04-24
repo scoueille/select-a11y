@@ -324,18 +324,24 @@ class Select{
       return;
     }
 
+    const currentButtons = this.selectedList.querySelectorAll('button');
+    const buttonPreviousIndex = Array.prototype.indexOf.call(currentButtons, button) - 1;
     const optionIndex = parseInt( button.getAttribute('data-index'), 10);
 
+    // disable the option
     this._toggleSelection(optionIndex);
 
+    // manage the focus if there's still the selected list
     if(this.selectedList.parentElement){
-      const button = this.selectedList.querySelector('button');
+      const buttons = this.selectedList.querySelectorAll('button');
 
-      if(button){
-        button.focus();
+      // loock for the bouton before the one clicked
+      if(buttons[buttonPreviousIndex]){
+        buttons[buttonPreviousIndex].focus();
       }
+      // fallback to the first button in the list if there's none
       else {
-        this.button.focus();
+        buttons[0].focus();
       }
     }
     else {

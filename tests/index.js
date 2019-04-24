@@ -341,3 +341,48 @@ test( 'Gestion de la selection au clavier d’un select multiple', async t => {
 
   t.end();
 });
+
+test( 'Suppression des options via la liste des options sélectionnées', async t => {
+  const [ browser, page ] = await createBrowser();
+
+  await page.click('.multiple button');
+
+  await page.keyboard.press('Tab');
+  await page.keyboard.press('Space');
+  await page.keyboard.press('Tab');
+  await page.keyboard.press('Space');
+  await page.keyboard.press('Tab');
+  await page.keyboard.press('Enter');
+
+  await page.focus('.list-selected .tag-item:nth-child(3) button');
+  await page.keyboard.press('Enter');
+
+  const secondButtonFocused = await page.evaluate(() => {
+    return document.activeElement === document.querySelector('.list-selected .tag-item:nth-child(2) button');
+  });
+
+  t.true(secondButtonFocused, 'Le focus est placé sur le bouton précédant dans l’ordre du document lors de la suppression');
+
+  await page.focus('.list-selected .tag-item:nth-child(1) button');
+  await page.keyboard.press('Enter');
+
+  const firstButtonFocused = await page.evaluate(() => {
+    return document.activeElement === document.querySelector('.list-selected .tag-item:nth-child(1) button');
+  });
+
+  t.true(firstButtonFocused, 'Le focus est placé sur le premier bouton dans l’ordre du document lors de la suppression du premier bouton');
+
+  await page.keyboard.press('Enter');
+  await page.keyboard.press('Enter');
+
+  const openerFocused = await page.evaluate(() => {
+    return document.activeElement === document.querySelector('.multiple button');
+  });
+
+  t.true(openerFocused, 'Le focus est placé sur le bouton d’ouverture du select lorsque tous les boutons de suppression ont disparu');
+
+
+  await browser.close();
+
+  t.end();
+});
