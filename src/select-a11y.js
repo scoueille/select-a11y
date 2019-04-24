@@ -246,7 +246,10 @@ class Select{
       return;
     }
 
-    this._toggleSelection(parseInt(option.getAttribute('data-index'), 10));
+    const optionIndex = parseInt(option.getAttribute('data-index'), 10);
+    const shouldClose = this.multiple && event.metaKey ? false : true;
+
+    this._toggleSelection(optionIndex, shouldClose);
   }
 
   _handleInput(){
@@ -292,7 +295,7 @@ class Select{
 
     if(event.keyCode === 13 || event.keyCode === 32){
       event.preventDefault();
-      this._toggleSelection(parseInt(option.getAttribute('data-index'), 10));
+      this._toggleSelection(parseInt(option.getAttribute('data-index'), 10), this.multiple ? false : true);
     }
 
     if(this.multiple && event.keyCode === 13){
@@ -409,7 +412,7 @@ class Select{
     }
   }
 
-  _toggleSelection(optionIndex){
+  _toggleSelection(optionIndex, close = true){
     const option = this.el.item(optionIndex);
 
     if(this.multiple){
@@ -432,10 +435,13 @@ class Select{
 
     if(!this.multiple){
       this._setButtonText(option.label || option.value);
-      this._toggleOverlay();
     }
     else if(this._options.showSelected){
       this._updateSelectedList();
+    }
+
+    if(close && this.open){
+      this._toggleOverlay();
     }
   }
 

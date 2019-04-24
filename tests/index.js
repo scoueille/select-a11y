@@ -567,3 +567,100 @@ test( 'Gestion de la liste au blur', async t => {
 
   t.end();
 });
+
+test( 'Gestion de la liste du select simple au clic', async t => {
+  const [ browser, page ] = await createBrowser();
+
+  await page.click('.form-group button');
+
+  await page.click('.a11y-suggestions [role="option"]:nth-child(2)');
+
+  await page.waitFor(10);
+
+  const clickStatus = await page.evaluate(() => {
+    const activeElement = document.activeElement;
+    const opener = document.querySelector('.form-group button');
+
+    return {
+      expanded: opener.getAttribute('aria-expanded'),
+      openerFocused: opener === activeElement
+    }
+  });
+
+  t.same(clickStatus.expanded, 'false', 'La liste est refermée après un clic sur une option');
+  t.true(clickStatus.openerFocused, 'Le focus est replacé sur le bouton ouvrant la liste');
+
+  await page.click('.form-group button');
+
+  await page.keyboard.down('Meta');
+  await page.click('.a11y-suggestions [role="option"]:nth-child(2)');
+  await page.keyboard.up('Meta');
+
+  await page.waitFor(10);
+
+  const metaClickStatus = await page.evaluate(() => {
+    const activeElement = document.activeElement;
+    const opener = document.querySelector('.form-group button');
+
+    return {
+      expanded: opener.getAttribute('aria-expanded'),
+      openerFocused: opener === activeElement
+    }
+  });
+
+  t.same(metaClickStatus.expanded, 'false', 'La liste est refermée après un meta + clic sur une option');
+  t.true(metaClickStatus.openerFocused, 'Le focus est replacé sur le bouton ouvrant la liste');
+
+  await browser.close();
+
+  t.end();
+});
+
+test( 'Gestion de la liste du select multiple au clic', async t => {
+  const [ browser, page ] = await createBrowser();
+
+  await page.click('.multiple button');
+
+  await page.click('.a11y-suggestions [role="option"]:nth-child(2)');
+
+  await page.waitFor(10);
+
+  const clickStatus = await page.evaluate(() => {
+    const activeElement = document.activeElement;
+    const opener = document.querySelector('.multiple button');
+
+    return {
+      expanded: opener.getAttribute('aria-expanded'),
+      openerFocused: opener === activeElement
+    }
+  });
+
+  t.same(clickStatus.expanded, 'false', 'La liste est refermée après un clic sur une option');
+  t.true(clickStatus.openerFocused, 'Le focus est replacé sur le bouton ouvrant la liste');
+
+  await page.click('.multiple button');
+
+  await page.keyboard.down('Meta');
+  await page.click('.a11y-suggestions [role="option"]:nth-child(2)');
+  await page.keyboard.up('Meta');
+
+  await page.waitFor(10);
+
+  const metaClickStatus = await page.evaluate(() => {
+    const activeElement = document.activeElement;
+    const opener = document.querySelector('.form-group button');
+    const option = document.querySelector('.a11y-suggestions [role="option"]:nth-child(2')
+
+    return {
+      expanded: opener.getAttribute('aria-expanded'),
+      optionFocused: option === activeElement
+    }
+  });
+
+  t.same(metaClickStatus.expanded, 'false', 'La liste n’est pas refermée après un meta + clic sur une option');
+  t.true(metaClickStatus.optionFocused, 'Le focus reste sur l’option cliquée');
+
+  await browser.close();
+
+  t.end();
+});
