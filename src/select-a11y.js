@@ -120,9 +120,9 @@ class Select{
     suggestions.id = `a11y-${this.id}-suggestions`;
 
     container.innerHTML = `
-      <p id="a11y-usage$${this.id}-js" class="sr-only">${this._options.text.help}</p>
+      <p id="a11y-usage-${this.id}-js" class="sr-only">${this._options.text.help}</p>
       <label for="a11y-${this.id}-js" class="sr-only">${this._options.text.placeholder}</label>
-      <input type="text" id="a11y-${this.id}-js" class="${this.el.className}" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${this._options.text.placeholder}" aria-describedby="a11y-usage${this.id}-js">
+      <input type="text" id="a11y-${this.id}-js" class="${this.el.className}" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${this._options.text.placeholder}" aria-describedby="a11y-usage-${this.id}-js">
     `;
 
     container.appendChild(suggestions);
@@ -180,7 +180,7 @@ class Select{
       this.list.innerHTML = `<p class="a11y-no-suggestion">${this._options.text.noResult}</p>`;
     }
     else {
-      this.list.innerHTML = `<div role="listbox"><div>`;
+      this.list.innerHTML = `<div role="listbox"></div>`;
 
       this.suggestions.forEach(function(suggestion){
         this.list.firstElementChild.appendChild(suggestion);

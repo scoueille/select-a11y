@@ -70,7 +70,7 @@ test( 'Creation du select-a11y simple', async t => {
 
   t.true( button.exists, 'Le bouton permettant d’ouvrir le select est créé');
   t.true( button.isClosed, 'Le bouton permettant d’ouvrir le select est paramétré comme fermé par défaut');
-  t.same( button.labelledby, label.id, 'Le bouton est lié au label via « aria-labelledby »');
+  t.same( button.labelledby, label.id, 'Le bouton est lié au label via l’attribut « aria-labelledby »');
 
   await browser.close();
 
@@ -181,6 +181,52 @@ test( 'État par défaut', async t => {
   t.end();
 });
 
+test( 'Création de la liste lors de l’ouverture', async t => {
+  const [ browser, page ] = await createBrowser();
+
+  await page.click('.form-group button');
+
+  const data = await page.evaluate(() => {
+    const wrapper = document.querySelector('.select-a11y');
+    const select = wrapper.querySelector('select');
+    const container = document.querySelector('.a11y-container');
+    const help = container.firstElementChild;
+    const label = container.querySelector('label');
+    const input = container.querySelector('input');
+    const options = container.querySelectorAll('[role="option"]');
+
+    return {
+      hasContainer: wrapper.contains(container),
+      help: {
+        isParagraph: help.tagName === 'P',
+        id: help.id
+      },
+      label: {
+        for: label.getAttribute('for')
+      },
+      input: {
+        id: input.id,
+        describedby: input.getAttribute('aria-describedby')
+      },
+      list: {
+        length: options.length
+      },
+      options: {
+        length: select.options.length
+      }
+    }
+  });
+
+  t.true(data.hasContainer, 'La liste est créée lors de l’activation du bouton');
+  t.true(data.help.isParagraph, 'Le texte explicatif est présent');
+  t.same(data.help.id, data.input.describedby, 'Le texte explicatif est lié au champ de recherche via l’attribut « aria-describedby »');
+  t.same(data.label.for, data.input.id, 'Le label est lié au champ de recherche via l’attribut « for »');
+  t.same(data.list.length, data.options.length, 'La liste crée contient le même nombre d’options que le select');
+
+  await browser.close();
+
+  t.end();
+});
 
 test( 'Position du curseur au focus du champ de recherche', async t => {
   const [ browser, page ] = await createBrowser();
