@@ -262,7 +262,6 @@ test( 'Position du curseur au focus du champ de recherche', async t => {
   t.end();
 });
 
-
 test( 'Gestion de la selection au clavier d’un select', async t => {
   const [ browser, page ] = await createBrowser();
 
@@ -427,6 +426,83 @@ test( 'Suppression des options via la liste des options sélectionnées', async 
 
   t.true(openerFocused, 'Le focus est placé sur le bouton d’ouverture du select lorsque tous les boutons de suppression ont disparu');
 
+  await browser.close();
+
+  t.end();
+});
+
+test( 'Gestion de la liste au blur', async t => {
+  const [ browser, page ] = await createBrowser();
+
+  await page.click('.multiple button');
+
+  await page.keyboard.down('Shift');
+  await page.keyboard.press('Tab');
+  await page.keyboard.up('Shift');
+
+  const buttonFocus = await page.evaluate(() => {
+    const button = document.activeElement;
+
+    return {
+      isButton: document.activeElement === document.querySelector('.multiple button'),
+      expanded: button.getAttribute('aria-expanded')
+    }
+  });
+
+  t.same(buttonFocus.isButton && buttonFocus.expanded, 'true', 'La liste reste ouverte lorsque le bouton d’ouverture à la focus');
+
+  await page.keyboard.down('Shift');
+  await page.keyboard.press('Tab');
+  await page.keyboard.up('Shift');
+
+  await page.waitFor(10);
+
+  const buttonBlurTopExpanded = await page.evaluate(() => {
+    const button = document.querySelector('.multiple button');
+
+    return button.getAttribute('aria-expanded');
+  });
+
+  t.same(buttonBlurTopExpanded, 'false', 'La liste est fermée lorsque le focus est en dehors du select');
+
+  await page.click('.multiple button');
+
+  await page.keyboard.press('Tab');
+  await page.keyboard.press('Tab');
+  await page.keyboard.press('Tab');
+  await page.keyboard.press('Tab');
+  await page.keyboard.press('Tab');
+  await page.keyboard.press('Tab');
+
+  await page.waitFor(10);
+
+  const select = await page.evaluate(() => {
+    const button = document.querySelector('.multiple button');
+    const selected = document.querySelector('.multiple .tag-item button');
+
+    return {
+      expanded: button.getAttribute('aria-expanded'),
+      selectionFocused: selected === document.activeElement
+    }
+  });
+
+  t.same(select.selectionFocused && select.expanded, 'false', 'La liste est fermée lorsque le focus est sur les boutons de la liste de sélection');
+
+  await page.click('.multiple button');
+
+  await page.waitFor(10);
+
+  await page.click('body')
+
+  await page.waitFor(10);
+
+  const focused = await page.evaluate(() => {
+    const button = document.querySelector('.multiple button');
+
+    return button === document.activeElement
+  });
+
+  t.true(focused, 'La liste est fermée lorsqu’on clique en dehors');
 
   await browser.close();
 

@@ -202,8 +202,8 @@ class Select{
     clearTimeout(this._focusTimeout);
 
     this._focusTimeout = setTimeout(function(){
-      if(!this.wrap.contains(document.activeElement)){
-        this._toggleOverlay(false);
+      if(!this.overlay.contains(document.activeElement) && this.button !== document.activeElement){
+        this._toggleOverlay( false, document.activeElement === document.body);
       }
       else if(document.activeElement === this.input){
         // reset the focus index
@@ -369,7 +369,7 @@ class Select{
     this.liveZone.innerText = text;
   }
 
-  _toggleOverlay(state){
+  _toggleOverlay(state, focusBack){
     this.open = state !== undefined ? state : !this.open;
     this.button.setAttribute('aria-expanded', this.open);
 
@@ -391,8 +391,7 @@ class Select{
 
       // reset aria-live
       this._setLiveZone();
-
-      if(state === undefined){
+      if(state === undefined || focusBack){
         // fix bug that will trigger a click on the button when focusing directly
         setTimeout(function(){
           this.button.focus();
