@@ -244,10 +244,7 @@ class Select{
     const option = closest.call(event.target, '[role="option"]');
     const input = closest.call(event.target, 'input');
 
-    // event.preventDefault();
-
     if(event.keyCode === 27){
-
       this._toggleOverlay();
       return;
     }
@@ -257,7 +254,8 @@ class Select{
       return;
     }
 
-    if(event.keyCode === 39 || event.keyCode === 40){
+    if(event.keyCode === 40){
+      event.preventDefault();
       this._moveIndex(1);
       return
     }
@@ -266,13 +264,25 @@ class Select{
       return;
     }
 
+    if(event.keyCode === 39){
+      event.preventDefault();
+      this._moveIndex(1);
+      return
+    }
+
     if(event.keyCode === 37 || event.keyCode === 38){
+      event.preventDefault();
       this._moveIndex(-1);
       return;
     }
 
     if(event.keyCode === 13 || event.keyCode === 32){
+      event.preventDefault();
       this._toggleSelection(parseInt(option.getAttribute('data-index'), 10));
+    }
+
+    if(this.multiple && event.keyCode === 13){
+      this._toggleOverlay();
     }
   }
 
