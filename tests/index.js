@@ -130,7 +130,6 @@ test( 'État par défaut', async t => {
 
   const selects = await page.evaluate(() => {
     const selects = Array.from(document.querySelectorAll('select'));
-    // const selectMultiple = document.querySelector('select[multiple]');
 
     return selects.map(select => {
       const wrapper = select.closest('.select-a11y');
@@ -170,8 +169,40 @@ test( 'État par défaut', async t => {
     }
   });
 
+  await browser.close();
+
+  t.end();
+});
 
 
+test( 'Position du curseur au focus du champ de recherche', async t => {
+  const [ browser, page ] = await createBrowser();
+
+  await page.click('.multiple button');
+
+  await page.type('#a11y-select-element-js', 'ee');
+
+  await page.keyboard.press('ArrowDown');
+
+  await page.keyboard.down('Shift');
+  await page.keyboard.press('Tab');
+  await page.keyboard.up('Shift');
+
+  const data = await page.evaluate(() => {
+    const input = document.getElementById('a11y-select-element-js');
+    const activeElement = document.activeElement;
+
+    return {
+      focused: input === activeElement,
+      selectionStart: input.selectionStart,
+      selectionEnd: input.selectionEnd,
+      length: input.value.length,
+    }
+  });
+
+  t.true(data.focused, 'Le focus est dans le champ');
+  t.same(data.selectionStart, data.selectionEnd, 'Le focus ne sélectionne pas tout le texte du champ');
+  t.same(data.selectionStart, data.length, 'Le curseur est positionné en fin de texte');
 
   await browser.close();
 

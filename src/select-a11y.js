@@ -48,6 +48,7 @@ class Select{
     this._handleOpener = this._handleOpener.bind(this);
     this._handleReset = this._handleReset.bind(this);
     this._handleSuggestionClick = this._handleSuggestionClick.bind(this);
+    this._positionCursor = this._positionCursor.bind(this);
     this._removeOption = this._removeOption.bind(this);
 
     this._disable();
@@ -66,6 +67,7 @@ class Select{
 
     this.button.addEventListener('click', this._handleOpener);
     this.input.addEventListener('input', this._handleInput);
+    this.input.addEventListener('focus', this._positionCursor, true);
     this.list.addEventListener('click', this._handleSuggestionClick);
     this.wrap.addEventListener('keydown', this._handleKeyboard);
     document.addEventListener('blur', this._handleFocus, true);
@@ -294,6 +296,10 @@ class Select{
     }
 
     this.suggestions[this.focusIndex].focus();
+  }
+
+  _positionCursor(){
+    this.input.selectionStart = this.input.selectionEnd = this.input.value.length;
   }
 
   _removeOption(event){
