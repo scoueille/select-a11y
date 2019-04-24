@@ -89,6 +89,11 @@ class Select{
     else {
       const selectedOption = this.el.item(this.el.selectedIndex);
       text.innerText = selectedOption.label || selectedOption.value;
+
+      if(!this.label.id){
+        this.label.id = `${this.el.id}-label`;
+      }
+      button.setAttribute('aria-labelledby', this.label.id);
     }
 
     button.appendChild(text);

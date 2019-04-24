@@ -21,21 +21,26 @@ test( 'Creation du select-a11y simple', async t => {
   const {label, select} = await page.evaluate(() => {
     const wrapper = document.querySelector('.form-group');
     const selectA11y = wrapper.querySelector('.select-a11y');
+    const label = wrapper.firstElementChild;
 
     return {
-      label: wrapper.firstElementChild.getAttribute('for') === 'select-option',
+      label: {
+        stayed: label && label.getAttribute('for') === 'select-option',
+        id: label && label.id
+      },
       select: selectA11y !== null
     }
   });
 
-  t.true( label, 'Le label n’est pas déplacé' );
+  t.true( label.stayed, 'Le label n’est pas déplacé' );
   t.true( select, 'Le conteneur de select-a11y est créé' );
 
-  const { tagHidden, live, button} = await page.evaluate(() => {
+  const { tagHidden, live, button } = await page.evaluate(() => {
     const selectA11y = document.querySelector('.form-group > .select-a11y');
     const tagHidden = selectA11y.querySelector('.tag-hidden');
     const live = selectA11y.querySelector('[aria-live]');
     const button = selectA11y.querySelector('button[aria-expanded]');
+    const label = selectA11y.querySelector('label');
 
 
     return {
@@ -50,7 +55,8 @@ test( 'Creation du select-a11y simple', async t => {
       },
       button: {
         exists: button !== null,
-        isClosed: button && button.getAttribute('aria-expanded') === 'false'
+        isClosed: button && button.getAttribute('aria-expanded') === 'false',
+        labelledby: button && button.getAttribute('aria-labelledby')
       }
     }
   });
@@ -64,6 +70,7 @@ test( 'Creation du select-a11y simple', async t => {
 
   t.true( button.exists, 'Le bouton permettant d’ouvrir le select est créé');
   t.true( button.isClosed, 'Le bouton permettant d’ouvrir le select est paramétré comme fermé par défaut');
+  t.same( button.labelledby, label.id, 'Le bouton est lié au label via « aria-labelledby »');
 
   await browser.close();
 
