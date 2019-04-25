@@ -140,6 +140,13 @@
     &:focus {
       box-shadow: none;
     }
+
+  }
+
+  .btn-select-a11y{
+    &:focus{
+      box-shadow: 0 0 5px 0 $code-color;
+    }
   }
 
   .icon-select::before {
