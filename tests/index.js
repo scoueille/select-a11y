@@ -287,7 +287,7 @@ test( 'Création de la liste lors de l’ouverture du select multiple', async t 
   t.end();
 });
 
-test( 'Position du curseur au focus du champ de recherche', async t => {
+test( 'Gestion du champ de recherche', async t => {
   const [ browser, page ] = await createBrowser();
 
   await page.click('.multiple button');
@@ -303,18 +303,29 @@ test( 'Position du curseur au focus du champ de recherche', async t => {
   const data = await page.evaluate(() => {
     const input = document.getElementById('a11y-select-element-js');
     const activeElement = document.activeElement;
+    const options = document.querySelectorAll('.multiple [role="option"]')
 
     return {
       focused: input === activeElement,
       selectionStart: input.selectionStart,
       selectionEnd: input.selectionEnd,
       length: input.value.length,
+      displayedOptions: options.length
     }
   });
 
   t.true(data.focused, 'Le focus est dans le champ');
   t.same(data.selectionStart, data.selectionEnd, 'Le focus ne sélectionne pas tout le texte du champ');
   t.same(data.selectionStart, data.length, 'Le curseur est positionné en fin de texte');
+  t.same(data.displayedOptions, 2, 'La liste des options est filtrée lorsque qu’un texte est saisi dans le champ');
+
+  await page.type('#a11y-select-element-js', 'eee');
+
+  const noResult = await page.evaluate(() => {
+    return document.querySelectorAll('.multiple .a11y-no-suggestion') !== undefined
+  });
+
+  t.true(noResult, 'La liste affiche un message d’erreur lorsqu’il n’y a pas d’option s’approchant du texte saisi dans le champ');
 
   await browser.close();
 
@@ -553,7 +564,7 @@ test( 'Gestion de la liste au blur', async t => {
 
   await page.click('body')
 
-  await page.waitFor(10);
+  await page.waitFor(20);
 
   const focused = await page.evaluate(() => {
     const button = document.querySelector('.multiple button');
@@ -659,6 +670,60 @@ test( 'Gestion de la liste du select multiple au clic', async t => {
 
   t.same(metaClickStatus.expanded, 'false', 'La liste n’est pas refermée après un meta + clic sur une option');
   t.true(metaClickStatus.optionFocused, 'Le focus reste sur l’option cliquée');
+
+  await browser.close();
+
+  t.end();
+});
+
+test( 'Navigation au clavier', async t => {
+  const [ browser, page ] = await createBrowser();
+
+  await page.focus('.form-group button');
+
+  await page.keyboard.press('Enter');
+
+  await page.keyboard.press('ArrowDown');
+
+  const firstElementSelected = await page.evaluate(() => {
+    return document.activeElement === document.querySelector('.select-a11y [role=option]:nth-child(1)');
+  });
+
+  t.true(firstElementSelected, 'La touche « flèche bas » déplace le focus sur le premier élément de la liste');
+
+  await page.keyboard.press('ArrowUp');
+
+  const lastElementSelected = await page.evaluate(() => {
+    return document.activeElement === document.querySelector('.select-a11y [role=option]:nth-child(4)');
+  });
+
+  t.true(lastElementSelected, 'La touche « flèche haut » déplace le focus sur le dernier élément de la liste lorsque le premier élément à le focus');
+
+  await page.keyboard.press('ArrowDown');
+
+  const backToFirstElementSelected = await page.evaluate(() => {
+    return document.activeElement === document.querySelector('.select-a11y [role=option]:nth-child(1)');
+  });
+
+  t.true(backToFirstElementSelected, 'La touche « flèche bas » déplace le focus sur le premier élément de la liste lorsque le dernier élément à le focus');
+
+  await page.keyboard.press('ArrowDown');
+  await page.keyboard.press('ArrowDown');
+
+  const nextElement = await page.evaluate(() => {
+    return document.activeElement === document.querySelector('.select-a11y [role=option]:nth-child(3)');
+  });
+
+  t.true(nextElement, 'La touche « flèche bas » déplace le focus sur l’élement suivant');
+
+  await page.keyboard.press('ArrowUp');
+  await page.keyboard.press('ArrowUp');
+
+  const previous = await page.evaluate(() => {
+    return document.activeElement === document.querySelector('.select-a11y [role=option]:nth-child(1)');
+  });
+
+  t.true(previous, 'La touche « flèche haut » déplace le focus sur l’élement précédent');
 
   await browser.close();
 
