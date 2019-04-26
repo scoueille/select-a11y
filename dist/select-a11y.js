@@ -353,7 +353,9 @@ var Select = (function () {
     }, {
       key: "_positionCursor",
       value: function _positionCursor() {
-        this.input.selectionStart = this.input.selectionEnd = this.input.value.length;
+        setTimeout(function () {
+          this.input.selectionStart = this.input.selectionEnd = this.input.value.length;
+        }.bind(this));
       }
     }, {
       key: "_removeOption",
@@ -515,4 +517,3 @@ var Select = (function () {
   return Select;
 
 }());
-//# sourceMappingURL=select-a11y.js.map

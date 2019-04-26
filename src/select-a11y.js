@@ -326,7 +326,9 @@ class Select{
   }
 
   _positionCursor(){
-    this.input.selectionStart = this.input.selectionEnd = this.input.value.length;
+    setTimeout(function(){
+      this.input.selectionStart = this.input.selectionEnd = this.input.value.length;
+    }.bind(this))
   }
 
   _removeOption(event){
