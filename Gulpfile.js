@@ -2,6 +2,8 @@ var gulp = require('gulp');
 var config = require('./tasks/config');
 var browserSync = require('browser-sync').create();
 var watch = require('gulp-watch');
+var runSequence = require('run-sequence');
+
 
 gulp.task('server', function(){
     browserSync.init({
@@ -30,6 +32,10 @@ gulp.task('default',['watch:dev']);
 
 gulp.task('make:public', function(){
   return gulp.start(['copy:public', 'css:public']);
+});
+
+gulp.task('build', function(cb){
+  runSequence('script:build','copy:public', 'css:public', cb);
 });
 
 require('./tasks/copy.js');

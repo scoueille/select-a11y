@@ -3,35 +3,34 @@
 [Version de cette page en français](readme.md)
 
 
-**select-a11y** transforms multi select into suggestions list with search input. It is compliant with [Web Content Accessibility Guidelines (WCAG)](https://www.w3.org/WAI/intro/wcag) and [General Accessibility Framework for Administrations](https://disic.github.io/rgaa_referentiel_en/introduction-RGAA.html) (Référentiel général d'accessibilité pour les administrations - RGAA).
+**select-a11y** transforms selects (multiple or not) into suggestions list with search input. It is compliant with [Web Content Accessibility Guidelines (WCAG)](https://www.w3.org/WAI/intro/wcag) and [General Accessibility Framework for Administrations](https://disic.github.io/rgaa_referentiel_en/introduction-RGAA.html) (Référentiel général d'accessibilité pour les administrations - RGAA).
 
 To see the demo, download or clone this repository, then open the file /demo/index.html.
 
 **select-a11y** is part of the DILA’s accessible and responsive UI components library [Scampi (fr)](https://gitlab.com/pidila/scampi). It was primarily developed and is currently used in production on service-public.fr, official website of the french administration. See filter boxes on [this page (fr)](https://www.service-public.fr/demarches-silence-vaut-accord/recherche).
-
-## Prerequisite
-
-jquery 3.1.1 or higher.
 
 ## References
 
 - https://select2.github.io/examples.html
 - https://a11y.nicolas-hoffmann.net/autocomplet-list/
 
-## Use 
+## Use
 
-All you need is ~~love~~ the files in the dist/ directory. Add the script in the bottom of your page, just before the body end tag (and jquery if it's not here already) and the css or scss in your style files.
+All you need is ~~love~~ the files in the dist/ directory. Add the script in the bottom of your page, just before the body end tag and the css or scss in your style files.
 
-To be transformed by select-a11y.js, the multi select element:
+To be transformed by select-a11y.js, the fastest way is to add the ```data-select-a11y``` attribute on the `select` and add the following JavaScript code in one of your file:
 
-- must contain the attribute data-select-a11y;
-- must contain an attribute data-placeholder="Text of the placeholder";
-- must contain a class attribute with any value;
-- may contain one or more option with selected attribute
+```js
+var selects = document.querySelectorAll('select[data-select-a11y]');
+
+Array.prototype.forEach.call(selects, function(select){
+  new Select(select);
+});
+```
 
 ### Code sample
 
-```html 
+```html
 
 <div class="form-group">
   <label for="select-element">What do you want to do today?</label>
@@ -43,38 +42,56 @@ To be transformed by select-a11y.js, the multi select element:
       <option>Dreaming</option>
   </select>
 </div>
-
 ```
+
+The default texts used for accessibility can be changed. When creating a new select a11y, you can pass an object containing the `text` property as a second parameter:
+
+```js
+new Select(HTMLSelectElement, {
+  text:{
+    help: 'Utilisez la tabulation (ou la touche flèche du bas) pour naviguer dans la liste des suggestions',
+    placeholder: 'Rechercher dans la liste',
+    noResult: 'Aucun résultat',
+    results: '{x} suggestion(s) disponibles',
+    deleteItem: 'Supprimer {t}',
+    delete: 'Supprimer'
+  }
+});
+```
+
+The texts in the example are the default texts used in the script.
 
 ## Contribute
 
-This project is under Test Driven Development with jasmine.
+This project is under Test Driven Development with tape.
 
 Requisite: Node.js, npm, npm gulp globally installed.
 
 After cloning this repository, install dependencies:
 
-```$ npm install```
+```bash
+$ npm install
+```
 
-and run tests in Chrome:
+and run tests:
 
-```$ gulp```
-
-**Important :** it may be required to modify the Gulpfile.js, line 53 to call Chrome with the [correct syntax](https://www.npmjs.com/package/opn#user-content-app) for your Operating System. 
+```bash
+$ npm test
+```
 
 ### Build the demo
 
-At first time, the Scampi library, the select-a11y script and the select-a11y scss must be copied in public/styles/scss :
+Final files for the demo pages are located in the **public** folder. In **demo/scss** you'll find the scss file that will compile into css in the **public** folder.
 
-```$ gulp prepare:demo```
+The following command will start a webserver and will listen to the changes of the **scss** file to recompile it:
 
-Then you just have to launch build as often as necessary:
-
-```$ gulp build:demo```
+```bash
+$ gulp watch:dev
+```
 
 ### Build the dist directory
 
-```$ gulp build:dist```
+```$ gulp build```
 
 ### What can I do to help?
 
@@ -83,11 +100,9 @@ Then you just have to launch build as often as necessary:
 - suggest enhancement
 - translate documentation in english
 - enhance documentation in english or in french
-- make select-a11y.js as a jquery plugin 
-- make select-a11y as a vanillia script
 - say thank you if you use it :)
 
-## Authors 
+## Authors
 
 Developpers and reviewers: Alain Batifol, Nicolas Bovorasmy, Anne Cavalier, Laurent Dutheil, Aurélien Lévy, Hugues Moreno - For the DILA, Direction de l'information légale et administrative.
 

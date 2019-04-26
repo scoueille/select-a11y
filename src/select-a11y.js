@@ -1,10 +1,10 @@
 const text = {
   help: 'Utilisez la tabulation (ou la touche flèche du bas) pour naviguer dans la liste des suggestions',
   placeholder: 'Rechercher dans la liste',
-  noResult: 'aucun résultat',
+  noResult: 'Aucun résultat',
   results: '{x} suggestion(s) disponibles',
-  deleteItem: 'supprimer {t}',
-  delete: 'supprimer'
+  deleteItem: 'Supprimer {t}',
+  delete: 'Supprimer'
 };
 
 const matches = Element.prototype.matches || Element.prototype.msMatchesSelector || Element.prototype.webkitMatchesSelector;

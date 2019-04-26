@@ -74,12 +74,27 @@
         </p>
       </form>
 
-      <p>To be transformed by select-a11y.js, the <code>select</code> element:</p>
-        <ul>
-           <li>must contain the attribute <code>data-select-a11y</code>;</li>
-           <li>must contain an attribute <code>data-placeholder="Text of the placeholder"</code>;</li>
-           <li>must contain a <code>class</code> attribute with any value.</li>
-         </ul>
+      <p>To be transformed by select-a11y.js, the <code>select</code> element must be passed to the <code>Select()</code> constructor:</p>
+      <p><code>new Select(HTMLSelectElement);</code></p>
+
+      <p>Accessibility texts can be passed; the following texts are the defaults:</p>
+      <pre><code>new Select(HTMLSelectElement, {
+  text:{
+    help: 'Utilisez la tabulation (ou la touche flèche du bas) pour naviguer dans la liste des suggestions',
+    placeholder: 'Rechercher dans la liste',
+    noResult: 'Aucun résultat',
+    results: '{x} suggestion(s) disponibles',
+    deleteItem: 'Supprimer {t}',
+    delete: 'Supprimer'
+  }
+});</code></pre>
+
+      <p>The simpliest way to use the plugin is to add a data-attribute on the selects that you want to transform, like <code>data-select-a11y</code> and add the following lines in one of your JavaScript file:</p>
+      <pre><code>var selects = document.querySelectorAll('select[data-select-a11y]');
+
+Array.prototype.forEach.call(selects, function(select){
+  new Select(select);
+});</code></pre>
     </div>
   </main>
 

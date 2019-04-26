@@ -8,7 +8,7 @@ pages:
   stage: deploy
   script:
   - npm install
-  - ./node_modules/.bin/gulp make:public
+  - ./node_modules/.bin/gulp build
   artifacts:
     paths:
     - public

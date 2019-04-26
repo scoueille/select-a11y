@@ -2,35 +2,34 @@
 
 [English version of this page](readme-en.md)
 
-**select-a11y** est un script javascript associé à des css qui transforme un select multiple en liste de suggestions avec champ de recherche à l'intérieur de cette liste. Il est conforme aux [Web Content Accessibility Guidelines (WCAG) (en)](https://www.w3.org/WAI/intro/wcag) et au [Référentiel général d'accessibilité pour les administrations (RGAA)](https://references.modernisation.gouv.fr/rgaa-accessibilite/).
+**select-a11y** est un script javascript associé à des css qui transforme un select (multiple ou non) en liste de suggestions avec champ de recherche à l'intérieur de cette liste. Il est conforme aux [Web Content Accessibility Guidelines (WCAG) (en)](https://www.w3.org/WAI/intro/wcag) et au [Référentiel général d'accessibilité pour les administrations (RGAA)](https://references.modernisation.gouv.fr/rgaa-accessibilite/).
 
-Pour voir la démo, télécharger ou cloner ce dépôt et ouvrir le fichier demo/index.html.
+Pour voir la démo, télécharger ou cloner ce dépôt et ouvrir le fichier public/index.html.
 
 **select-a11y** fait partie de [Scampi](https://gitlab.com/pidila/scampi), la bibliothèque de composants accessibles développée par le Pôle intégration html de la Direction de l'information légale et administrative (DILA). Il a été initialement développé pour le site service-public.fr, le site officiel de l'administration française. On peut le voir en action les filtres de recherche de [cette page](https://www.service-public.fr/demarches-silence-vaut-accord/recherche).
-
-## Prérequis
-
-jquery 3.1.1 ou supérieure.
 
 ## Références
 
 - https://select2.github.io/examples.html
 - https://a11y.nicolas-hoffmann.net/autocomplet-list/
 
-## Utilisation 
+## Utilisation
 
-Les fichiers nécessaires à la mise en œuvre sont ceux du répertoire dist/. Ajoutez le script en pied de page, juste avant le tag de fermeture du body (ainsi que jquery s'il n'est pas déjà prévu) et les css ou scss dans vos fichiers de style.
+Les fichiers nécessaires à la mise en œuvre sont ceux du répertoire dist/. Ajoutez le script en pied de page, juste avant le tag de fermeture du body et les css ou scss dans vos fichiers de style.
 
-Pour être pris en compte et transformé par le script select-a11y.js le tag select multiple :
+Pour être pris en compte et transformé par le script select-a11y.js le plus simple est d'ajouter l'attribut ```data-select-a11y``` et le code JavaScript suivant :
 
-- doit contenir l'attribut ```data-select-a11y``` ;
-- doit contenir l'attribut ```data-placeholder="Texte du placeholder"``` ;
-- doit contenir un attribut ```class``` avec une valeur quelconque ;
-- une ou plusieurs options peuvent contenir l'attribut ```selected``` si souhaité.
+```js
+var selects = document.querySelectorAll('select[data-select-a11y]');
+
+Array.prototype.forEach.call(selects, function(select){
+  new Select(select);
+});
+```
 
 ### Exemple de code
 
-```html 
+```html
 
 <div class="form-group">
   <label for="select-element">Que voulez-vous faire aujourd'hui ?</label>
@@ -42,49 +41,56 @@ Pour être pris en compte et transformé par le script select-a11y.js le tag sel
       <option>Rêver</option>
   </select>
 </div>
-
 ```
+
+Il est possible de changer les textes utilisés dans le script pour les textes accessibles. Lors de la création du select a11y il suffit de passer un objet contenant une propriété `text` en second paramètre :
+
+```js
+new Select(HTMLSelectElement, {
+  text:{
+    help: 'Utilisez la tabulation (ou la touche flèche du bas) pour naviguer dans la liste des suggestions',
+    placeholder: 'Rechercher dans la liste',
+    noResult: 'Aucun résultat',
+    results: '{x} suggestion(s) disponibles',
+    deleteItem: 'Supprimer {t}',
+    delete: 'Supprimer'
+  }
+});
+```
+
 
 ## Contribute
 
-Ce projet est développé en Test Driven Development avec jasmine.
+Ce projet est développé en Test Driven Development avec tape.
 
 Prérequis : nodejs, npm et gulp installé en global.
 
 Après avoir cloné ce dépôt, installer les dépendances :
 
-```
+```bash
 $ npm install
 ```
 
-puis lancer les tests avec Chrome :
+puis lancer les tests :
 
+```bash
+$ npm run test
 ```
-$ gulp
-```
-
-**Important :** Si nécessaire modifier la tâche Gulp associée, ligne 53 de Gulpfile.js pour indiquer la [bonne syntaxe](https://www.npmjs.com/package/opn#user-content-app) correspondant au navigateur pour votre plate-forme. Par défaut celle-ci est adaptée à Windows. 
 
 ### Modifier la démo
 
-Toutes les ressources nécessaires à la démo se trouvent dans le répertoire **demo**.
+Toutes les ressources nécessaires à la démo se trouvent dans le répertoire **public**, le fichier scss pour la page de demo se trouve dans **demo/scss**.
 
-Au premier usage, on installe la dépendance Scampi dans les fichiers de style de la démo et on récupère la dernière version du script et du partial scss de select-a11y :
+La commande suivante permet de lancer un serveur local qui écoute les modifications de **scss** pour recomplier la css à la volée
 
-```
-$ gulp prepare:demo
-```
-
-Ensuite la commande de build de démo pourra être lancée à chaque fois que nécessaire.
-
-```
-$ gulp build:demo
+```bash
+$ gulp watch:dev
 ```
 
 ### Constuire le répertoire de distribution
 
 ```
-$ gulp build:dist
+$ gulp build
 ```
 
 ### Comment puis-je aider ?
@@ -94,8 +100,6 @@ $ gulp build:dist
 - proposer des améliorations
 - traduire ou relire la doc en anglais
 - améliorer la documentation (en anglais ou en français)
-- faire de select-a11y.js un plugin jquery 
-- faire de select-a11y un script sans dépendance à jquery
 
 ## Auteurs
 

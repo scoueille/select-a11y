@@ -30,10 +30,10 @@ var Select = (function () {
   var text = {
     help: 'Utilisez la tabulation (ou la touche flèche du bas) pour naviguer dans la liste des suggestions',
     placeholder: 'Rechercher dans la liste',
-    noResult: 'aucun résultat',
+    noResult: 'Aucun résultat',
     results: '{x} suggestion(s) disponibles',
-    deleteItem: 'supprimer {t}',
-    delete: 'supprimer'
+    deleteItem: 'Supprimer {t}',
+    delete: 'Supprimer'
   };
   var matches = Element.prototype.matches || Element.prototype.msMatchesSelector || Element.prototype.webkitMatchesSelector;
   var closest = Element.prototype.closest;
@@ -78,6 +78,7 @@ var Select = (function () {
       this._handleOpener = this._handleOpener.bind(this);
       this._handleReset = this._handleReset.bind(this);
       this._handleSuggestionClick = this._handleSuggestionClick.bind(this);
+      this._positionCursor = this._positionCursor.bind(this);
       this._removeOption = this._removeOption.bind(this);
 
       this._disable();
@@ -97,6 +98,7 @@ var Select = (function () {
 
       this.button.addEventListener('click', this._handleOpener);
       this.input.addEventListener('input', this._handleInput);
+      this.input.addEventListener('focus', this._positionCursor, true);
       this.list.addEventListener('click', this._handleSuggestionClick);
       this.wrap.addEventListener('keydown', this._handleKeyboard);
       document.addEventListener('blur', this._handleFocus, true);
@@ -117,6 +119,12 @@ var Select = (function () {
         } else {
           var selectedOption = this.el.item(this.el.selectedIndex);
           text.innerText = selectedOption.label || selectedOption.value;
+
+          if (!this.label.id) {
+            this.label.id = "".concat(this.el.id, "-label");
+          }
+
+          button.setAttribute('aria-labelledby', this.label.id);
         }
 
         button.appendChild(text);
@@ -139,7 +147,7 @@ var Select = (function () {
         var suggestions = document.createElement('div');
         suggestions.classList.add('a11y-suggestions');
         suggestions.id = "a11y-".concat(this.id, "-suggestions");
-        container.innerHTML = "\n      <p id=\"a11y-usage$".concat(this.id, "-js\" class=\"sr-only\">").concat(this._options.text.help, "</p>\n      <label for=\"a11y-").concat(this.id, "-js\" class=\"sr-only\">").concat(this._options.text.placeholder, "</label>\n      <input type=\"text\" id=\"a11y-").concat(this.id, "-js\" class=\"").concat(this.el.className, "\" autocomplete=\"off\" autocapitalize=\"off\" spellcheck=\"false\" placeholder=\"").concat(this._options.text.placeholder, "\" aria-describedby=\"a11y-usage").concat(this.id, "-js\">\n    ");
+        container.innerHTML = "\n      <p id=\"a11y-usage-".concat(this.id, "-js\" class=\"sr-only\">").concat(this._options.text.help, "</p>\n      <label for=\"a11y-").concat(this.id, "-js\" class=\"sr-only\">").concat(this._options.text.placeholder, "</label>\n      <input type=\"text\" id=\"a11y-").concat(this.id, "-js\" class=\"").concat(this.el.className, "\" autocomplete=\"off\" autocapitalize=\"off\" spellcheck=\"false\" placeholder=\"").concat(this._options.text.placeholder, "\" aria-describedby=\"a11y-usage-").concat(this.id, "-js\">\n    ");
         container.appendChild(suggestions);
         this.list = suggestions;
         this.input = container.querySelector('input');
@@ -190,10 +198,18 @@ var Select = (function () {
         if (!this.suggestions.length) {
           this.list.innerHTML = "<p class=\"a11y-no-suggestion\">".concat(this._options.text.noResult, "</p>");
         } else {
-          this.list.innerHTML = "<div role=\"listbox\"><div>";
+          var listBox = document.createElement('div');
+          listBox.setAttribute('role', 'listbox');
+
+          if (this.multiple) {
+            listBox.setAttribute('aria-multiselectable', 'true');
+          }
+
           this.suggestions.forEach(function (suggestion) {
-            this.list.firstElementChild.appendChild(suggestion);
+            listBox.appendChild(suggestion);
           }.bind(this));
+          this.list.innerHTML = '';
+          this.list.appendChild(listBox);
         }
 
         this._setLiveZone();
@@ -212,8 +228,8 @@ var Select = (function () {
 
         clearTimeout(this._focusTimeout);
         this._focusTimeout = setTimeout(function () {
-          if (!this.wrap.contains(document.activeElement)) {
-            this._toggleOverlay(false);
+          if (!this.overlay.contains(document.activeElement) && this.button !== document.activeElement) {
+            this._toggleOverlay(false, document.activeElement === document.body);
           } else if (document.activeElement === this.input) {
             // reset the focus index
             this.focusIndex = null;
@@ -247,7 +263,10 @@ var Select = (function () {
           return;
         }
 
-        this._toggleSelection(parseInt(option.getAttribute('data-index'), 10));
+        var optionIndex = parseInt(option.getAttribute('data-index'), 10);
+        var shouldClose = this.multiple && event.metaKey ? false : true;
+
+        this._toggleSelection(optionIndex, shouldClose);
       }
     }, {
       key: "_handleInput",
@@ -260,7 +279,7 @@ var Select = (function () {
       key: "_handleKeyboard",
       value: function _handleKeyboard(event) {
         var option = closest.call(event.target, '[role="option"]');
-        var input = closest.call(event.target, 'input'); // event.preventDefault();
+        var input = closest.call(event.target, 'input');
 
         if (event.keyCode === 27) {
           this._toggleOverlay();
@@ -273,7 +292,9 @@ var Select = (function () {
           return;
         }
 
-        if (event.keyCode === 39 || event.keyCode === 40) {
+        if (event.keyCode === 40) {
+          event.preventDefault();
+
           this._moveIndex(1);
 
           return;
@@ -283,14 +304,30 @@ var Select = (function () {
           return;
         }
 
+        if (event.keyCode === 39) {
+          event.preventDefault();
+
+          this._moveIndex(1);
+
+          return;
+        }
+
         if (event.keyCode === 37 || event.keyCode === 38) {
+          event.preventDefault();
+
           this._moveIndex(-1);
 
           return;
         }
 
         if (event.keyCode === 13 || event.keyCode === 32) {
-          this._toggleSelection(parseInt(option.getAttribute('data-index'), 10));
+          event.preventDefault();
+
+          this._toggleSelection(parseInt(option.getAttribute('data-index'), 10), this.multiple ? false : true);
+        }
+
+        if (this.multiple && event.keyCode === 13) {
+          this._toggleOverlay();
         }
       }
     }, {
@@ -314,6 +351,11 @@ var Select = (function () {
         this.suggestions[this.focusIndex].focus();
       }
     }, {
+      key: "_positionCursor",
+      value: function _positionCursor() {
+        this.input.selectionStart = this.input.selectionEnd = this.input.value.length;
+      }
+    }, {
       key: "_removeOption",
       value: function _removeOption(event) {
         var button = closest.call(event.target, 'button');
@@ -322,18 +364,22 @@ var Select = (function () {
           return;
         }
 
-        var optionIndex = parseInt(button.getAttribute('data-index'), 10);
+        var currentButtons = this.selectedList.querySelectorAll('button');
+        var buttonPreviousIndex = Array.prototype.indexOf.call(currentButtons, button) - 1;
+        var optionIndex = parseInt(button.getAttribute('data-index'), 10); // disable the option
 
-        this._toggleSelection(optionIndex);
+        this._toggleSelection(optionIndex); // manage the focus if there's still the selected list
+
 
         if (this.selectedList.parentElement) {
-          var _button = this.selectedList.querySelector('button');
+          var buttons = this.selectedList.querySelectorAll('button'); // loock for the bouton before the one clicked
 
-          if (_button) {
-            _button.focus();
-          } else {
-            this.button.focus();
-          }
+          if (buttons[buttonPreviousIndex]) {
+            buttons[buttonPreviousIndex].focus();
+          } // fallback to the first button in the list if there's none
+          else {
+              buttons[0].focus();
+            }
         } else {
           this.button.focus();
         }
@@ -361,7 +407,7 @@ var Select = (function () {
       }
     }, {
       key: "_toggleOverlay",
-      value: function _toggleOverlay(state) {
+      value: function _toggleOverlay(state, focusBack) {
         this.open = state !== undefined ? state : !this.open;
         this.button.setAttribute('aria-expanded', this.open);
 
@@ -380,7 +426,7 @@ var Select = (function () {
 
           this._setLiveZone();
 
-          if (state === undefined) {
+          if (state === undefined || focusBack) {
             // fix bug that will trigger a click on the button when focusing directly
             setTimeout(function () {
               this.button.focus();
@@ -391,6 +437,7 @@ var Select = (function () {
     }, {
       key: "_toggleSelection",
       value: function _toggleSelection(optionIndex) {
+        var close = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
         var option = this.el.item(optionIndex);
 
         if (this.multiple) {
@@ -411,10 +458,12 @@ var Select = (function () {
 
         if (!this.multiple) {
           this._setButtonText(option.label || option.value);
-
-          this._toggleOverlay();
         } else if (this._options.showSelected) {
           this._updateSelectedList();
+        }
+
+        if (close && this.open) {
+          this._toggleOverlay();
         }
       }
     }, {
@@ -466,3 +515,4 @@ var Select = (function () {
   return Select;
 
 }());
+//# sourceMappingURL=select-a11y.js.map
