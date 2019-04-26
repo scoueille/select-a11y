@@ -1,8 +1,11 @@
-image: node
+image: node:10.15.3
 
 cache:
   paths:
     - node_modules/
+
+before_script:
+  - node -v
 
 pages:
   stage: deploy
