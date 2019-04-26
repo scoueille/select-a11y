@@ -58,6 +58,8 @@ new Select(HTMLSelectElement, {
 });
 ```
 
+Les textes ci-dessus sont les textes utilisés par défaut.
+
 
 ## Contribute
 
