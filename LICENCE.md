@@ -1,3 +1,3 @@
-Filter-componant est distribué sous une double licence MIT et CeCILL-B.
+select-a11y est distribué sous une double licence MIT et CeCILL-B.
 
-Vous pouvez utiliser Filter-componant avec l’une ou l’autre licence.
+Vous pouvez utiliser select-a11y avec l’une ou l’autre licence.
