@@ -3,9 +3,6 @@
   "version": "1.0.0",
   "description": "Module de select multiple accessible",
   "main": "index.js",
-  "dependencies": {
-    "@pidila/scampi": "gitlab:pidila/scampi#migration-npm-jquery"
-  },
   "repository": {
     "type": "git",
     "url": "https://gitlab.com/pidila/select-a11y.git"
@@ -18,6 +15,7 @@
   "devDependencies": {
     "@babel/core": "^7.4.3",
     "@babel/preset-env": "^7.4.3",
+    "@pidila/scampi": "gitlab:pidila/scampi#develop",
     "browser-sync": "^2.26.4",
     "gulp": "^3.9.1",
     "gulp-autoprefixer": "^6.0.0",
