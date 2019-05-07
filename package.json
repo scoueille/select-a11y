@@ -1,6 +1,6 @@
 {
   "name": "select-a11y",
-  "version": "1.0.0-beta",
+  "version": "1.0.0",
   "description": "Module de select multiple accessible",
   "main": "index.js",
   "dependencies": {
