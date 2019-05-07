@@ -251,6 +251,10 @@ var Select = (function () {
 
           if (this.multiple && this._options.showSelected) {
             this._updateSelectedList();
+          } else if (!this.multiple) {
+            var option = this.el.item(this.el.selectedIndex);
+
+            this._setButtonText(option.label || option.value);
           }
         }.bind(this), 10);
       }
@@ -485,7 +489,7 @@ var Select = (function () {
           if (!this.selectedList.parentElement) {
             this.wrap.appendChild(this.selectedList);
           }
-        } else {
+        } else if (this.selectedList.parentElement) {
           this.wrap.removeChild(this.selectedList);
         }
       }
