@@ -472,7 +472,7 @@ class Select{
         this.wrap.appendChild(this.selectedList);
       }
     }
-    else {
+    else if(this.selectedList.parentElement){
       this.wrap.removeChild(this.selectedList);
     }
   }
