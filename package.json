@@ -1,32 +1,38 @@
 {
   "name": "select-a11y",
-  "version": "0.2.0",
+  "version": "1.0.0-beta",
   "description": "Module de select multiple accessible",
   "main": "index.js",
   "dependencies": {
-    "jquery": "^3.1.1"
+    "@pidila/scampi": "gitlab:pidila/scampi#migration-npm-jquery"
   },
   "repository": {
     "type": "git",
-    "url": "git@gitlab.spplusplus.fr:service-public/filter-component.git"
+    "url": "https://gitlab.com/pidila/select-a11y.git"
   },
   "scripts": {
-    "test": "./node_modules/.bin/gulp serve:test"
+    "test": "tape tests/index.js | tap-diff"
   },
-  "author": "DILA - DPSN - Pidila",
+  "author": "DILA - PiDILA",
   "license": "(MIT OR CeCILL-B)",
   "devDependencies": {
+    "@babel/core": "^7.4.3",
+    "@babel/preset-env": "^7.4.3",
+    "browser-sync": "^2.26.4",
     "gulp": "^3.9.1",
-    "gulp-autoprefixer": "^3.1.1",
-    "gulp-sass": "^2.3.2",
-    "gulp-sourcemaps": "^1.8.1",
-    "connect": "^3.5.0",
-    "connect-livereload": "^0.6.0",
-    "gulp-livereload": "^3.8.1",
-    "jasmine-core": "^2.5.2",
-    "jasmine-jquery": "^2.1.1",
-    "opn": "^4.0.2",
-    "requirejs": "^2.3.2",
-    "serve-static": "^1.11.1"
+    "gulp-autoprefixer": "^6.0.0",
+    "gulp-rename": "^1.4.0",
+    "gulp-sass": "^3.1.0",
+    "gulp-sourcemaps": "^2.6.4",
+    "gulp-watch": "^5.0.1",
+    "puppeteer": "^1.14.0",
+    "rollup": "^1.10.1",
+    "rollup-plugin-babel": "^4.3.2",
+    "rollup-plugin-commonjs": "^9.3.4",
+    "rollup-plugin-node-resolve": "^4.2.3",
+    "rollup-plugin-uglify": "^6.0.2",
+    "run-sequence": "^2.2.1",
+    "tap-diff": "^0.1.1",
+    "tape": "^4.10.1"
   }
 }

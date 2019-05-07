@@ -1,3 +1,5 @@
 # directories
 node_modules
-_assets/css
+*.js.map
+public/assets/scripts/select-a11y.js
+public/assets/css

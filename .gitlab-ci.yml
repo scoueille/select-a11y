@@ -1,0 +1,19 @@
+image: node:11.14.0
+
+cache:
+  paths:
+    - node_modules/
+
+before_script:
+  - node -v
+
+pages:
+  stage: deploy
+  script:
+  - npm install
+  - ./node_modules/.bin/gulp build
+  artifacts:
+    paths:
+    - public
+  only:
+  - prepare_v1.0.0
