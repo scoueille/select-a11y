@@ -236,6 +236,10 @@ class Select{
       if(this.multiple && this._options.showSelected){
         this._updateSelectedList();
       }
+      else if(!this.multiple){
+        const option = this.el.item(this.el.selectedIndex);
+        this._setButtonText(option.label || option.value);
+      }
     }.bind(this), 10);
   }
 

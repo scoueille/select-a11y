@@ -729,3 +729,52 @@ test( 'Navigation au clavier', async t => {
 
   t.end();
 });
+
+test( 'Reset du forumlaire', async t => {
+  const [ browser, page ] = await createBrowser();
+
+  await page.click('.form-group button');
+
+  await page.click('.a11y-suggestions [role="option"]:nth-child(2)');
+
+  await page.waitFor(10);
+
+  await page.click('.multiple button');
+
+  await page.click('.a11y-suggestions [role="option"]:nth-child(2)');
+
+  await page.waitFor(10);
+
+  await page.click('[type="reset"]');
+
+  await page.waitFor(10);
+
+  const [singleState, multipleState] = await page.evaluate(() => {
+    const singleSelect = document.querySelector('select[data-select-a11y]:not([multiple])');
+    const multipleSelect = document.querySelector('select[data-select-a11y][multiple]');
+    const list = Array.from(document.querySelectorAll('.multiple .list-selected li'));
+
+    return [
+      {
+        selectedValue: singleSelect.value,
+        label: document.querySelector('.form-group button span').textContent.trim(),
+      },
+      {
+        selectedOptions: Array.from(multipleSelect.selectedOptions).map(option => option.value),
+        selectedItems: list.map(item => item.firstElementChild.textContent.trim()),
+      }
+    ]
+  });
+
+  t.same(singleState.selectedValue, singleState.label, 'Le reset de formulaire change le texte du bouton d’ouverture')
+
+  const selectedOptionsMatches = multipleState.selectedOptions.every((option, index) =>{
+    return option === multipleState.selectedItems[index];
+  })
+
+  t.true(selectedOptionsMatches, 'Le reset de formulaire change la liste des éléments sélectionnés')
+
+  await browser.close();
+
+  t.end();
+});
