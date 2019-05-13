@@ -1,5 +1,5 @@
 const text = {
-  help: 'Utilisez la tabulation (ou la touche flèche du bas) pour naviguer dans la liste des suggestions',
+  help: 'Utilisez la tabulation (ou les touches flèches) pour naviguer dans la liste des suggestions',
   placeholder: 'Rechercher dans la liste',
   noResult: 'Aucun résultat',
   results: '{x} suggestion(s) disponibles',

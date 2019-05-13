@@ -105,7 +105,7 @@ $ gulp build
 
 ## Auteurs
 
-Développement et revue : Alain Batifol, Nicolas Bovorasmy, Anne Cavalier, Laurent Dutheil, Aurélien Lévy, Hugues Moreno - Pour la DILA, Direction de l'information légale et administrative.
+Développement et revue : Alain Batifol, Nicolas Bovorasmy, Anne Cavalier, Laurent Dutheil, Aurélien Lévy, Hugues Moreno, Thomas Beduneau - Pour la DILA, Direction de l'information légale et administrative.
 
 ## License
 
