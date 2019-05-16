@@ -15,7 +15,7 @@
   "devDependencies": {
     "@babel/core": "^7.4.3",
     "@babel/preset-env": "^7.4.3",
-    "@pidila/scampi": "gitlab:pidila/scampi#develop",
+    "@pidila/scampi": "gitlab:pidila/scampi",
     "browser-sync": "^2.26.4",
     "gulp": "^3.9.1",
     "gulp-autoprefixer": "^6.0.0",

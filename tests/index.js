@@ -4,7 +4,7 @@
 const nodePath = require('path');
 const test = require( 'tape' );
 const puppeteer = require( 'puppeteer' );
-const path = `file://${nodePath.resolve(__dirname, '../public/index.html')}`;
+const path = `file://${nodePath.resolve(__dirname, '../demo/index.html')}`;
 
 const createBrowser = async () => {
   const browser = await puppeteer.launch();
