@@ -105,8 +105,10 @@ $ npm install
 #### Afficher en local (localhost:3000)
 
 ```bash
-$ gulp dev
+$ gulp
 ```
+
+Cette tâche enchaîne les tâches `gulp build` (compilation des sources et envoi vers le répertoire de démo) et `gulp dev` (lancement du serveur pour afficher la page en local et recompilation des sources à la volée si modifiées).
 
 #### Lancer les tests :
 
@@ -120,10 +122,12 @@ $ npm test
   * assets/css les css compilées
   * assets/img les images (seulement utilisées pour la démo)
   * assets/scripts : le script select-a11y.js et l'instanciation pour la démo dans main.js
-  * scss/ : sources sass pour la page de démo (style.scss importe les styles dédiés à select-a11y + les styles spécifiques à la démo)
+  * assets/scss/ : sources sass pour la page de démo (style.scss importe les styles dédiés à select-a11y + les styles spécifiques à la démo)
+  * index.html : source html de la page de démonstration
 * src/ : fichiers source (js et sass)
-* tests/ : index pour faire tourner les tests
+* tests/ : index.js pour faire tourner les tests
 
+***Note importante :*** ne pas modifier directement le fichier assets/scripts/select-a11y.js ni les fichiers contenus dans assets/css/ : ils sont générés par les tâches de build.
 
 ### Comment puis-je aider ?
 

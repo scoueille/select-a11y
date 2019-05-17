@@ -51,7 +51,7 @@ gulp.task('dev', ['server'], function(){
   watch('./src/*.scss', function(){
     return gulp.start('css:select');
   });
-  watch('./demo/assets/scss/*',{delay: 1000}, function(){
+  watch('./demo/assets/scss/*.scss',{delay: 1000}, function(){
     return gulp.start('css:demo');
   });
 });
