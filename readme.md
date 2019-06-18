@@ -12,7 +12,7 @@ Pour voir la démo, trois solutions sont offertes :
 
 * consulter la [démo en ligne](http://pidila.gitlab.io/select-a11y/) ;
 * télécharger ou cloner ce dépôt et ouvrir le fichier demo/index.html ;
-* installer en local en clonant ce dépôt puis en lançant les commandes `$ npm install` puis `$ npm dev`.
+* installer en local en clonant ce dépôt puis en lançant les commandes `$ npm install` puis `$ gulp dev`.
 
 **select-a11y** fait partie de [Scampi](https://gitlab.com/pidila/scampi), la bibliothèque de composants accessibles développée par le Pôle intégration html de la Direction de l'information légale et administrative (DILA). Il a été initialement développé pour le site service-public.fr, le site officiel de l'administration française. On peut le voir en action les filtres de recherche de [cette page](https://www.service-public.fr/demarches-silence-vaut-accord/recherche).
 
