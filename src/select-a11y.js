@@ -80,7 +80,6 @@ class Select{
     button.setAttribute('type', 'button');
     button.setAttribute('aria-expanded', this.open);
     button.className = 'btn btn-select-a11y';
-    button.setAttribute('id','select-option-button');
 
     const text = document.createElement('span');
 
@@ -94,6 +93,7 @@ class Select{
       if(!this.label.id){
         this.label.id = `${this.el.id}-label`;
       }
+      button.setAttribute('id',this.el.id+'-button');
       button.setAttribute('aria-labelledby', this.label.id+' '+button.id);
     }
 
