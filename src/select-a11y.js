@@ -93,7 +93,8 @@ class Select{
       if(!this.label.id){
         this.label.id = `${this.el.id}-label`;
       }
-      button.setAttribute('aria-labelledby', this.label.id);
+      button.setAttribute('id',this.el.id+'-button');
+      button.setAttribute('aria-labelledby', this.label.id+' '+button.id);
     }
 
     button.appendChild(text);

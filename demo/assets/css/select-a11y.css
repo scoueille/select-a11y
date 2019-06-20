@@ -118,7 +118,7 @@ select {
 }
 
 .select-a11y .a11y-suggestion {
-  padding: 0 0.5em;
+  padding: 0 0.5em 0 1.625em;
   color: #595b6a;
   cursor: pointer;
   text-align: left;
@@ -137,6 +137,16 @@ select {
 .select-a11y .a11y-suggestion[aria-selected="true"] {
   background-color: #c3c4cc;
   color: #363740;
+  position: relative;
+}
+
+.select-a11y .a11y-suggestion[aria-selected="true"]:before {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  -webkit-transform: translateY(-50%);
+          transform: translateY(-50%);
+  left: 0.5em;
 }
 
 .select-a11y .a11y-no-suggestion {
