@@ -32,7 +32,7 @@ gulp server
 gulp.task('server', function(){
     browserSync.init({
       server: {
-        baseDir: "./demo",
+        baseDir: "./public",
         port: config.servingPort
       },
       open: false,
@@ -51,8 +51,8 @@ gulp.task('dev', ['server'], function(){
   watch('./src/*.scss', function(){
     return gulp.start('css:select');
   });
-  watch('./demo/assets/scss/*.scss',{delay: 1000}, function(){
-    return gulp.start('css:demo');
+  watch('./public/assets/scss/*.scss',{delay: 1000}, function(){
+    return gulp.start('css:public');
   });
 });
 
@@ -60,7 +60,7 @@ gulp.task('dev', ['server'], function(){
 gulp build
 -------------------------------------- */
 gulp.task('build', function(cb){
-  runSequence('script:build', 'script:dev', 'css:select', 'css:demo', cb);
+  runSequence('script:build', 'script:dev', 'css:select', 'css:public', cb);
 });
 
 
@@ -76,18 +76,18 @@ gulp.task('css:select', function () {
       includePaths: ['node_modules']
     }).on('error', sass.logError))
     .pipe(autoprefixer(config.browser))
-    .pipe(gulp.dest('./demo/assets/css'));
+    .pipe(gulp.dest('./public/assets/css'));
 });
 
-// compile all the styles for the demo page
-gulp.task('css:demo', function () {
-    return gulp.src('./demo/assets/scss/*.scss')
+// compile all the styles for the public page
+gulp.task('css:public', function () {
+    return gulp.src('./public/assets/scss/*.scss')
         .pipe(sass({
           outputStyle: 'compressed',
           includePaths: ['node_modules']
         }).on('error', sass.logError))
         .pipe(autoprefixer(config.browser))
-        .pipe(gulp.dest('./demo/assets/css'))
+        .pipe(gulp.dest('./public/assets/css'))
 });
 
 
@@ -143,7 +143,7 @@ const babel = require( 'rollup-plugin-babel' );
 const params = {
   src: `./src/select-a11y.js`,
   name: 'Select',
-  dest: `./demo/assets/scripts/select-a11y.js`
+  dest: `./public/assets/scripts/select-a11y.js`
 }
 
 const plugins = [
