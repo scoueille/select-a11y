@@ -5,7 +5,10 @@
 
 **select-a11y** transforms selects (multiple or not) into suggestions list with search input. It is compliant with [Web Content Accessibility Guidelines (WCAG)](https://www.w3.org/WAI/intro/wcag) and [General Accessibility Framework for Administrations](https://disic.github.io/rgaa_referentiel_en/introduction-RGAA.html) (Référentiel général d'accessibilité pour les administrations - RGAA).
 
-To see the demo, download or clone this repository, then open the file /demo/index.html.
+To see the demo, three solutions are available:
+*  view the [online demo](http://pidila.gitlab.io/select-a11y/) ;
+* download or clone this repository, then open the file /public/index.html ;
+* install locally by cloning the repository, and then running the commands `$ npm install` then `$ gulp dev`.
 
 **select-a11y** is part of the DILA’s accessible and responsive UI components library [Scampi (fr)](https://gitlab.com/pidila/scampi). It was primarily developed and is currently used in production on service-public.fr, official website of the french administration. See filter boxes on [this page (fr)](https://www.service-public.fr/demarches-silence-vaut-accord/recherche).
 
@@ -16,22 +19,31 @@ To see the demo, download or clone this repository, then open the file /demo/ind
 
 ## Use
 
-All you need is ~~love~~ the files in the dist/ directory. Add the script in the bottom of your page, just before the body end tag and the css or scss in your style files.
+All you need is ~~love~~ the files in the public/ directory.
 
-To be transformed by select-a11y.js, the fastest way is to add the ```data-select-a11y``` attribute on the `select` and add the following JavaScript code in one of your file:
+* Call the select-a11y.js script in the bottom of your page, just before the body closing tag, or compile it with your others scripts.
 
-```js
-var selects = document.querySelectorAll('select[data-select-a11y]');
+* Add the css or scss in your style files.
+You can retrieve select-a11y.css, an already compiled version, in public/assets/css/
 
-Array.prototype.forEach.call(selects, function(select){
-  new Select(select);
-});
-```
+To be transformed by select-a11y.js, the fastest way is to add the ```data-select-a11y``` attribute on the `select` tag.
+
 
 ### Code sample
 
 ```html
+<!-- select simple -->
+<div class="form-group">
+  <label for="select-option">Is your website…</label>
+  <select class="form-control" id="select-option" data-select-a11y>
+      <option>Perceivable</option>
+      <option>Operable</option>
+      <option>Understandable</option>
+      <option>Robust</option>
+  </select>
+</div>
 
+<!-- select multiple -->
 <div class="form-group">
   <label for="select-element">What do you want to do today?</label>
   <select class="form-control" id="select-element" multiple data-select-a11y data-placeholder="Search in list">
@@ -44,18 +56,34 @@ Array.prototype.forEach.call(selects, function(select){
 </div>
 ```
 
+Then, add the following JavaScript code in one of your file (that must be after select-a11y script):
+
+
+```js
+var selects = document.querySelectorAll('select[data-select-a11y]');
+
+Array.prototype.forEach.call(selects, function(select){
+  new Select(select);
+});
+
+```
+
 The default texts used for accessibility can be changed. When creating a new select a11y, you can pass an object containing the `text` property as a second parameter:
 
 ```js
-new Select(HTMLSelectElement, {
-  text:{
-    help: 'Utilisez la tabulation (ou la touche flèche du bas) pour naviguer dans la liste des suggestions',
-    placeholder: 'Rechercher dans la liste',
-    noResult: 'Aucun résultat',
-    results: '{x} suggestion(s) disponibles',
-    deleteItem: 'Supprimer {t}',
-    delete: 'Supprimer'
-  }
+var selects = document.querySelectorAll('select[data-select-a11y]');
+
+Array.prototype.forEach.call(selects, function(select){
+  new Select(HTMLSelectElement, {
+    text:{
+      help: 'Utilisez la tabulation (ou la touche flèche du bas) pour naviguer dans la liste des suggestions',
+      placeholder: 'Rechercher dans la liste',
+      noResult: 'Aucun résultat',
+      results: '{x} suggestion(s) disponibles',
+      deleteItem: 'Supprimer {t}',
+      delete: 'Supprimer'
+    }
+  })
 });
 ```
 
@@ -65,7 +93,9 @@ The texts in the example are the default texts used in the script.
 
 This project is under Test Driven Development with tape.
 
-Requisite: Node.js, npm, npm gulp globally installed.
+Requisite: Node.js 10.x, npm, npm gulp 3.x globally installed.
+
+### Installation and development
 
 After cloning this repository, install dependencies:
 
@@ -73,25 +103,32 @@ After cloning this repository, install dependencies:
 $ npm install
 ```
 
-and run tests:
+#### Display locally (localhost:3000)
+
+```bash
+$ gulp
+```
+
+This task is a combination of the `gulp build` (compilation of sources and sending to the demo directory) and `gulp dev` (launching the server to display the page locally and recompiling sources on the fly if modified) tasks.
+
+#### Run tests
 
 ```bash
 $ npm test
 ```
 
-### Build the demo
+## Content of the repository
 
-Final files for the demo pages are located in the **public** folder. In **demo/scss** you'll find the scss file that will compile into css in the **public** folder.
+* public/ : demo page and its assets
+  * assets/css : the compiled css
+  * assets/img : the images (only used for demo)
+  * assets/scripts : the select-a11y.js script and instantiation for the demo in main.js
+  * assets/scss : sass sources for the demo page (style.scss imports styles dedicated to select-a11y + demo specific styles)
+  index.html : html source of the demo page
+* src/ : source files (js and sass)
+* tests/ : index.js to run the tests
 
-The following command will start a webserver and will listen to the changes of the **scss** file to recompile it:
-
-```bash
-$ gulp watch:dev
-```
-
-### Build the dist directory
-
-```$ gulp build```
+***Important note:*** do not directly modify the assets/scripts/select-a11y.js file or the assets/css/select-a11y.css file : they are generated by the build tasks.
 
 ### What can I do to help?
 
@@ -104,7 +141,7 @@ $ gulp watch:dev
 
 ## Authors
 
-Developpers and reviewers: Alain Batifol, Nicolas Bovorasmy, Anne Cavalier, Laurent Dutheil, Aurélien Lévy, Hugues Moreno - For the DILA, Direction de l'information légale et administrative.
+Developpers and reviewers: Alain Batifol, Thomas Beduneau, Nicolas Bovorasmy, Anne Cavalier, Laurent Dutheil, Lucile Houdinet, Aurélien Lévy, Hugues Moreno - For the DILA, Direction de l'information légale et administrative.
 
 ## License
 
