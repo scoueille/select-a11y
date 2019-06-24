@@ -1,6 +1,12 @@
 Changelog
 ====================================================================
 
+v 1.1.1
+--------------------------------------------------------------------
+- Renommage du répertoire "demo" en "public" pour un bon déploiement
+- Synchronisation des fichiers readme en français et en anglais
+
+
 v 1.1.0
 --------------------------------------------------------------------
 
