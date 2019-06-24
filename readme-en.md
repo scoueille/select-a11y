@@ -124,7 +124,7 @@ $ npm test
   * assets/img : the images (only used for demo)
   * assets/scripts : the select-a11y.js script and instantiation for the demo in main.js
   * assets/scss : sass sources for the demo page (style.scss imports styles dedicated to select-a11y + demo specific styles)
-  index.html : html source of the demo page
+  * index.html : html source of the demo page
 * src/ : source files (js and sass)
 * tests/ : index.js to run the tests
 
