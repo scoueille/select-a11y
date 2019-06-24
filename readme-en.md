@@ -21,12 +21,14 @@ To see the demo, three solutions are available:
 
 All you need is ~~love~~ the files in the public/ directory.
 
+The source files are in the src/ directory.
+
 * Call the select-a11y.js script in the bottom of your page, just before the body closing tag, or compile it with your others scripts.
 
 * Add the css or scss in your style files.
 You can retrieve select-a11y.css, an already compiled version, in public/assets/css/
 
-To be transformed by select-a11y.js, the fastest way is to add the ```data-select-a11y``` attribute on the `select` tag.
+To be transformed by select-a11y.js, the fastest way is to add the ```data-select-a11y``` attribute on the `select` tag you want to transform.
 
 
 ### Code sample
@@ -58,14 +60,12 @@ To be transformed by select-a11y.js, the fastest way is to add the ```data-selec
 
 Then, add the following JavaScript code in one of your file (that must be after select-a11y script):
 
-
 ```js
 var selects = document.querySelectorAll('select[data-select-a11y]');
 
-Array.prototype.forEach.call(selects, function(select){
-  new Select(select);
+var selectA11ys = Array.prototype.map.call(selects, function(select){
+  return new Select(select);
 });
-
 ```
 
 The default texts used for accessibility can be changed. When creating a new select a11y, you can pass an object containing the `text` property as a second parameter:
@@ -73,8 +73,8 @@ The default texts used for accessibility can be changed. When creating a new sel
 ```js
 var selects = document.querySelectorAll('select[data-select-a11y]');
 
-Array.prototype.forEach.call(selects, function(select){
-  new Select(HTMLSelectElement, {
+var selectA11ys = Array.prototype.map.call(selects, function(select){
+  new Select(select, {
     text:{
       help: 'Utilisez la tabulation (ou la touche flèche du bas) pour naviguer dans la liste des suggestions',
       placeholder: 'Rechercher dans la liste',
