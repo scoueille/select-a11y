@@ -8,7 +8,7 @@ const text = {
 };
 
 const matches = Element.prototype.matches || Element.prototype.msMatchesSelector || Element.prototype.webkitMatchesSelector;
-const closest = Element.prototype.closest;
+let closest = Element.prototype.closest;
 
 if (!closest) {
   closest = function(s) {
@@ -166,9 +166,7 @@ class Select{
       suggestion.classList.add('a11y-suggestion');
 
       // check if the option is selected
-      const selected = Array.prototype.indexOf.call(this.el.selectedOptions, option) !== -1;
-
-      if(selected){
+      if(option.selected){
         suggestion.setAttribute('aria-selected', 'true');
       }
 
@@ -258,6 +256,11 @@ class Select{
   }
 
   _handleInput(){
+    // prevent event fireing on focus and blur
+    if( this.search === this.input.value ){
+      return;
+    }
+
     this.search = this.input.value;
     this._fillSuggestions();
   }
