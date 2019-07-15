@@ -14,9 +14,10 @@
   "license": "(MIT OR CeCILL-B)",
   "devDependencies": {
     "@babel/core": "^7.4.3",
+    "@babel/plugin-transform-object-assign": "^7.2.0",
     "@babel/preset-env": "^7.4.3",
     "@pidila/scampi": "gitlab:pidila/scampi",
-    "browser-sync": "^2.26.4",
+    "browser-sync": "^2.26.7",
     "gulp": "^3.9.1",
     "gulp-autoprefixer": "^6.0.0",
     "gulp-rename": "^1.4.0",
