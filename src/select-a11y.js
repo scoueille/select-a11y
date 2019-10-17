@@ -301,7 +301,7 @@ class Select{
       return;
     }
 
-    if(event.keyCode === 13 || event.keyCode === 32){
+    if(( !this.multiple && event.keyCode === 13 ) || event.keyCode === 32){
       event.preventDefault();
       this._toggleSelection(parseInt(option.getAttribute('data-index'), 10), this.multiple ? false : true);
     }
