@@ -70,7 +70,7 @@ test( 'Creation du select-a11y simple', async t => {
 
   t.true( button.exists, 'Le bouton permettant d’ouvrir le select est créé');
   t.true( button.isClosed, 'Le bouton permettant d’ouvrir le select est paramétré comme fermé par défaut');
-  t.same( button.labelledby, label.id, 'Le bouton est lié au label via l’attribut « aria-labelledby »');
+  t.true( button.labelledby.includes( label.id ), 'Le bouton est lié au label via l’attribut « aria-labelledby »');
 
   await browser.close();
 
