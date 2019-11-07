@@ -140,7 +140,7 @@ $ npm test
 
 ## Auteurs
 
-Développement et revue : Alain Batifol, Thomas Beduneau, Nicolas Bovorasmy, Anne Cavalier, Laurent Dutheil, Lucile Houdinet, Aurélien Lévy, Hugues Moreno - Pour la DILA, Direction de l'information légale et administrative.
+Développement et revue : Alain Batifol, Thomas Beduneau, Nicolas Bovorasmy, Anne Cavalier, Benoît Dequick, Laurent Dutheil, Lucile Houdinet, Aurélien Lévy, Hugues Moreno, Damien Petton - Pour la DILA, Direction de l'information légale et administrative.
 
 ## License
 
