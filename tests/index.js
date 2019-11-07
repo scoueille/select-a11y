@@ -4,7 +4,7 @@
 const nodePath = require('path');
 const test = require( 'tape' );
 const puppeteer = require( 'puppeteer' );
-const path = `file://${nodePath.resolve(__dirname, '../demo/index.html')}`;
+const path = `file://${nodePath.resolve(__dirname, '../public/index.html')}`;
 
 const createBrowser = async () => {
   const browser = await puppeteer.launch();
@@ -70,7 +70,7 @@ test( 'Creation du select-a11y simple', async t => {
 
   t.true( button.exists, 'Le bouton permettant d’ouvrir le select est créé');
   t.true( button.isClosed, 'Le bouton permettant d’ouvrir le select est paramétré comme fermé par défaut');
-  t.same( button.labelledby, label.id, 'Le bouton est lié au label via l’attribut « aria-labelledby »');
+  t.true( button.labelledby.includes( label.id ), 'Le bouton est lié au label via l’attribut « aria-labelledby »');
 
   await browser.close();
 
@@ -449,7 +449,7 @@ test( 'Gestion de la selection au clavier d’un select multiple', async t => {
 
   t.true(enterPressed.closed, 'L’appui sur la touche entrée sur une option ferme la liste des options');
   t.true(enterPressed.focus, 'L’appui sur la touche entrée sur une option rend le focus au bouton d’ouverture');
-  t.same(enterPressed.selectedOptions.length, 3, 'Le select comporte 3 options sélectionnées' );
+  t.same(enterPressed.selectedOptions.length, 2, 'Le select comporte 2 options sélectionnées' );
   t.same(enterPressed.selectedItems, enterPressed.selectedOptions, 'L’appui sur la touche entrée sur une option sélectionne l’option');
 
   await browser.close();
@@ -467,6 +467,7 @@ test( 'Suppression des options via la liste des options sélectionnées', async 
   await page.keyboard.press('Tab');
   await page.keyboard.press('Space');
   await page.keyboard.press('Tab');
+  await page.keyboard.press('Space');
   await page.keyboard.press('Enter');
 
   await page.focus('.list-selected .tag-item:nth-child(3) button');

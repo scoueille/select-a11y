@@ -158,7 +158,8 @@ const plugins = [
           browsers: config.browser,
         }
       }]
-    ]
+    ],
+    plugins: ['@babel/plugin-transform-object-assign']
   }),
 ];
 

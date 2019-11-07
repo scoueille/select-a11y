@@ -23,12 +23,14 @@ Pour voir la démo, trois solutions sont offertes :
 
 ## Mise en oeuvre
 
-Les fichiers nécessaires à la mise en œuvre sont placés dans le répertoire src/. 
+Les fichiers source sont dans le répertoire src/.
 
-* Le script select-a11y.js doit être appelé en pied de page, juste avant le tag de fermeture du body, ou compilé avec vos autres scripts. 
+Les fichiers nécessaires à la mise en œuvre sont placés dans le répertoire public/assets/scripts/. 
+
+* Le script select-a11y.js doit être appelé en pied de page, juste avant le tag de fermeture du body, ou compilé avec vos autres scripts.
 * Les styles scss dans vos fichiers de style ; pour récupérer une version déjà compilée, prendre le fichier public/assets/css/select-a11y.css.
 
-Pour être pris en compte et transformé par le script select-a11y.js le plus simple est d'ajouter un attribut (par exemple ```data-select-a11y```) dans la balise ```select``` qu'on veut transformer.
+Pour être pris en compte et transformé par le script select-a11y.js, le plus simple est d'ajouter un attribut (par exemple ```data-select-a11y```) dans la balise ```select``` qu'on veut transformer.
 
 
 ```html
@@ -61,10 +63,9 @@ On ajoute ensuite le code javascript suivant dans le fichier javascript du proje
 ```js
 var selects = document.querySelectorAll('select[data-select-a11y]');
 
-Array.prototype.forEach.call(selects, function(select){
-  new Select(select);
+var selectA11ys = Array.prototype.map.call(selects, function(select){
+  return new Select(select);
 });
-
 ```
 
 Il est possible de changer les textes des libellés d'aide du composant. Pour cela on ajoute un second paramètre à  `new Select` contenant uniquement les textes à modifier comme dans l'exemple ci-dessous :
@@ -72,8 +73,8 @@ Il est possible de changer les textes des libellés d'aide du composant. Pour ce
 ```js
 var selects = document.querySelectorAll('select[data-select-a11y]');
 
-Array.prototype.forEach.call(selects, function(select){
-  new Select(HTMLSelectElement, {
+var selectA11ys = Array.prototype.map.call(selects, function(select){
+  new Select(select, {
     text:{
       help: 'Utilisez la tabulation (ou la touche flèche du bas) pour naviguer dans la liste des suggestions',
       placeholder: 'Rechercher dans la liste',
