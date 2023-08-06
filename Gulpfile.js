@@ -9,7 +9,7 @@ const sass = require('gulp-sass');
 const autoprefixer = require('gulp-autoprefixer');
 const browserSync = require('browser-sync').create();
 const watch = require('gulp-watch');
-const runSequence = require('run-sequence');
+const runSequence = require('gulp4-run-sequence');
 
 // config
 const path = require('path');
@@ -44,7 +44,7 @@ gulp.task('server', function(){
 gulp dev
 -------------------------------------- */
 
-gulp.task('dev', ['server'], function(){
+gulp.task('dev', gulp.series('server', function(){
   watch('./src/*.js', function(){
     return gulp.start('script:dev');
   });
@@ -54,7 +54,7 @@ gulp.task('dev', ['server'], function(){
   watch('./public/assets/scss/*.scss',{delay: 1000}, function(){
     return gulp.start('css:public');
   });
-});
+}));
 
 /* -----------------------------------
 gulp build
