@@ -28,6 +28,7 @@ class Select{
     this.label = document.querySelector(`label[for=${el.id}]`);
     this.id = el.id;
     this.open = false;
+    this.preventClose = false;
     this.multiple = this.el.multiple;
     this.search = '';
     this.suggestions = [];
@@ -210,8 +211,11 @@ class Select{
     clearTimeout(this._focusTimeout);
 
     this._focusTimeout = setTimeout(function(){
-      if(!this.overlay.contains(document.activeElement) && this.button !== document.activeElement){
-        this._toggleOverlay( false, document.activeElement === document.body);
+      if(!this.overlay.contains(document.activeElement) 
+        && this.button !== document.activeElement){
+        if(!this.preventClose) {
+          this._toggleOverlay( false, document.activeElement === document.body);
+        }
       }
       else if(document.activeElement === this.input){
         // reset the focus index
@@ -306,7 +310,7 @@ class Select{
       this._toggleSelection(parseInt(option.getAttribute('data-index'), 10), this.multiple ? false : true);
     }
 
-    if(this.multiple && event.keyCode === 13){
+    if(this.multiple && event.keyCode === 13 && !this.preventClose){
       this._toggleOverlay();
     }
   }
@@ -424,6 +428,18 @@ class Select{
     }
   }
 
+  _open() {
+    this._toggleOverlay(true);
+  }
+
+  _close() {
+    this._toggleOverlay(false);
+  }
+
+  _preventClose(preventClose = true) {
+    this.preventClose = preventClose;
+  }
+  
   _toggleSelection(optionIndex, close = true){
     const option = this.el.item(optionIndex);
 
