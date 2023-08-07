@@ -399,6 +399,7 @@ class Select{
       this._fillSuggestions();
       this.button.insertAdjacentElement('afterend', this.overlay);
       this.input.focus();
+      this.wrap.classList.add('select-a11y-opened');
     }
     else if(this.wrap.contains(this.overlay)){
       this.wrap.removeChild(this.overlay);
@@ -410,6 +411,7 @@ class Select{
       this.input.value = '';
       this.search = '';
 
+      this.wrap.classList.remove('select-a11y-opened');
 
       // reset aria-live
       this._setLiveZone();
