@@ -95,8 +95,9 @@ class Select{
     if(this.multiple){
       text.innerText = this.label.innerText;
     }
+
     else {
-      const selectedOption = this.el.item(this.el.selectedIndex);options
+      const selectedOption = this.el.item(this.el.selectedIndex);
       text.innerText = selectedOption.label || selectedOption.value;
 
       if(!this.label.id){
@@ -365,7 +366,6 @@ class Select{
       return;
     }
 
-
     if(( !this.multiple && event.keyCode === 13 ) || event.keyCode === 32){
       event.preventDefault();
       this._toggleSelection(parseInt(option.getAttribute('data-index'), 10), this.multiple ? false : true);
@@ -537,7 +537,9 @@ class Select{
     if(close && this.open){
       this._toggleOverlay();
     }
-    this.el.onchange();
+    if(this.el.onchange){
+      this.el.onchange();
+    }
   }
 
   _toggleSelectAll (){
@@ -590,7 +592,9 @@ class Select{
     if(this._options.showSelected){
       this._updateSelectedList();
     }
-    this.el.onchange();
+    if(this.el.onchange){
+      this.el.onchange(); 
+    }
   }
 
   _clearSelection(){
