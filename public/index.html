@@ -66,10 +66,22 @@
               <option>Eating cupcakes</option>
           </select>
         </div>
+        
+        <h3>Example 3</h3>
+        <div class="form-group multiple">
+          <label for="select-element-1">Is your website…</label>
+          <select class="form-control" id="select-element-1" multiple data-select-a11y-open>
+              <option>Perceivable</option>
+              <option>Operable</option>
+              <option>Understandable</option>
+              <option>Robust</option>
+          </select>
+        </div>
 
         <p class="form-buttons">
           <button class="btn btn-secondary" type="reset">Reset filters</button>
           <button class="btn btn-primary" type="submit">Submit button</button>
+          <button class="btn btn-primary" type="button" onclick="javascript: selectA11ys1[0]._open(); selectA11ys1[0]._preventClose(true);">Open button</button>
         </p>
 
       </form>

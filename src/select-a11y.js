@@ -4,7 +4,9 @@ const text = {
   noResult: 'Aucun résultat',
   results: '{x} suggestion(s) disponibles',
   deleteItem: 'Supprimer {t}',
-  delete: 'Supprimer'
+  delete: 'Supprimer',
+  selectAll: 'Sélectionner tout',
+  closeButton: 'Retour',
 };
 
 const matches = Element.prototype.matches || Element.prototype.msMatchesSelector || Element.prototype.webkitMatchesSelector;
@@ -40,7 +42,9 @@ class Select{
 
     this._options = Object.assign({
       text: textOptions,
-      showSelected: true
+      showSelected: true,
+      selectAll: false,
+      addCloseButton: false,
     }, passedOptions );
 
     this._handleFocus = this._handleFocus.bind(this);
@@ -49,6 +53,7 @@ class Select{
     this._handleOpener = this._handleOpener.bind(this);
     this._handleReset = this._handleReset.bind(this);
     this._handleSuggestionClick = this._handleSuggestionClick.bind(this);
+    this._handleCloseButton = this._handleCloseButton.bind(this);
     this._positionCursor = this._positionCursor.bind(this);
     this._removeOption = this._removeOption.bind(this);
 
@@ -72,6 +77,9 @@ class Select{
     this.list.addEventListener('click', this._handleSuggestionClick);
     this.wrap.addEventListener('keydown', this._handleKeyboard);
     document.addEventListener('blur', this._handleFocus, true);
+    if(this.closeButton) {
+      this.closeButton.addEventListener('click', this._handleCloseButton);
+    }
 
     this.el.form.addEventListener('reset', this._handleReset);
   }
@@ -88,7 +96,7 @@ class Select{
       text.innerText = this.label.innerText;
     }
     else {
-      const selectedOption = this.el.item(this.el.selectedIndex);
+      const selectedOption = this.el.item(this.el.selectedIndex);options
       text.innerText = selectedOption.label || selectedOption.value;
 
       if(!this.label.id){
@@ -129,6 +137,16 @@ class Select{
 
     container.appendChild(suggestions);
 
+    if(this._options.addCloseButton) {
+      const closeButton = document.createElement('div');
+      closeButton.setAttribute('role', 'button');
+      closeButton.setAttribute('tabindex', 0);
+      closeButton.classList.add('a11y-close-button');
+      closeButton.innerText = this._options.text.closeButton;
+      container.appendChild(closeButton);
+      this.closeButton = closeButton;
+    }
+
     this.list = suggestions;
     this.input = container.querySelector('input');
 
@@ -150,10 +168,12 @@ class Select{
     const search = this.search.toLowerCase();
 
     // loop over the
+    let nbValues = 0;
+    let nbSelectedValues = 0;
     this.suggestions = Array.prototype.map.call(this.el.options, function(option, index){
       const text = option.label || option.value;
       const formatedText = text.toLowerCase();
-
+      nbValues++;
       // test if search text match the current option
       if(formatedText.indexOf(search) === -1){
         return;
@@ -163,11 +183,12 @@ class Select{
       const suggestion = document.createElement('div');
       suggestion.setAttribute('role', 'option');
       suggestion.setAttribute('tabindex', 0);
-      suggestion.setAttribute('data-index', index)
+      suggestion.setAttribute('data-index', index);
       suggestion.classList.add('a11y-suggestion');
 
       // check if the option is selected
       if(option.selected){
+        nbSelectedValues++;
         suggestion.setAttribute('aria-selected', 'true');
       }
 
@@ -187,6 +208,21 @@ class Select{
         listBox.setAttribute('aria-multiselectable', 'true');
       }
 
+      if(this._options.selectAll && nbValues > 0) {
+        // create the option
+        const selectAll = document.createElement('div');
+        selectAll.setAttribute('role', 'button');
+        selectAll.setAttribute('tabindex', 0);
+        if(nbValues == nbSelectedValues) {
+          selectAll.setAttribute('aria-pressed', 1);
+        } else {
+          selectAll.setAttribute('aria-pressed', 0);
+        }
+        selectAll.classList.add('a11y-suggestion');
+        selectAll.classList.add('a11y-select-all-suggestion');
+        selectAll.innerText = this._options.text.selectAll;
+        listBox.appendChild(selectAll);
+      }
 
       this.suggestions.forEach(function(suggestion){
         listBox.appendChild(suggestion);
@@ -201,6 +237,10 @@ class Select{
 
   _handleOpener(event){
     this._toggleOverlay();
+  }
+
+  _handleCloseButton (event){
+    this._close();
   }
 
   _handleFocus(){
@@ -250,6 +290,11 @@ class Select{
     const option = closest.call(event.target, '[role="option"]');
 
     if(!option){
+      const option = closest.call(event.target, '[role="button"]');
+      if(!option || !this.multiple || !this._options.selectAll){
+        return;
+      }
+      this._toggleSelectAll();
       return;
     }
 
@@ -271,7 +316,22 @@ class Select{
 
   _handleKeyboard(event){
     const option = closest.call(event.target, '[role="option"]');
+    const selectAllButton = closest.call(event.target, '.a11y-select-all-suggestion[role="button"]');
+    const closeButton = closest.call(event.target, '.a11y-close-button[role="button"]');
     const input = closest.call(event.target, 'input');
+
+    if(selectAllButton) {
+      if(this.multiple && this._options.selectAll && event.keyCode === 32){
+        this._toggleSelectAll();
+      }
+      return;
+    }
+    if(closeButton) {
+      if(event.keyCode === 32 || event.keyCode === 13){
+        this._toggleOverlay();
+      }
+      return;
+    }
 
     if(event.keyCode === 27){
       this._toggleOverlay();
@@ -461,6 +521,11 @@ class Select{
       }
     }.bind(this));
 
+    const selectAllButton = this.list.querySelectorAll('.a11y-select-all-suggestion');
+    selectAllButton.forEach(function(button){
+      button.setAttribute('aria-pressed', 'false');
+    }.bind(this));
+
     if(!this.multiple){
       this._setButtonText(option.label || option.value);
     }
@@ -471,6 +536,82 @@ class Select{
     if(close && this.open){
       this._toggleOverlay();
     }
+    this.el.onchange();
+  }
+
+  _toggleSelectAll (){
+    const selectAllButton = this.list.querySelectorAll('.a11y-select-all-suggestion');
+
+    let buttonSelected = false;
+    selectAllButton.forEach(function(button){
+      if(button.getAttribute('aria-pressed') == 'true') {
+        buttonSelected = true;
+      }
+    }.bind(this));
+
+    let nbValues = 0;
+    let nbSelectedValues = 0;
+    Array.prototype.map.call(this.el.options, function(option, index){
+      nbValues++;
+      if(option.selected){
+        nbSelectedValues++;
+      }
+    }.bind(this)).filter(Boolean);
+
+    if(nbSelectedValues == nbValues && buttonSelected) {
+      // On déselectionne tout
+      Array.prototype.map.call(this.el.options, function(option, index){
+        this.el.item(index).selected = false;
+      }.bind(this));
+      
+      this.suggestions.forEach(function(suggestion){
+        suggestion.removeAttribute('aria-selected');
+      }.bind(this));
+
+      selectAllButton.forEach(function(button){
+        button.setAttribute('aria-pressed', 'false');
+      }.bind(this));
+    } else {
+      // On sélectionne tout
+      Array.prototype.map.call(this.el.options, function(option, index){
+        this.el.item(index).selected = true;
+      }.bind(this));
+
+      this.suggestions.forEach(function(suggestion){
+        suggestion.setAttribute('aria-selected', 'true');
+      }.bind(this));
+  
+      selectAllButton.forEach(function(button){
+        button.setAttribute('aria-pressed', 'true');
+      }.bind(this));
+    }
+
+    if(this._options.showSelected){
+      this._updateSelectedList();
+    }
+    this.el.onchange();
+  }
+
+  _clearSelection(){
+    const selectAllButton = this.list.querySelectorAll('.a11y-select-all-suggestion');
+
+    // On déselectionne tout
+    Array.prototype.map.call(this.el.options, function(option, index){
+      this.el.item(index).selected = false;
+    }.bind(this));
+    
+    this.suggestions.forEach(function(suggestion){
+      suggestion.removeAttribute('aria-selected');
+    }.bind(this));
+
+    selectAllButton.forEach(function(button){
+      button.setAttribute('aria-pressed', 'false');
+    }.bind(this));
+    
+    if(this._options.showSelected){
+      this._updateSelectedList();
+    }
+    this.el.onchange();
   }
 
   _updateSelectedList(){
