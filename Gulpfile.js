@@ -8,7 +8,7 @@ const gulp = require('gulp');
 const sass = require('gulp-sass');
 const autoprefixer = require('gulp-autoprefixer');
 const browserSync = require('browser-sync').create();
-const watch = require('gulp-watch');
+const watch = require('gulp');
 const runSequence = require('gulp4-run-sequence');
 
 // config
@@ -44,17 +44,12 @@ gulp.task('server', function(){
 gulp dev
 -------------------------------------- */
 
-gulp.task('dev', gulp.series('server', function(){
-  watch('./src/*.js', function(){
-    return gulp.start('script:dev');
-  });
-  watch('./src/*.scss', function(){
-    return gulp.start('css:select');
-  });
-  watch('./public/assets/scss/*.scss',{delay: 1000}, function(){
-    return gulp.start('css:public');
-  });
-}));
+gulp.task('dev', gulp.series(function(cb){
+  gulp.watch('src/*.js', gulp.series(['script:dev']));
+  gulp.watch('src/*.scss', gulp.series(['css:select']));
+  gulp.watch('public/assets/scss/*.scss',{delay: 1000}, gulp.series(['css:public']));
+  cb();
+}, 'server'));
 
 /* -----------------------------------
 gulp build
