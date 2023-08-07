@@ -3,3 +3,10 @@ node_modules
 *.js.map
 public/assets/scripts/select-a11y.js
 public/assets/css
+select-a11y.zip
+.vs/slnx.sqlite
+.vs/VSWorkspaceState.json
+.vs/select-a11y/FileContentIndex/097b3d01-37b2-4088-b9f4-eeabc51d40bb.vsidx
+.vs/select-a11y/FileContentIndex/read.lock
+.vs/select-a11y/v17/.suo
+public/assets/scripts/scripts.zip
