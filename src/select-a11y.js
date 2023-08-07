@@ -254,7 +254,7 @@ class Select{
     }
 
     const optionIndex = parseInt(option.getAttribute('data-index'), 10);
-    const shouldClose = this.multiple && event.metaKey ? false : true;
+    const shouldClose = this.multiple ? false : true;
 
     this._toggleSelection(optionIndex, shouldClose);
   }
