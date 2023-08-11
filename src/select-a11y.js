@@ -639,7 +639,7 @@ class Select{
     }.bind(this));
 
     const selectAllButton = this.list.querySelector('.a11y-select-all-suggestion');
-    selectAllButton.setAttribute('aria-pressed', 'false');
+    if(selectAllButton) selectAllButton.setAttribute('aria-pressed', 'false');
     
     this.suggestionsGroups.forEach(function(groupOptions){
       if(groupOptions.querySelectorAll('[role="option"]:not([aria-selected="true"])').length == 0) {
