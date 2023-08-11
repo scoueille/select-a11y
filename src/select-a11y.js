@@ -34,6 +34,8 @@ class Select{
     this.multiple = this.el.multiple;
     this.search = '';
     this.suggestions = [];
+    this.suggestionsGroups = [];
+    this.allSuggestionsAndGroups = [];
     this.focusIndex = null;
 
     const passedOptions = Object.assign({}, options);
@@ -171,32 +173,131 @@ class Select{
     // loop over the
     let nbValues = 0;
     let nbSelectedValues = 0;
-    this.suggestions = Array.prototype.map.call(this.el.options, function(option, index){
-      const text = option.label || option.value;
-      const formatedText = text.toLowerCase();
-      nbValues++;
-      // test if search text match the current option
-      if(formatedText.indexOf(search) === -1){
-        return;
+    let optionIndex = -1;
+
+    let suggestionsEtGroups = Array.prototype.map.call(this.el.querySelectorAll(':scope>option, :scope>optgroup'), function(optionEl, indexGroup){
+      if(optionEl.nodeName.toLowerCase() == 'option') {
+        const text = optionEl.label || optionEl.value;
+        const formatedText = text.toLowerCase();
+        nbValues++;
+        optionIndex++;
+        // test if search text match the current option
+        if(formatedText.indexOf(search) === -1){
+          return;
+        }
+  
+        // create the option
+        const suggestion = document.createElement('div');
+        suggestion.setAttribute('role', 'option');
+        suggestion.setAttribute('tabindex', 0);
+        suggestion.setAttribute('data-index', optionIndex);
+        suggestion.classList.add('a11y-suggestion');
+  
+        // check if the option is selected
+        if(optionEl.selected){
+          nbSelectedValues++;
+          suggestion.setAttribute('aria-selected', 'true');
+        }
+  
+        suggestion.innerText = optionEl.label || optionEl.value;
+  
+        return suggestion;
+      } else {
+        const text = optionEl.label;
+        const formatedText = text.toLowerCase();
+        // test if search text match the current option
+        const groupMatchSearch = (formatedText.indexOf(search) !== -1);
+
+        const options = optionEl.querySelectorAll('option');
+        const suggestionOptions = Array.prototype.map.call(options, function(option, index){
+          const text = option.label || option.value;
+          const formatedText = text.toLowerCase();
+          optionIndex++;
+          nbValues++;
+          // test if search text match the current option
+          if(!groupMatchSearch && formatedText.indexOf(search) === -1){
+            return;
+          }
+    
+          // create the option
+          const suggestion = document.createElement('div');
+          suggestion.setAttribute('role', 'option');
+          suggestion.setAttribute('tabindex', 0);
+          suggestion.setAttribute('data-index', optionIndex);
+          suggestion.classList.add('a11y-suggestion');
+    
+          // check if the option is selected
+          if(option.selected){
+            nbSelectedValues++;
+            suggestion.setAttribute('aria-selected', 'true');
+          }
+    
+          suggestion.innerText = option.label || option.value;
+    
+          return suggestion;
+        }.bind(this)).filter(Boolean);
+        
+        if(suggestionOptions.length == 0){
+          return;
+        }
+  
+        const suggestionGroup = document.createElement('div');
+        suggestionGroup.setAttribute('role', 'group');
+        //suggestionGroup.setAttribute('tabindex', 0);
+        suggestionGroup.setAttribute('aria-labelledby', this.id + '_group_label_' + indexGroup);
+        suggestionGroup.classList.add('a11y-suggestion-group');
+
+        const suggestionGroupLabel = document.createElement('div');
+        suggestionGroupLabel.setAttribute('role', 'presentation');
+        suggestionGroupLabel.setAttribute('tabindex', 0);
+        suggestionGroupLabel.setAttribute('id', this.id + '_group_label_' + indexGroup);
+        suggestionGroupLabel.classList.add('a11y-suggestion-group-label');
+        suggestionGroupLabel.innerText = text
+
+        suggestionGroup.appendChild(suggestionGroupLabel);
+        suggestionOptions.forEach(function(suggestionOption){
+          suggestionGroup.appendChild(suggestionOption);
+        }.bind(this));
+
+        return suggestionGroup;
       }
 
-      // create the option
-      const suggestion = document.createElement('div');
-      suggestion.setAttribute('role', 'option');
-      suggestion.setAttribute('tabindex', 0);
-      suggestion.setAttribute('data-index', index);
-      suggestion.classList.add('a11y-suggestion');
-
-      // check if the option is selected
-      if(option.selected){
-        nbSelectedValues++;
-        suggestion.setAttribute('aria-selected', 'true');
-      }
-
-      suggestion.innerText = option.label || option.value;
-
-      return suggestion;
     }.bind(this)).filter(Boolean);
+
+    // Initialise un tableau pour stocker les éléments avec le rôle "Option"
+    let divOptions = [];
+    // Initialise un tableau pour stocker les éléments avec le rôle "Presentation" pour la div de rôle "Group"
+    let divOptgroup = [];
+    // Initialise un tableau pour stocker les éléments avec les rôle "Presentation" et "Option"
+    let divOptgroupAndOption = [];
+
+    // Parcours de chaque élément dans la NodeList suggestionsEtGroups
+    suggestionsEtGroups.forEach(function(element) {
+      // Vérifie si l'élément a le rôle "Option"
+      if (element.getAttribute('role') === 'option') {
+        // Ajoute l'élément au tableau divOptions
+        divOptions.push(element);
+        divOptgroupAndOption.push(element);
+      } else if (element.getAttribute('role') === 'group') {
+        if(this.multiple){
+          let presentationElementsInGroup = element.querySelectorAll('[role="presentation"]');
+          presentationElementsInGroup.forEach(function(presentationElement) {
+              divOptions.push(presentationElement);
+              divOptgroupAndOption.push(presentationElement);
+          });
+        }
+        // Si l'élément a le rôle "Group", parcours ses enfants pour récupérer les div avec le rôle "Option"
+        let optionElementsInGroup = element.querySelectorAll('[role="option"]');
+        optionElementsInGroup.forEach(function(optionElement) {
+            divOptions.push(optionElement);
+            divOptgroupAndOption.push(optionElement);
+        });
+        divOptgroup.push(element);
+      }
+    }.bind(this));
+
+    this.suggestions              = divOptions;
+    this.suggestionsGroups        = divOptgroup;
 
     if(!this.suggestions.length){
       this.list.innerHTML = `<p class="a11y-no-suggestion">${this._options.text.noResult}</p>`;
@@ -207,25 +308,26 @@ class Select{
 
       if(this.multiple){
         listBox.setAttribute('aria-multiselectable', 'true');
-      }
 
-      if(this._options.selectAll && nbValues > 0) {
-        // create the option
-        const selectAll = document.createElement('div');
-        selectAll.setAttribute('role', 'button');
-        selectAll.setAttribute('tabindex', 0);
-        if(nbValues == nbSelectedValues) {
-          selectAll.setAttribute('aria-pressed', 1);
-        } else {
-          selectAll.setAttribute('aria-pressed', 0);
+        if(this._options.selectAll && nbValues > 0) {
+          // create the option
+          const selectAll = document.createElement('div');
+          selectAll.setAttribute('role', 'button');
+          selectAll.setAttribute('tabindex', 0);
+          if(nbValues == nbSelectedValues) {
+            selectAll.setAttribute('aria-pressed', 1);
+          } else {
+            selectAll.setAttribute('aria-pressed', 0);
+          }
+          selectAll.classList.add('a11y-suggestion');
+          selectAll.classList.add('a11y-select-all-suggestion');
+          selectAll.innerText = this._options.text.selectAll;
+          listBox.appendChild(selectAll);
+          divOptgroupAndOption.unshift(selectAll);
         }
-        selectAll.classList.add('a11y-suggestion');
-        selectAll.classList.add('a11y-select-all-suggestion');
-        selectAll.innerText = this._options.text.selectAll;
-        listBox.appendChild(selectAll);
       }
 
-      this.suggestions.forEach(function(suggestion){
+      suggestionsEtGroups.forEach(function(suggestion){
         listBox.appendChild(suggestion);
       }.bind(this));
 
@@ -233,8 +335,11 @@ class Select{
       this.list.appendChild(listBox);
     }
 
+    this.allSuggestionsAndGroups  = divOptgroupAndOption;
+
     this._setLiveZone();
   }
+  
 
   _handleOpener(event){
     this._toggleOverlay();
@@ -263,7 +368,7 @@ class Select{
         this.focusIndex =  null;
       }
       else {
-        const optionIndex = this.suggestions.indexOf(document.activeElement);
+        const optionIndex = this.allSuggestionsAndGroups.indexOf(document.activeElement);
 
         if(optionIndex !== -1){
           this.focusIndex = optionIndex;
@@ -291,11 +396,16 @@ class Select{
     const option = closest.call(event.target, '[role="option"]');
 
     if(!option){
-      const option = closest.call(event.target, '[role="button"]');
-      if(!option || !this.multiple || !this._options.selectAll){
+      const group = closest.call(event.target, '[role="group"]');
+      if(!group){
+        const option = closest.call(event.target, '[role="button"]');
+        if(!option || !this.multiple || !this._options.selectAll){
+          return;
+        }
+        this._toggleSelectAll();
         return;
       }
-      this._toggleSelectAll();
+      this._toggleSelectionGroup(group);
       return;
     }
 
@@ -317,14 +427,13 @@ class Select{
 
   _handleKeyboard(event){
     const option = closest.call(event.target, '[role="option"]');
+    const group = closest.call(event.target, '[role="group"]');
     const selectAllButton = closest.call(event.target, '.a11y-select-all-suggestion[role="button"]');
     const closeButton = closest.call(event.target, '.a11y-close-button[role="button"]');
     const input = closest.call(event.target, 'input');
 
-    if(selectAllButton) {
-      if(this.multiple && this._options.selectAll && event.keyCode === 32){
-        this._toggleSelectAll();
-      }
+    if(selectAllButton && this.multiple && this._options.selectAll && event.keyCode === 32){
+      this._toggleSelectAll();
       return;
     }
     if(closeButton) {
@@ -350,7 +459,7 @@ class Select{
       return
     }
 
-    if(!option){
+    if(!option && !group && !selectAllButton){
       return;
     }
 
@@ -366,9 +475,16 @@ class Select{
       return;
     }
 
-    if(( !this.multiple && event.keyCode === 13 ) || event.keyCode === 32){
+    if(!option && !group){
+      return;
+    } 
+
+    if(option && (( !this.multiple && event.keyCode === 13 ) || event.keyCode === 32)){
       event.preventDefault();
       this._toggleSelection(parseInt(option.getAttribute('data-index'), 10), this.multiple ? false : true);
+    } else if(group && this.multiple && event.keyCode === 32){
+      event.preventDefault();
+      this._toggleSelectionGroup(group);
     }
 
     if(this.multiple && event.keyCode === 13 && !this.preventClose){
@@ -382,7 +498,7 @@ class Select{
     }
     else {
       const nextIndex = this.focusIndex + step;
-      const selectionItems = this.suggestions.length - 1;
+      const selectionItems = this.allSuggestionsAndGroups.length - 1;
 
       if(nextIndex > selectionItems){
         this.focusIndex = 0;
@@ -395,7 +511,7 @@ class Select{
       }
     }
 
-    this.suggestions[this.focusIndex].focus();
+    this.allSuggestionsAndGroups[this.focusIndex].focus();
   }
 
   _positionCursor(){
@@ -522,10 +638,16 @@ class Select{
       }
     }.bind(this));
 
-    const selectAllButton = this.list.querySelectorAll('.a11y-select-all-suggestion');
-    selectAllButton.forEach(function(button){
-      button.setAttribute('aria-pressed', 'false');
-    }.bind(this));
+    const selectAllButton = this.list.querySelector('.a11y-select-all-suggestion');
+    selectAllButton.setAttribute('aria-pressed', 'false');
+    
+    this.suggestionsGroups.forEach(function(groupOptions){
+      if(groupOptions.querySelectorAll('[role="option"]:not([aria-selected="true"])').length == 0) {
+        groupOptions.setAttribute('aria-selected', "true");
+      } else {
+        groupOptions.removeAttribute('aria-selected');
+      }
+    });
 
     if(!this.multiple){
       this._setButtonText(option.label || option.value);
@@ -542,25 +664,59 @@ class Select{
     }
   }
 
-  _toggleSelectAll (){
-    const selectAllButton = this.list.querySelectorAll('.a11y-select-all-suggestion');
+  _toggleSelectionGroup(groupElement){
+    
+    let optionElementsInGroup = groupElement.querySelectorAll('[role="option"]');
+    optionElementsInGroup.forEach(function(optionElement) {
+      const optionIndex = parseInt(optionElement.getAttribute('data-index'), 10);
+      const option = this.el.item(optionIndex);
 
-    let buttonSelected = false;
-    selectAllButton.forEach(function(button){
-      if(button.getAttribute('aria-pressed') == 'true') {
-        buttonSelected = true;
+      if(this.multiple){
+        this.el.item(optionIndex).selected = !(groupElement.getAttribute('aria-selected') == "true");
+      }
+      else {
+        this.el.selectedIndex = optionIndex;
+      }
+    }.bind(this));
+    
+    if(groupElement.getAttribute('aria-selected') != "true"){
+      groupElement.setAttribute('aria-selected', 'true');
+    }
+    else{
+      groupElement.removeAttribute('aria-selected');
+    }
+    
+    this.suggestions.forEach(function(suggestion){
+      const index = parseInt(suggestion.getAttribute('data-index'), 10);
+
+      if(this.el.item(index).selected){
+        suggestion.setAttribute('aria-selected', 'true');
+      }
+      else{
+        suggestion.removeAttribute('aria-selected');
       }
     }.bind(this));
 
-    let nbValues = 0;
-    let nbSelectedValues = 0;
-    Array.prototype.map.call(this.el.options, function(option, index){
-      nbValues++;
-      if(option.selected){
-        nbSelectedValues++;
-      }
-    }.bind(this)).filter(Boolean);
+    const selectAllButton = this.list.querySelector('.a11y-select-all-suggestion');
+    selectAllButton.setAttribute('aria-pressed', 'false');
 
+    if(this._options.showSelected){
+      this._updateSelectedList();
+    }
+
+    if(this.el.onchange){
+      this.el.onchange();
+    }
+  }
+
+  _toggleSelectAll (){
+    const selectAllButton = this.list.querySelector('.a11y-select-all-suggestion');
+
+    const buttonSelected = (selectAllButton.getAttribute('aria-pressed') == 'true');
+
+    const nbValues = selectAllButton.querySelectorAll('[role="option"]').length;
+    const nbSelectedValues = selectAllButton.querySelectorAll('[role="option"][aria-selected="true"]').length;
+    
     if(nbSelectedValues == nbValues && buttonSelected) {
       // On déselectionne tout
       Array.prototype.map.call(this.el.options, function(option, index){
@@ -569,11 +725,9 @@ class Select{
       
       this.suggestions.forEach(function(suggestion){
         suggestion.removeAttribute('aria-selected');
-      }.bind(this));
+      });
 
-      selectAllButton.forEach(function(button){
-        button.setAttribute('aria-pressed', 'false');
-      }.bind(this));
+      selectAllButton.setAttribute('aria-pressed', 'false');
     } else {
       // On sélectionne tout
       Array.prototype.map.call(this.el.options, function(option, index){
@@ -582,12 +736,18 @@ class Select{
 
       this.suggestions.forEach(function(suggestion){
         suggestion.setAttribute('aria-selected', 'true');
-      }.bind(this));
+      });
   
-      selectAllButton.forEach(function(button){
-        button.setAttribute('aria-pressed', 'true');
-      }.bind(this));
+      selectAllButton.setAttribute('aria-pressed', 'true');
     }
+    
+    this.suggestionsGroups.forEach(function(groupOptions){
+      if(groupOptions.querySelectorAll('[role="option"]:not([aria-selected="true"])').length == 0) {
+        groupOptions.setAttribute('aria-selected', "true");
+      } else {
+        groupOptions.removeAttribute('aria-selected');
+      }
+    });
 
     if(this._options.showSelected){
       this._updateSelectedList();
@@ -598,7 +758,7 @@ class Select{
   }
 
   _clearSelection(){
-    const selectAllButton = this.list.querySelectorAll('.a11y-select-all-suggestion');
+    const selectAllButton = this.list.querySelector('.a11y-select-all-suggestion');
 
     // On déselectionne tout
     Array.prototype.map.call(this.el.options, function(option, index){
@@ -609,10 +769,16 @@ class Select{
       suggestion.removeAttribute('aria-selected');
     }.bind(this));
 
-    selectAllButton.forEach(function(button){
-      button.setAttribute('aria-pressed', 'false');
-    }.bind(this));
+    selectAllButton.setAttribute('aria-pressed', 'false');
     
+    this.suggestionsGroups.forEach(function(groupOptions){
+      if(groupOptions.querySelectorAll('[role="option"]:not([aria-selected="true"])').length == 0) {
+        groupOptions.setAttribute('aria-selected', "true");
+      } else {
+        groupOptions.removeAttribute('aria-selected');
+      }
+    });
+
     if(this._options.showSelected){
       this._updateSelectedList();
     }

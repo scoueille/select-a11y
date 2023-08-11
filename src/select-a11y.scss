@@ -178,6 +178,44 @@ $a11y-suggestion-border:      $gray-3 !default;
     }
   }
 
+  .a11y-suggestion-group {
+
+    div[role="presentation"] {
+      padding: 0 (8em/16) 0 (26em/16);
+      color: $a11y-suggestion-color;
+      cursor: pointer;
+      text-align: left;
+    }
+    .a11y-suggestion {
+      padding: 0 (8em/16) 0 (2*26em/16);
+    }
+
+    div[role="presentation"]:focus,
+    div[role="presentation"]:hover {
+      color: $a11y-suggestion-color-hover;
+      background-color: $a11y-suggestion-bg-hover;
+    }
+    div[role="presentation"]:focus {
+      outline: 1px dotted $a11y-suggestion-color-hover !important;
+      outline-offset: -1px;
+    }
+
+    &[aria-pressed="true"] div[role="presentation"],
+    &[aria-selected="true"] div[role="presentation"]{
+      background-color: $a11y-suggestion-bg-selected;
+      color: $a11y-suggestion-color-hover;
+      position: relative;
+
+      &:before{
+        content: '✓';
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        left: (8em/16);
+      }
+    }
+  }
+  
   .a11y-no-suggestion {
     padding: 0 0.5em;
     color: $a11y-suggestion-color;

@@ -77,11 +77,32 @@
               <option>Robust</option>
           </select>
         </div>
+        <p class="form-buttons">
+          <button class="btn btn-primary" type="button" onclick="javascript: selectA11ys1[0]._open(); selectA11ys1[0]._preventClose(true);">Open button</button>
+        </p>
+
+        <h3>Example 4</h3>
+        <div class="form-group multiple">
+          <label for="select-element-2">Is your website…</label>
+          <select class="form-control" id="select-element-2" multiple data-select-a11y-open>
+            <option>Robust 1</option>
+            <optgroup label="Groupe 1">
+              <option>Perceivable</option>
+              <option>Operable</option>
+            </optgroup>
+            <option>Understandable 1</option>
+            <option>Robust 2</option>
+            <optgroup label="Groupe 2">
+              <option>Understandable</option>
+              <option>Robust</option>
+            </optgroup>
+            <option>Understandable 2</option>
+          </select>
+        </div>
 
         <p class="form-buttons">
           <button class="btn btn-secondary" type="reset">Reset filters</button>
           <button class="btn btn-primary" type="submit">Submit button</button>
-          <button class="btn btn-primary" type="button" onclick="javascript: selectA11ys1[0]._open(); selectA11ys1[0]._preventClose(true);">Open button</button>
         </p>
 
       </form>
