@@ -47,7 +47,7 @@ gulp dev
 gulp.task('dev', gulp.series(function(cb){
   gulp.watch('src/*.js', gulp.series(['script:dev']));
   gulp.watch('src/*.scss', gulp.series(['css:select']));
-  gulp.watch('public/assets/scss/*.scss',{delay: 1000}, gulp.series(['css:public']));
+  gulp.watch(['public/assets/scss/*.scss', 'public/assets/css/select-a11y.css'],{delay: 1000}, gulp.series(['css:public']));
   cb();
 }, 'server'));
 
