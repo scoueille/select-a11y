@@ -157,8 +157,10 @@ class Select{
   }
 
   _createSelectedList() {
-    const list = document.createElement('ul');
-    list.className = 'list-inline list-selected';
+    const list = document.createElement('div');
+    list.className = 'list-selected';
+    list.role = 'grid';
+    list.ariaLabel = "Eléments sélectionnés";
 
     return list;
   }
@@ -257,7 +259,7 @@ class Select{
         suggestionGroup.appendChild(suggestionGroupLabel);
         suggestionOptions.forEach(function(suggestionOption){
           suggestionGroup.appendChild(suggestionOption);
-        }.bind(this));
+        });
 
         return suggestionGroup;
       }
@@ -433,6 +435,7 @@ class Select{
     const selectAllButton = closest.call(event.target, '.a11y-select-all-suggestion[role="button"]');
     const closeButton = closest.call(event.target, '.a11y-close-button[role="button"]');
     const input = closest.call(event.target, 'input');
+    const tagItem = closest.call(event.target, '.tag-item');
 
     if(selectAllButton && this.multiple && this._options.selectAll && event.keyCode === 32){
       this._toggleSelectAll();
@@ -441,6 +444,68 @@ class Select{
     if(closeButton) {
       if(event.keyCode === 32 || event.keyCode === 13){
         this._toggleOverlay();
+      }
+      return;
+    }
+
+    if(tagItem) {
+      const tagItemSupp = closest.call(event.target, '.tag-item-supp');
+      const curentItem = closest.call(event.target, '[tabindex="0"]');
+      let isMinMax = false;
+      let cible = null;
+      if(tagItemSupp && event.keyCode === 13){  
+        this._removeOption(event);
+      } else if(event.keyCode === 39){ // Droite
+        event.preventDefault();
+        if(tagItemSupp) { // Vers prochain Tag
+          const nextTag = tagItem.nextSibling;
+          if(nextTag) {
+            cible = nextTag.querySelector('[tabindex]');
+          } 
+        } else { // Vers bouton suppr
+          cible = tagItem.querySelector('.tag-item-supp');
+        }
+      } else if(event.keyCode === 37){ // Gauche
+        event.preventDefault();
+        if(tagItemSupp) { // Vers texte du tag
+          cible = tagItem.querySelector('[tabindex]');
+        } else { // Vers précédent Tag, bouton suppr
+          const prevTag = tagItem.previousSibling;
+          if(prevTag) {
+            cible = prevTag.querySelector('.tag-item-supp');
+          } 
+        }
+      } else if(event.keyCode === 40){ // Bas
+        event.preventDefault();
+        const nextTag = tagItem.nextSibling;
+        if(tagItemSupp && nextTag) { // Vers bouton suppression suivant
+          cible = nextTag.querySelector('.tag-item-supp');
+        } else if(nextTag) { // Vers texte Tag suivant
+          cible = nextTag.querySelector('[tabindex]');
+        }
+      } else if(event.keyCode === 38){ // haut
+        event.preventDefault();
+        const prevTag = tagItem.previousSibling;
+        if(tagItemSupp && prevTag) { // Vers bouton suppression précédent
+          cible = prevTag.querySelector('.tag-item-supp');
+        } else if(prevTag) { // Vers texte Tag précédent
+          cible = prevTag.querySelector('[tabindex]');
+        }
+      } else if(event.keyCode === 36){ // Home
+        event.preventDefault();
+        cible = this.selectedList.querySelector('[tabindex]');
+      } else if(event.keyCode === 35){ // Fin
+        event.preventDefault();
+        cible = this.selectedList.lastChild.querySelector('[tabindex]');
+      }
+      if(cible) {
+        curentItem.setAttribute('tabindex', '-1');
+        cible.setAttribute('tabindex', '0');
+        cible.focus();
+      }
+      if(this.selectedList.querySelectorAll('[tabindex="0"]').length == 0) {
+        this.selectedList.querySelector('[tabindex]').setAttribute('tabindex', '0');
+        this.selectedList.querySelector('[tabindex]').focus();
       }
       return;
     }
@@ -523,13 +588,13 @@ class Select{
   }
 
   _removeOption(event){
-    const button = closest.call(event.target, 'button');
+    const button = closest.call(event.target, '[role="button"]');
 
     if(!button){
       return;
     }
 
-    const currentButtons = this.selectedList.querySelectorAll('button');
+    const currentButtons = this.selectedList.querySelectorAll('[role="button"]');
     const buttonPreviousIndex = Array.prototype.indexOf.call(currentButtons, button) - 1;
     const optionIndex = parseInt( button.getAttribute('data-index'), 10);
 
@@ -538,14 +603,16 @@ class Select{
 
     // manage the focus if there's still the selected list
     if(this.selectedList.parentElement){
-      const buttons = this.selectedList.querySelectorAll('button');
+      const buttons = this.selectedList.querySelectorAll('[role="button"]');
 
       // loock for the bouton before the one clicked
       if(buttons[buttonPreviousIndex]){
+        buttons[buttonPreviousIndex].setAttribute('tabindex', '0');
         buttons[buttonPreviousIndex].focus();
       }
       // fallback to the first button in the list if there's none
       else {
+        buttons[0].setAttribute('tabindex', '0');
         buttons[0].focus();
       }
     }
@@ -781,23 +848,27 @@ class Select{
       }
 
       const text = option.label || option.value;
+      
+      const tagItem = document.createElement('div');
+      tagItem.classList.add('tag-item');
+      tagItem.role = 'row';
 
-      return `
-        <li class="tag-item">
-          <span>${text}</span>
-          <button class="tag-item-supp" title="${this._options.text.deleteItem.replace('{t}', text)}" type="button" data-index="${index}">
-            <span class="sr-only">${this._options.text.delete}</span>
-            <span class="icon-delete" aria-hidden="true"></span>
-          </button>
-        </li>`;
+      tagItem.insertAdjacentHTML('beforeend', '<span role="gridcell"><span tabindex="-1" id="tag-item-' + index + '">' + text + '</span></span>');
+      tagItem.insertAdjacentHTML('beforeend', '<span role="gridcell"><span class="tag-item-supp" tabindex="-1" title="' + this._options.text.deleteItem.replace('{t}', text) + '" id="tag-item-remove-' + index + '" role="button" data-index="' + index + '" aria-label="' + this._options.text.delete + '" aria-labelledby="tag-item-remove-' + index + ' tag-item-' + index + '"><span class="icon-delete" aria-hidden="true"></span></span></span>');
+
+      return tagItem;
     }.bind(this)).filter(Boolean);
 
-    this.selectedList.innerHTML = items.join('');
+    this.selectedList.innerHTML = '';
+    items.forEach(function(item){
+      this.selectedList.appendChild(item);
+    }.bind(this));
 
     if(items.length){
       if(!this.selectedList.parentElement){
         this.wrap.appendChild(this.selectedList);
       }
+      this.selectedList.querySelector("[tabindex='-1']").setAttribute('tabindex', '0');
     }
     else if(this.selectedList.parentElement){
       this.wrap.removeChild(this.selectedList);
