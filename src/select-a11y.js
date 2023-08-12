@@ -330,6 +330,8 @@ class Select{
       suggestionsEtGroups.forEach(function(suggestion){
         listBox.appendChild(suggestion);
       }.bind(this));
+      
+      this._updateSelectedGroups();
 
       this.list.innerHTML = '';
       this.list.appendChild(listBox);
@@ -616,6 +618,16 @@ class Select{
   _preventClose(preventClose = true) {
     this.preventClose = preventClose;
   }
+
+  _updateSelectedGroups() {
+    this.suggestionsGroups.forEach(function(groupOptions){
+      if(groupOptions.querySelectorAll('[role="option"]:not([aria-selected="true"])').length == 0) {
+        groupOptions.setAttribute('aria-selected', "true");
+      } else {
+        groupOptions.removeAttribute('aria-selected');
+      }
+    });
+  }
   
   _toggleSelection(optionIndex, close = true){
     const option = this.el.item(optionIndex);
@@ -641,13 +653,7 @@ class Select{
     const selectAllButton = this.list.querySelector('.a11y-select-all-suggestion');
     if(selectAllButton) selectAllButton.setAttribute('aria-pressed', 'false');
     
-    this.suggestionsGroups.forEach(function(groupOptions){
-      if(groupOptions.querySelectorAll('[role="option"]:not([aria-selected="true"])').length == 0) {
-        groupOptions.setAttribute('aria-selected', "true");
-      } else {
-        groupOptions.removeAttribute('aria-selected');
-      }
-    });
+    this._updateSelectedGroups();
 
     if(!this.multiple){
       this._setButtonText(option.label || option.value);
@@ -740,14 +746,8 @@ class Select{
   
       selectAllButton.setAttribute('aria-pressed', 'true');
     }
-    
-    this.suggestionsGroups.forEach(function(groupOptions){
-      if(groupOptions.querySelectorAll('[role="option"]:not([aria-selected="true"])').length == 0) {
-        groupOptions.setAttribute('aria-selected', "true");
-      } else {
-        groupOptions.removeAttribute('aria-selected');
-      }
-    });
+
+    this._updateSelectedGroups();
 
     if(this._options.showSelected){
       this._updateSelectedList();
@@ -771,13 +771,7 @@ class Select{
 
     selectAllButton.setAttribute('aria-pressed', 'false');
     
-    this.suggestionsGroups.forEach(function(groupOptions){
-      if(groupOptions.querySelectorAll('[role="option"]:not([aria-selected="true"])').length == 0) {
-        groupOptions.setAttribute('aria-selected', "true");
-      } else {
-        groupOptions.removeAttribute('aria-selected');
-      }
-    });
+    this._updateSelectedGroups();
 
     if(this._options.showSelected){
       this._updateSelectedList();
