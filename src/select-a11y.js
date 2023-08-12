@@ -684,14 +684,7 @@ class Select{
         this.el.selectedIndex = optionIndex;
       }
     }.bind(this));
-    
-    if(groupElement.getAttribute('aria-selected') != "true"){
-      groupElement.setAttribute('aria-selected', 'true');
-    }
-    else{
-      groupElement.removeAttribute('aria-selected');
-    }
-    
+        
     this.suggestions.forEach(function(suggestion){
       const index = parseInt(suggestion.getAttribute('data-index'), 10);
 
@@ -702,6 +695,8 @@ class Select{
         suggestion.removeAttribute('aria-selected');
       }
     }.bind(this));
+
+    this._updateSelectedGroups();
 
     const selectAllButton = this.list.querySelector('.a11y-select-all-suggestion');
     selectAllButton.setAttribute('aria-pressed', 'false');
