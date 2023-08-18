@@ -44,11 +44,13 @@ class Select{
 
     this._options = Object.assign({
       text: textOptions,
+      preventClose: false,
       showSelected: true,
       selectAll: false,
       addCloseButton: false,
     }, passedOptions );
 
+    this._preventClose(this._options.preventClose);
     this._handleFocus = this._handleFocus.bind(this);
     this._handleInput = this._handleInput.bind(this);
     this._handleKeyboard = this._handleKeyboard.bind(this);
