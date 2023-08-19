@@ -703,7 +703,7 @@ class Select{
     const option = this.el.item(optionIndex);
 
     if(this.multiple){
-      this.el.item(optionIndex).selected = !this.el.item(optionIndex).selected;
+      option.selected = !option.selected;
     }
     else {
       this.el.selectedIndex = optionIndex;
