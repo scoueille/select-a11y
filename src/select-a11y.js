@@ -30,7 +30,6 @@ class Select{
     this.label = document.querySelector(`label[for=${el.id}]`);
     this.id = el.id;
     this.open = false;
-    this.preventClose = false;
     this.multiple = this.el.multiple;
     this.search = '';
     this.suggestions = [];
@@ -44,13 +43,14 @@ class Select{
 
     this._options = Object.assign({
       text: textOptions,
-      preventClose: false,
+      preventCloseOnSelect: false,
+      preventCloseOnFocusLost: false,
       showSelected: true,
       selectAll: false,
       addCloseButton: false,
     }, passedOptions );
 
-    this._preventClose(this._options.preventClose);
+    
     this._handleFocus = this._handleFocus.bind(this);
     this._handleInput = this._handleInput.bind(this);
     this._handleKeyboard = this._handleKeyboard.bind(this);
@@ -365,7 +365,7 @@ class Select{
     this._focusTimeout = setTimeout(function(){
       if(!this.overlay.contains(document.activeElement) 
         && this.button !== document.activeElement){
-        if(!this.preventClose) {
+        if(!this._options.preventCloseOnFocusLost) {
           this._toggleOverlay( false, document.activeElement === document.body);
         }
       }
@@ -556,7 +556,7 @@ class Select{
       this._toggleSelectionGroup(group);
     }
 
-    if(this.multiple && event.keyCode === 13 && !this.preventClose){
+    if(this.multiple && event.keyCode === 13 && !this._options.preventCloseOnSelect){
       this._toggleOverlay();
     }
   }
@@ -685,7 +685,8 @@ class Select{
   }
 
   _preventClose(preventClose = true) {
-    this.preventClose = preventClose;
+    this._options.preventCloseOnFocusLost = preventClose;
+    this._options.preventCloseOnSelect = preventClose;
   }
 
   _updateSelectedGroups() {
