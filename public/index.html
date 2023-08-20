@@ -78,7 +78,7 @@
           </select>
         </div>
         <p class="form-buttons">
-          <button class="btn btn-primary" type="button" onclick="javascript: selectA11ys1[0]._open(); selectA11ys1[0]._preventClose(true);">Open button</button>
+          <button class="btn btn-primary" type="button" onclick="javascript: selectA11ys1[0]._open(); selectA11ys1[0]._preventClose(true);">Open button and prevent close</button>
         </p>
 
         <h3>Example 4</h3>
@@ -97,6 +97,28 @@
               <option>Robust</option>
             </optgroup>
             <option>Understandable 2</option>
+          </select>
+        </div>
+
+        <h3>Example 5 Keywords</h3>
+        <div class="form-group multiple">
+          <label for="select-element-3">Is your website…</label>
+          <select class="form-control" id="select-element-3" multiple data-keyword-a11y>
+              <option selected>Perceivable</option>
+              <option selected>Operable</option>
+              <option selected>Understandable</option>
+              <option selected>Robust</option>
+          </select>
+        </div>
+
+        <h3>Example 6 Keywords autocomplete</h3>
+        <div class="form-group multiple">
+          <label for="select-element-4">Is your website…</label>
+          <select class="form-control" id="select-element-4" multiple data-autocomplete-a11y>
+              <option selected>Perceivable</option>
+              <option selected>Operable</option>
+              <option selected>Understandable</option>
+              <option selected>Robust</option>
           </select>
         </div>
 

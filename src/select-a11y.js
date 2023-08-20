@@ -32,6 +32,7 @@ class Select{
     this.open = false;
     this.multiple = this.el.multiple;
     this.search = '';
+    this.selectedKeywords = [];
     this.suggestions = [];
     this.suggestionsGroups = [];
     this.allSuggestionsAndGroups = [];
@@ -48,9 +49,21 @@ class Select{
       showSelected: true,
       selectAll: false,
       addCloseButton: false,
+      keywordsMode: false,
+      url: null,
+      allowNewKeyword: true,
     }, passedOptions );
 
-    
+
+    if(!this._options.keywordsMode) { // Mode select classique
+      this._initialiseSelect();
+    } else { // Mode Mots clés avec ou sans autocomplete
+      this._options.showSelected = true;
+      this._initialiseInputKeywords();
+    }
+  }
+
+  _initialiseSelect(){
     this._handleFocus = this._handleFocus.bind(this);
     this._handleInput = this._handleInput.bind(this);
     this._handleKeyboard = this._handleKeyboard.bind(this);
@@ -79,6 +92,41 @@ class Select{
     this.input.addEventListener('input', this._handleInput);
     this.input.addEventListener('focus', this._positionCursor, true);
     this.list.addEventListener('click', this._handleSuggestionClick);
+    this.wrap.addEventListener('keydown', this._handleKeyboard);
+    document.addEventListener('blur', this._handleFocus, true);
+    if(this.closeButton) {
+      this.closeButton.addEventListener('click', this._handleCloseButton);
+    }
+
+    this.el.form.addEventListener('reset', this._handleReset);
+  }
+
+  _initialiseInputKeywords(){
+    this._handleFocus = this._handleFocus.bind(this);
+    this._handleInput = this._handleInput.bind(this);
+    this._handleKeyboard = this._handleKeyboard.bind(this);
+    //this._handleOpener = this._handleOpener.bind(this);
+    this._handleReset = this._handleReset.bind(this);
+    this._handleAutocompleteKeywordClick = this._handleAutocompleteKeywordClick.bind(this);
+    this._handleCloseButton = this._handleCloseButton.bind(this);
+    this._positionCursor = this._positionCursor.bind(this);
+    this._removeOption = this._removeOption.bind(this);
+
+    this._disable();
+
+    this.input = this._createKeywordInput();
+    this.liveZone = this._createLiveZone();
+    this.overlay = this._createOverlay();
+    this.wrap = this._wrap();
+    this.selectedList = this._createSelectedList();
+    this._updateSelectedList();
+
+    this.selectedList.addEventListener('click', this._removeOption);
+
+    //this.button.addEventListener('click', this._handleOpener);
+    this.input.addEventListener('input', this._handleInput);
+    this.input.addEventListener('focus', this._positionCursor, true);
+    this.list.addEventListener('click', this._handleAutocompleteKeywordClick);
     this.wrap.addEventListener('keydown', this._handleKeyboard);
     document.addEventListener('blur', this._handleFocus, true);
     if(this.closeButton) {
@@ -118,6 +166,21 @@ class Select{
     return button;
   }
 
+  _createKeywordInput(){
+    const button = document.createElement('input');
+    button.setAttribute('type', 'text');
+    if(this._options.url != null) {
+      button.setAttribute('role', 'combobox');
+      button.setAttribute('aria-expanded', this.open);
+      button.setAttribute('aria-autocomplete', 'list');
+    }
+    button.className = 'form-control form-control-a11y';
+
+    button.setAttribute('id',this.el.id+'-input');
+    button.setAttribute('aria-label', this.label.innerText);
+    return button;
+  }
+
   _createLiveZone(){
     const live = document.createElement('p');
     live.setAttribute('aria-live', 'polite');
@@ -134,11 +197,17 @@ class Select{
     suggestions.classList.add('a11y-suggestions');
     suggestions.id = `a11y-${this.id}-suggestions`;
 
-    container.innerHTML = `
-      <p id="a11y-usage-${this.id}-js" class="sr-only">${this._options.text.help}</p>
-      <label for="a11y-${this.id}-js" class="sr-only">${this._options.text.placeholder}</label>
-      <input type="text" id="a11y-${this.id}-js" class="${this.el.className}" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${this._options.text.placeholder}" aria-describedby="a11y-usage-${this.id}-js">
-    `;
+    if(!this._options.keywordsMode) { // Mode select classique
+      container.innerHTML = `
+        <p id="a11y-usage-${this.id}-js" class="sr-only">${this._options.text.help}</p>
+        <label for="a11y-${this.id}-js" class="sr-only">${this._options.text.placeholder}</label>
+        <input type="text" id="a11y-${this.id}-js" class="${this.el.className}" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${this._options.text.placeholder}" aria-describedby="a11y-usage-${this.id}-js">
+      `;
+    } else {
+      container.innerHTML = `
+        <p id="a11y-usage-${this.id}-js" class="sr-only">${this._options.text.help}</p>
+      `;
+    }
 
     container.appendChild(suggestions);
 
@@ -153,8 +222,9 @@ class Select{
     }
 
     this.list = suggestions;
-    this.input = container.querySelector('input');
-
+    if(!this._options.keywordsMode) { // Mode select classique
+      this.input = container.querySelector('input');
+    }
     return container;
   }
 
@@ -309,6 +379,7 @@ class Select{
     else {
       const listBox = document.createElement('div');
       listBox.setAttribute('role', 'listbox');
+      listBox.id = `a11y-${this.id}-listbox`;
 
       if(this.multiple){
         listBox.setAttribute('aria-multiselectable', 'true');
@@ -339,6 +410,7 @@ class Select{
 
       this.list.innerHTML = '';
       this.list.appendChild(listBox);
+      this.button.setAttribute('aria-controls', `a11y-${this.id}-listbox`);
     }
 
     this.allSuggestionsAndGroups  = divOptgroupAndOption;
@@ -346,6 +418,104 @@ class Select{
     this._setLiveZone();
   }
   
+  /**
+   * Proceed Ajax results
+   * @param  {String} data JSON result
+   * @param  {String} value Search value
+   * @return
+   * @private
+   */ 
+  _searchParseResult(data, value, focusOnResults = false) {
+    // Valeur déjà ajourée sans attendre l'autocomplete
+    /*const actualValue = stripHTML(this.input.value);
+    if(actualValue.length == 0)
+      return;
+    const activeItems = this.store.getItemsFilteredByActive();
+    const canAddItem = this._canAddItem(activeItems, actualValue);*/
+
+    console.log(data[this._options.urlResultsArray]);
+    let suggestionsEtGroups = Array.prototype.map.call(data[this._options.urlResultsArray], function(result) {
+      let value = result[this._options.urlValueField];
+      let label = result[this._options.urlLabelField];
+      if(this.selectedKeywords.includes(value)) {
+        return;
+      }
+      
+      // create the option
+      const suggestion = document.createElement('div');
+      suggestion.setAttribute('role', 'option');
+      suggestion.setAttribute('tabindex', 0);
+      suggestion.setAttribute('data-value', value);
+      suggestion.setAttribute('data-label', label);
+      suggestion.classList.add('a11y-suggestion');
+
+      suggestion.innerText = label;
+
+      return suggestion;
+    }.bind(this)).filter(Boolean);
+    
+    // Initialise un tableau pour stocker les éléments avec le rôle "Option"
+    let divOptions = [];
+    // Initialise un tableau pour stocker les éléments avec le rôle "Presentation" pour la div de rôle "Group"
+    let divOptgroup = [];
+    // Initialise un tableau pour stocker les éléments avec les rôle "Presentation" et "Option"
+    let divOptgroupAndOption = [];
+
+    suggestionsEtGroups.forEach(function(element) {
+      // Ajoute l'élément au tableau divOptions
+      divOptions.push(element);
+      divOptgroupAndOption.push(element);
+    }.bind(this));
+
+    this.suggestions              = divOptions;
+    this.suggestionsGroups        = divOptgroup;
+
+    if(!this.suggestions.length){
+      this.list.innerHTML = `<p class="a11y-no-suggestion">${this._options.text.noResult}</p>`;
+    } else {
+      const listBox = document.createElement('div');
+      listBox.setAttribute('role', 'listbox');
+      listBox.id = `a11y-${this.id}-listbox`;
+      listBox.setAttribute('aria-multiselectable', 'true');
+
+      suggestionsEtGroups.forEach(function(suggestion){
+        listBox.appendChild(suggestion);
+      }.bind(this));
+      
+      this.list.innerHTML = '';
+      this.list.appendChild(listBox);
+      this.input.setAttribute('aria-controls', `a11y-${this.id}-listbox`);
+    }
+
+    this.allSuggestionsAndGroups  = divOptgroupAndOption;
+
+    this._setLiveZone();
+    if(this.suggestions.length && focusOnResults) {
+      this._moveIndex(0);
+    }
+  }
+
+  _fillAutocomplete(focusOnResults = false) {
+    const search = this.search.toLowerCase();
+    
+    if(search.length > 0) {
+      this.ajaxRequest = new XMLHttpRequest();
+      
+      var url = this._options.url + search;
+      
+      var that = this;
+      this.ajaxRequest.onload  = function(e) {
+        if(that.ajaxRequest != null && that.ajaxRequest.responseText) {
+          var data = JSON.parse(that.ajaxRequest.responseText);
+          that._searchParseResult(data, search, focusOnResults);
+        }
+      }
+      this.ajaxRequest.open('GET', url, true);
+      this.ajaxRequest.send();
+    }
+
+    this._setLiveZone();
+  }
 
   _handleOpener(event){
     this._toggleOverlay();
@@ -364,8 +534,10 @@ class Select{
 
     this._focusTimeout = setTimeout(function(){
       if(!this.overlay.contains(document.activeElement) 
+        && this.input !== document.activeElement
         && this.button !== document.activeElement){
         if(!this._options.preventCloseOnFocusLost) {
+          console.log(document.activeElement);
           this._toggleOverlay( false, document.activeElement === document.body);
         }
       }
@@ -421,14 +593,42 @@ class Select{
     this._toggleSelection(optionIndex, shouldClose);
   }
 
-  _handleInput(){
-    // prevent event fireing on focus and blur
-    if( this.search === this.input.value ){
+  _handleAutocompleteKeywordClick(event){
+    const option = closest.call(event.target, '[role="option"]');
+
+    if(!option){
       return;
     }
 
-    this.search = this.input.value;
-    this._fillSuggestions();
+    const optionValue = option.getAttribute('data-value');
+    const optionlabel = option.getAttribute('data-label');
+    this._addOption(optionlabel, optionValue);
+    if(!this._options.preventCloseOnSelect) {
+      this._toggleOverlay( false );
+    } else {
+      this._removeSuggestion(option);
+    }
+  }
+
+  _handleInput(){
+    // prevent event fireing on focus and blur
+    if( this.search === this.input.value.trim() ){
+      return;
+    }
+
+    this.search = this.input.value.trim();
+    
+    if(!this._options.keywordsMode) { // Mode select classique
+      this._fillSuggestions();
+    } else if(this._options.url != null) { // Mode kayword avec autocomplete
+      if(!this.open && this.search != '') {
+        this._toggleOverlay(true);
+      } else if(this.search == ''){
+        this._toggleOverlay(false);
+      } else {
+        this._fillAutocomplete();
+      }
+    }
   }
 
   _handleKeyboard(event){
@@ -517,9 +717,44 @@ class Select{
       return;
     }
 
-    if(input && event.keyCode === 13){
-      event.preventDefault();
-      return;
+    if(!this._options.keywordsMode) { // Mode select classique
+      if(input && event.keyCode === 13){
+        event.preventDefault();
+        return;
+      }
+    } else { // Mode Mots clés avec ou sans autocomplete
+      if(input && event.keyCode === 13){
+        event.preventDefault();
+        let keyword = this.input.value;
+        if( keyword != '') {
+          this._addOption(keyword);
+              
+          this.input.value = "";
+        }
+
+        return;
+      } else if(input && this.input.value.trim() != "" && event.keyCode === 40){ // Bas
+        event.preventDefault();
+        if(!this.open) {
+          this._toggleOverlay(true, false);
+        } else {
+          this._moveIndex(0);
+        }
+        return;
+      }
+      if(option && (event.keyCode === 13 || event.keyCode === 32)){
+        event.preventDefault();    
+        const optionValue = option.getAttribute('data-value');
+        const optionlabel = option.getAttribute('data-label');
+        this._addOption(optionlabel, optionValue);
+        if(!this._options.preventCloseOnSelect) {
+          this._toggleOverlay( false );
+        } else {
+          this._removeSuggestion(option);
+        }
+        
+        return;
+      }
     }
 
     if(event.keyCode === 40){
@@ -562,6 +797,10 @@ class Select{
   }
 
   _moveIndex(step){
+    if(this.allSuggestionsAndGroups.length == 0) {
+      return;
+    }
+
     if(this.focusIndex === null){
       this.focusIndex = 0;
     }
@@ -587,6 +826,47 @@ class Select{
     setTimeout(function(){
       this.input.selectionStart = this.input.selectionEnd = this.input.value.length;
     }.bind(this))
+  }
+  
+  _removeSuggestion(option) {
+    const selectionItemsCount = this.allSuggestionsAndGroups.length - 1;
+    const optionIndex = this.allSuggestionsAndGroups.indexOf(option);
+    const optionIndex1 = this.suggestions.indexOf(option);
+    
+    if(selectionItemsCount < 1) {
+      this._fillAutocomplete();
+      this.input.focus();
+      this._positionCursor();
+      return;
+    } 
+    if(this.focusIndex == null || selectionItemsCount > this.focusIndex) {
+      this._moveIndex(1);
+    } else {
+      this._moveIndex(-1);
+    }
+
+    if(optionIndex !== -1){
+      this.allSuggestionsAndGroups.splice(optionIndex, 1);
+      this.suggestions.splice(optionIndex1, 1);
+    }
+    option.remove();
+
+  }
+
+  _addOption(keyword, keywordValue){
+    const optionValue = keywordValue || keyword;
+    const existingOption =  this.el.querySelector('option[value="' + optionValue + '"]');
+    if(existingOption != null) {
+      existingOption.selected = true;
+      this._updateSelectedList();
+    } else {
+      this.el.add(new Option(keyword, optionValue, true, true));
+      this._updateSelectedList();
+    }
+
+    if(this.el.onchange){
+      this.el.onchange();
+    }
   }
 
   _removeOption(event){
@@ -624,7 +904,11 @@ class Select{
       }
     }
     else {
-      this.button.focus();
+      if(!this._options.keywordsMode) { // Mode normal
+        this.button.focus();
+      } else { // mode autocomplete
+        this.input.focus();
+      }
     }
   }
 
@@ -649,13 +933,29 @@ class Select{
   }
 
   _toggleOverlay(state, focusBack){
-    this.open = state !== undefined ? state : !this.open;
-    this.button.setAttribute('aria-expanded', this.open);
+    if(this._options.keywordsMode && this._options.url == null) {// Pas d'overlay
+      this.open = false;
+    } else {
+      this.open = state !== undefined ? state : !this.open;
+
+      if(!this._options.keywordsMode) { // Mode select classique
+        this.button.setAttribute('aria-expanded', this.open);
+      } else {
+        this.input.setAttribute('aria-expanded', this.open);
+      }
+    }
 
     if(this.open){
-      this._fillSuggestions();
-      this.button.insertAdjacentElement('afterend', this.overlay);
-      this.input.focus();
+      if(!this._options.keywordsMode) { // Mode select classique
+        this._fillSuggestions();
+        this.button.insertAdjacentElement('afterend', this.overlay);
+      } else if(this._options.url != null) { // Mode kayword avec autocomplete
+        this._fillAutocomplete(focusBack === false);
+        this.input.insertAdjacentElement('afterend', this.overlay);
+      } 
+      if(focusBack !== false) {
+        this.input.focus();
+      }
       this.wrap.classList.add('select-a11y-opened');
     }
     else if(this.wrap.contains(this.overlay)){
@@ -665,9 +965,10 @@ class Select{
       this.focusIndex =  null;
 
       // reset search values
-      this.input.value = '';
-      this.search = '';
-
+      if(!this._options.keywordsMode) { // Mode select classique
+        this.input.value = '';
+        this.search = '';
+      }
       this.wrap.classList.remove('select-a11y-opened');
 
       // reset aria-live
@@ -675,7 +976,11 @@ class Select{
       if(state === undefined || focusBack){
         // fix bug that will trigger a click on the button when focusing directly
         setTimeout(function(){
-          this.button.focus();
+          if(!this._options.keywordsMode) {
+            this.button.focus();
+          } else {
+            this.input.focus();
+          }
         }.bind(this))
       }
     }
@@ -850,13 +1155,16 @@ class Select{
   }
 
   _updateSelectedList(){
+    this.selectedKeywords.length = 0;
     const items = Array.prototype.map.call(this.el.options, function(option, index){
       if(!option.selected){
         return;
       }
 
       const text = option.label || option.value;
-      
+
+      this.selectedKeywords.push(option.value);
+
       const tagItem = document.createElement('div');
       tagItem.classList.add('tag-item');
       tagItem.role = 'row';
@@ -899,7 +1207,11 @@ class Select{
 
     wrapper.appendChild(tagHidden);
     wrapper.appendChild(this.liveZone);
-    wrapper.appendChild(this.button);
+    if(!this._options.keywordsMode) { // Mode select classique
+      wrapper.appendChild(this.button);
+    } else {
+      wrapper.appendChild(this.input);
+    }
 
     return wrapper;
   }
