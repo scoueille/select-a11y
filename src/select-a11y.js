@@ -606,6 +606,11 @@ class Select{
     // manage the focus if there's still the selected list
     if(this.selectedList.parentElement){
       const buttons = this.selectedList.querySelectorAll('[role="button"]');
+      const focusables = this.selectedList.querySelectorAll('[tabindex="0"]');
+
+      focusables.forEach(function(focusable){
+        focusable.setAttribute('tabindex', '-1');
+      });
 
       // loock for the bouton before the one clicked
       if(buttons[buttonPreviousIndex]){
