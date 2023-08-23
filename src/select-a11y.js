@@ -723,7 +723,7 @@ class Select{
         return;
       }
     } else { // Mode Mots clés avec ou sans autocomplete
-      if(input && event.keyCode === 13){
+      if(input && event.keyCode === 13 && this._options.allowNewKeyword){
         event.preventDefault();
         let keyword = this.input.value;
         if( keyword != '') {
