@@ -36,6 +36,20 @@ var selectA11ys3 = Array.prototype.map.call(selects3, function(select){
   });
 });
 
+var selects4 = document.querySelectorAll('select[data-email-a11y]');
+var selectA11ys4 = Array.prototype.map.call(selects4, function(select){
+  return new Select(select, {
+    keywordsMode: true,
+    allowNewKeyword: true,
+    regexFilter: /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+    text: {
+      regexErrorText: function(value) {
+        return 'L\'adresse e-mail "' + String(value) + '" est invalide ou mal formatée';
+      },
+    },
+  });
+});
+
 
 // Exemple d'instanciation avec le paramètre "text" des libellés d'aide du composant
 /*

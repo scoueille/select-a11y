@@ -7,6 +7,7 @@ const text = {
   delete: 'Supprimer',
   selectAll: 'Sélectionner tout',
   closeButton: 'Retour',
+  regexErrorText: 'Le mot clé est mal formaté',
 };
 
 const matches = Element.prototype.matches || Element.prototype.msMatchesSelector || Element.prototype.webkitMatchesSelector;
@@ -37,6 +38,7 @@ class Select{
     this.suggestionsGroups = [];
     this.allSuggestionsAndGroups = [];
     this.focusIndex = null;
+    this.customOverlayMessageShown = false;
 
     const passedOptions = Object.assign({}, options);
     const textOptions = Object.assign(text, passedOptions.text);
@@ -52,6 +54,7 @@ class Select{
       keywordsMode: false,
       url: null,
       allowNewKeyword: true,
+      regexFilter: null,
     }, passedOptions );
 
 
@@ -241,6 +244,16 @@ class Select{
     this.el.setAttribute('tabindex', -1);
   }
 
+  _fillOverlayWithText(text){
+    this.suggestions                = [];
+    this.suggestionsGroups          = [];
+    this.allSuggestionsAndGroups    = [];
+    this.customOverlayMessageShown  = true;
+
+    this.list.innerHTML = `<p class="a11y-no-suggestion">${text}</p>`;
+    this._setLiveZone(text);
+  }
+
   _fillSuggestions(){
     const search = this.search.toLowerCase();
 
@@ -426,14 +439,6 @@ class Select{
    * @private
    */ 
   _searchParseResult(data, value, focusOnResults = false) {
-    // Valeur déjà ajourée sans attendre l'autocomplete
-    /*const actualValue = stripHTML(this.input.value);
-    if(actualValue.length == 0)
-      return;
-    const activeItems = this.store.getItemsFilteredByActive();
-    const canAddItem = this._canAddItem(activeItems, actualValue);*/
-
-    console.log(data[this._options.urlResultsArray]);
     let suggestionsEtGroups = Array.prototype.map.call(data[this._options.urlResultsArray], function(result) {
       let value = result[this._options.urlValueField];
       let label = result[this._options.urlLabelField];
@@ -616,6 +621,10 @@ class Select{
       return;
     }
 
+    if(this.customOverlayMessageShown){
+      this._toggleOverlay(false);
+    }
+
     this.search = this.input.value.trim();
     
     if(!this._options.keywordsMode) { // Mode select classique
@@ -727,9 +736,23 @@ class Select{
         event.preventDefault();
         let keyword = this.input.value;
         if( keyword != '') {
-          this._addOption(keyword);
-              
-          this.input.value = "";
+          let canAddItem = true;
+          if (this._options.regexFilter) {
+            // Determine whether we can update based on whether
+            // our regular expression passes
+            canAddItem = this._regexFilter(keyword);
+          /*  if(!canAddItem) {
+            }*/
+          }
+          if(canAddItem) {
+            this._addOption(keyword);
+            this.input.value = "";
+          } else {
+            const notice = this._isType('Function', this._options.text.regexErrorText) ?
+              this._options.text.regexErrorText(keyword) :
+              this._options.text.regexErrorText;
+            this._toggleOverlay(true, true, notice);
+          }
         }
 
         return;
@@ -916,25 +939,31 @@ class Select{
     this.button.firstElementChild.innerText = text;
   }
 
-  _setLiveZone(){
-    const suggestions = this.suggestions.length;
+  _setLiveZone(overrideText = null){
     let text = '';
-
-    if(this.open){
-      if(!suggestions){
-        text = this._options.text.noResult;
-      }
-      else {
-        text = this._options.text.results.replace('{x}', suggestions);
+    if(overrideText != null) {
+      text = overrideText;
+    } else {
+      const suggestions = this.suggestions.length;
+  
+      if(this.open){
+        if(!suggestions){
+          text = this._options.text.noResult;
+        }
+        else {
+          text = this._options.text.results.replace('{x}', suggestions);
+        }
       }
     }
 
     this.liveZone.innerText = text;
   }
 
-  _toggleOverlay(state, focusBack){
-    if(this._options.keywordsMode && this._options.url == null) {// Pas d'overlay
+  _toggleOverlay(state, focusBack, overrideText = null){
+    if(this._options.keywordsMode && this._options.url == null && overrideText == null) {// Pas d'overlay
       this.open = false;
+    } else if(overrideText) {
+      this.open = state !== undefined ? state : true;
     } else {
       this.open = state !== undefined ? state : !this.open;
 
@@ -947,10 +976,18 @@ class Select{
 
     if(this.open){
       if(!this._options.keywordsMode) { // Mode select classique
-        this._fillSuggestions();
+        if(overrideText != null) {
+          this._fillOverlayWithText(overrideText);
+        } else {
+          this._fillSuggestions();
+        }
         this.button.insertAdjacentElement('afterend', this.overlay);
-      } else if(this._options.url != null) { // Mode kayword avec autocomplete
-        this._fillAutocomplete(focusBack === false);
+      } else if(this._options.url != null || overrideText) { // Mode kayword avec autocomplete
+        if(overrideText != null) {
+          this._fillOverlayWithText(overrideText);
+        } else {
+          this._fillAutocomplete(focusBack === false);
+        }
         this.input.insertAdjacentElement('afterend', this.overlay);
       } 
       if(focusBack !== false) {
@@ -963,6 +1000,8 @@ class Select{
 
       // reset the focus index
       this.focusIndex =  null;
+
+      this.customOverlayMessageShown = false;
 
       // reset search values
       if(!this._options.keywordsMode) { // Mode select classique
@@ -1215,6 +1254,34 @@ class Select{
 
     return wrapper;
   }
+  
+  /**
+   * Tests value against a regular expression
+   * @param  {string} value   Value to test
+   * @return {Boolean}        Whether test passed/failed
+   * @private
+   */
+  _regexFilter(value) {
+    if (!value) {
+      return false;
+    }
+
+    const regex = this._options.regexFilter;
+    const expression = new RegExp(regex.source, 'i');
+    return expression.test(value);
+  }
+
+  /**
+   * Tests the type of an object
+   * @param  {String}  type Type to test object against
+   * @param  {Object}  obj  Object to be tested
+   * @return {Boolean}
+   */
+  _isType(type, obj) {
+    var clas = Object.prototype.toString.call(obj).slice(8, -1);
+    return obj !== undefined && obj !== null && clas === type;
+  };
+
 }
 
 export default Select;
