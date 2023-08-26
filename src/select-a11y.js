@@ -1,15 +1,3 @@
-const text = {
-  help: 'Utilisez la tabulation (ou les touches flèches) pour naviguer dans la liste des suggestions',
-  placeholder: 'Rechercher dans la liste',
-  noResult: 'Aucun résultat',
-  results: '{x} suggestion(s) disponibles',
-  deleteItem: 'Supprimer {t}',
-  delete: 'Supprimer',
-  selectAll: 'Sélectionner tout',
-  closeButton: 'Retour',
-  regexErrorText: 'Le mot clé est mal formaté',
-};
-
 const matches = Element.prototype.matches || Element.prototype.msMatchesSelector || Element.prototype.webkitMatchesSelector;
 let closest = Element.prototype.closest;
 
@@ -27,6 +15,19 @@ if (!closest) {
 
 class Select{
   constructor( el, options ){
+    const text = {
+      help: 'Utilisez la tabulation (ou les touches flèches) pour naviguer dans la liste des suggestions',
+      placeholder: 'Rechercher dans la liste',
+      noResult: 'Aucun résultat',
+      results: '{x} suggestion(s) disponibles',
+      deleteItem: 'Supprimer {t}',
+      delete: 'Supprimer',
+      selectAll: 'Sélectionner tout',
+      closeButton: 'Retour',
+      regexErrorText: 'Le mot clé est mal formaté',
+      welcomeMessage: null,
+    };
+    
     this.el = el;
     this.label = document.querySelector(`label[for=${el.id}]`);
     this.id = el.id;
@@ -181,6 +182,8 @@ class Select{
 
     button.setAttribute('id',this.el.id+'-input');
     button.setAttribute('aria-label', this.label.innerText);
+    button.setAttribute('autocomplete', 'off');
+    button.setAttribute('spellcheck', 'false');
     return button;
   }
 
@@ -542,7 +545,7 @@ class Select{
         && this.input !== document.activeElement
         && this.button !== document.activeElement){
         if(!this._options.preventCloseOnFocusLost) {
-          this._toggleOverlay( false, document.activeElement === document.body);
+          this._toggleOverlay( false, document.activeElement === document.body && !this._options.keywordsMode);
         }
       }
       else if(document.activeElement === this.input){
@@ -847,6 +850,9 @@ class Select{
   _positionCursor(){
     setTimeout(function(){
       this.input.selectionStart = this.input.selectionEnd = this.input.value.length;
+      if(!this.open && this._options.text.welcomeMessage != null) {
+        this._toggleOverlay(true, false, this._options.text.welcomeMessage);
+      }
     }.bind(this))
   }
   

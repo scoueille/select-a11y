@@ -43,6 +43,7 @@ var selectA11ys4 = Array.prototype.map.call(selects4, function(select){
     allowNewKeyword: true,
     regexFilter: /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
     text: {
+      welcomeMessage: 'Indiquez ici des adresses emails',
       regexErrorText: function(value) {
         return 'L\'adresse e-mail "' + String(value) + '" est invalide ou mal formatée';
       },
