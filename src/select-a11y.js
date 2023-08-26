@@ -542,7 +542,6 @@ class Select{
         && this.input !== document.activeElement
         && this.button !== document.activeElement){
         if(!this._options.preventCloseOnFocusLost) {
-          console.log(document.activeElement);
           this._toggleOverlay( false, document.activeElement === document.body);
         }
       }
