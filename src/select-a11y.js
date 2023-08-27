@@ -664,10 +664,21 @@ class Select{
     if(tagItem) {
       const tagItemSupp = closest.call(event.target, '.tag-item-supp');
       const curentItem = closest.call(event.target, '[tabindex="0"]');
-      let isMinMax = false;
       let cible = null;
       if(tagItemSupp && event.keyCode === 13){  
         this._removeOption(event);
+      } else if(event.keyCode === 46){  // Suppr
+        event.preventDefault();
+        if(tagItemSupp) { 
+          this._removeOption(event);
+        } else { // Vers bouton suppr
+          // Crée un nouvel événement keydown à transmettre à l'élément cible
+          var nouvelEvenement = new KeyboardEvent('keydown', event);
+
+          // Transmet l'événement à l'élément cible
+          cible = tagItem.querySelector('.tag-item-supp');
+          cible.dispatchEvent(nouvelEvenement);
+        }
       } else if(event.keyCode === 39){ // Droite
         event.preventDefault();
         if(tagItemSupp) { // Vers prochain Tag
