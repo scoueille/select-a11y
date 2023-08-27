@@ -754,8 +754,6 @@ class Select{
             // Determine whether we can update based on whether
             // our regular expression passes
             canAddItem = this._regexFilter(keyword);
-          /*  if(!canAddItem) {
-            }*/
           }
           if(canAddItem) {
             this._addOption(keyword);
