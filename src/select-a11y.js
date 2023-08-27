@@ -40,6 +40,7 @@ class Select{
     this.allSuggestionsAndGroups = [];
     this.focusIndex = null;
     this.customOverlayMessageShown = false;
+    this.ctrlVPressed = false;
 
     const passedOptions = Object.assign({}, options);
     const textOptions = Object.assign(text, passedOptions.text);
@@ -56,6 +57,7 @@ class Select{
       url: null,
       allowNewKeyword: true,
       regexFilter: null,
+      additionalDelemiters: [],
     }, passedOptions );
 
 
@@ -628,6 +630,63 @@ class Select{
     }
 
     this.search = this.input.value.trim();
+
+    if(this.ctrlVPressed && this._options.keywordsMode && this._options.allowNewKeyword && this._options.additionalDelemiters.length > 0 && this.search != '') { // Mode keyword libre
+      let delimiters = this._options.additionalDelemiters;
+      let firstDelimiter = null;
+      let errorMessage = null;
+      let notUsedContent = '';
+      let firstIteration = true;
+      
+      do {
+        firstDelimiter = null;
+        delimiters.forEach(element => {
+          var delimiterPos = this.search.indexOf(element);
+          
+          if(delimiterPos >= 0 && (firstDelimiter == null || delimiterPos<firstDelimiter) ) {
+            firstDelimiter = delimiterPos;
+          }
+        });
+        let keyword = null; 
+        let currentManagedString = null; 
+        if(firstDelimiter > 0) {
+          keyword = this.search.substring(0, firstDelimiter).trim();
+          currentManagedString = this.search.substring(0, firstDelimiter + 1);
+          this.search = this.search.substring(firstDelimiter + 1).trim();
+        } else if(!firstIteration) {
+          keyword = this.search.trim();
+          currentManagedString = this.search;
+          this.search = '';
+        }
+        if( keyword && keyword.length > 0) {
+          let canAddItem = true;
+          if (this._options.regexFilter) {
+            // Determine whether we can update based on whether
+            // our regular expression passes
+            canAddItem = this._regexFilter(keyword);
+          }
+          if(canAddItem) {
+            this._addOption(keyword);
+          } else { 
+            errorMessage = (errorMessage && errorMessage.length > 0 ? errorMessage + "<br />" : "") +
+              (this._isType('Function', this._options.text.regexErrorText) ?
+                this._options.text.regexErrorText(keyword) :
+                this._options.text.regexErrorText);
+            notUsedContent += currentManagedString;
+          }
+        }
+        firstIteration = false;
+      } while (firstDelimiter > 0);
+
+      if(errorMessage != null) {
+        this._toggleOverlay(true, true, errorMessage);
+      }
+      if(notUsedContent.length > 0) {
+        this.search = notUsedContent + this.search;
+      }
+      
+      this.input.value = this.search;
+    }
     
     if(!this._options.keywordsMode) { // Mode select classique
       this._fillSuggestions();
@@ -639,7 +698,7 @@ class Select{
       } else {
         this._fillAutocomplete();
       }
-    } else if (this._options.regexFilter) {
+    } else if (this._options.regexFilter  && this.search != '') {
       // Determine whether we can update based on whether
       // our regular expression passes
       const canAddItem = this._regexFilter(this.search);
@@ -659,6 +718,7 @@ class Select{
     const closeButton = closest.call(event.target, '.a11y-close-button[role="button"]');
     const input = closest.call(event.target, 'input');
     const tagItem = closest.call(event.target, '.tag-item');
+    this.ctrlVPressed = false;
 
     if(selectAllButton && this.multiple && this._options.selectAll && event.keyCode === 32){
       this._toggleSelectAll();
@@ -755,7 +815,11 @@ class Select{
         return;
       }
     } else { // Mode Mots clés avec ou sans autocomplete
-      if(input && event.keyCode === 13 && this._options.allowNewKeyword){
+      if (input &&(event.ctrlKey || event.metaKey) && event.key === 'v') {
+        // La combinaison CTRL+V a été pressée
+        this.ctrlVPressed = true;
+      } 
+      if(input && (event.keyCode === 13 || this._options.additionalDelemiters.includes(event.key)) && this._options.allowNewKeyword){
         event.preventDefault();
         let keyword = this.input.value;
         if( keyword != '') {
