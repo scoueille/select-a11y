@@ -639,6 +639,16 @@ class Select{
       } else {
         this._fillAutocomplete();
       }
+    } else if (this._options.regexFilter) {
+      // Determine whether we can update based on whether
+      // our regular expression passes
+      const canAddItem = this._regexFilter(this.search);
+      if(!canAddItem) {
+        const notice = this._isType('Function', this._options.text.regexErrorText) ?
+          this._options.text.regexErrorText(this.search) :
+          this._options.text.regexErrorText;
+        this._toggleOverlay(true, true, notice);
+      }
     }
   }
 
