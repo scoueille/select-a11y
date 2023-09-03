@@ -1327,6 +1327,9 @@ class Select{
   _wrap(){
     const wrapper = document.createElement('div');
     wrapper.classList.add('select-a11y');
+    if(this._options.keywordsMode) { // Mode keyword
+      wrapper.classList.add('select-a11y-keyword');
+    }
     this.el.parentElement.appendChild(wrapper);
 
     const tagHidden = document.createElement('div');
