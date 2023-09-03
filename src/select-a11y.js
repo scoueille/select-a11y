@@ -58,6 +58,8 @@ class Select{
       allowNewKeyword: true,
       regexFilter: null,
       additionalDelemiters: [],
+      keywordInputTemplateFunction: null,
+      wrapTemplateFunction: null,
     }, passedOptions );
 
 
@@ -186,7 +188,11 @@ class Select{
     button.setAttribute('aria-label', this.label.innerText);
     button.setAttribute('autocomplete', 'off');
     button.setAttribute('spellcheck', 'false');
-    return button;
+    if(this._isType('Function', this._options.keywordInputTemplateFunction)) {
+      return this._options.keywordInputTemplateFunction(button);
+    } else {
+      return button;
+    }
   }
 
   _createLiveZone(){
@@ -1339,8 +1345,11 @@ class Select{
     } else {
       wrapper.appendChild(this.input);
     }
-
-    return wrapper;
+    if(this._isType('Function', this._options.wrapTemplateFunction)) {
+      return this._options.wrapTemplateFunction(wrapper, this.input.id);
+    } else {
+      return wrapper;
+    }
   }
   
   /**
