@@ -503,6 +503,7 @@ class Select{
       this.input.setAttribute('aria-controls', `a11y-${this.id}-listbox`);
     }
 
+    this.wrap.append(this.overlay);
     this.allSuggestionsAndGroups  = divOptgroupAndOption;
 
     this._setLiveZone();
@@ -1079,10 +1080,10 @@ class Select{
       } else if(this._options.url != null || overrideText) { // Mode kayword avec autocomplete
         if(overrideText != null) {
           this._fillOverlayWithText(overrideText);
+          this.wrap.append(this.overlay);
         } else {
           this._fillAutocomplete(focusBack === false);
         }
-        this.input.insertAdjacentElement('afterend', this.overlay);
       } 
       if(focusBack !== false) {
         this.input.focus();
