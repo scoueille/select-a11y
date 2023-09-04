@@ -1220,7 +1220,7 @@ class Select{
     this._updateSelectedGroups();
 
     const selectAllButton = this.list.querySelector('.a11y-select-all-suggestion');
-    selectAllButton.setAttribute('aria-pressed', 'false');
+    if(selectAllButton) selectAllButton.setAttribute('aria-pressed', 'false');
 
     if(this._options.showSelected){
       this._updateSelectedList();
@@ -1248,8 +1248,7 @@ class Select{
       this.suggestions.forEach(function(suggestion){
         suggestion.removeAttribute('aria-selected');
       });
-
-      selectAllButton.setAttribute('aria-pressed', 'false');
+      if(selectAllButton) selectAllButton.setAttribute('aria-pressed', 'false');
     } else {
       // On sélectionne tout
       Array.prototype.map.call(this.el.options, function(option, index){
@@ -1259,8 +1258,7 @@ class Select{
       this.suggestions.forEach(function(suggestion){
         suggestion.setAttribute('aria-selected', 'true');
       });
-  
-      selectAllButton.setAttribute('aria-pressed', 'true');
+      if(selectAllButton) selectAllButton.setAttribute('aria-pressed', 'true');
     }
 
     this._updateSelectedGroups();
@@ -1285,7 +1283,7 @@ class Select{
       suggestion.removeAttribute('aria-selected');
     }.bind(this));
 
-    selectAllButton.setAttribute('aria-pressed', 'false');
+    if(selectAllButton) selectAllButton.setAttribute('aria-pressed', 'false');
     
     this._updateSelectedGroups();
 
