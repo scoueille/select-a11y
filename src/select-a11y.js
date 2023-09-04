@@ -128,6 +128,7 @@ class Select{
     this.wrap = this._wrap();
     this.selectedList = this._createSelectedList();
     this._updateSelectedList();
+    this.ajaxRequest = null;
 
     this.selectedList.addEventListener('click', this._removeOption);
 
@@ -516,6 +517,9 @@ class Select{
     const search = this.search.toLowerCase();
     
     if(search.length > 0) {
+      if(this.ajaxRequest != null) {
+        this.ajaxRequest.abort();
+      }
       this.ajaxRequest = new XMLHttpRequest();
       
       var url = this._options.url + search;
@@ -555,6 +559,9 @@ class Select{
         && this.button !== document.activeElement){
         if(!this._options.preventCloseOnFocusLost) {
           this._toggleOverlay( false, document.activeElement === document.body && !this._options.keywordsMode);
+          if(this.ajaxRequest != null) {
+            this.ajaxRequest.abort();
+          }
         }
       }
       else if(document.activeElement === this.input){
