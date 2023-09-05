@@ -381,7 +381,7 @@ class Select{
         if(this.multiple){
           let presentationElementsInGroup = element.querySelectorAll('[role="presentation"]');
           presentationElementsInGroup.forEach(function(presentationElement) {
-              divOptions.push(presentationElement);
+              //divOptions.push(presentationElement);
               divOptgroupAndOption.push(presentationElement);
           });
         }
@@ -1163,11 +1163,12 @@ class Select{
     this.suggestions.forEach(function(suggestion){
       const index = parseInt(suggestion.getAttribute('data-index'), 10);
 
-      if(this.el.item(index).selected){
-        suggestion.setAttribute('aria-selected', 'true');
-      }
-      else{
-        suggestion.removeAttribute('aria-selected');
+      if(index != NaN) {
+        if(this.el.item(index).selected){
+          suggestion.setAttribute('aria-selected', 'true');
+        } else {
+          suggestion.removeAttribute('aria-selected');
+        }
       }
     }.bind(this));
 
@@ -1208,12 +1209,12 @@ class Select{
         
     this.suggestions.forEach(function(suggestion){
       const index = parseInt(suggestion.getAttribute('data-index'), 10);
-
-      if(this.el.item(index).selected){
-        suggestion.setAttribute('aria-selected', 'true');
-      }
-      else{
-        suggestion.removeAttribute('aria-selected');
+      if(index != NaN) {
+        if(this.el.item(index).selected){
+          suggestion.setAttribute('aria-selected', 'true');
+        } else {
+          suggestion.removeAttribute('aria-selected');
+        }
       }
     }.bind(this));
 
