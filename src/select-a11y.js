@@ -77,10 +77,6 @@ class Select{
   
   setValue(value) {
     this._clearSelection();
-    if(value !== undefined) {
-
-    console.log(value, this._isType('Array', value), value.length);
-    }
     if(value === undefined || value == "" || (this._isType('Array', value) && value.length == 0)) {
       return;
     }
