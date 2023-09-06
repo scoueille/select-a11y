@@ -71,6 +71,28 @@ class Select{
     }
   }
 
+  clearSelection(){
+    this._clearSelection();
+  }
+  
+  setValue(value) {
+    this._clearSelection();
+    if(value !== undefined) {
+
+    console.log(value, this._isType('Array', value), value.length);
+    }
+    if(value === undefined || value == "" || (this._isType('Array', value) && value.length == 0)) {
+      return;
+    }
+    // If only one value has been passed, convert to array
+    var choiceValue = this._isType('Array', value) ? value : [value];
+
+    // Loop through each value and
+    choiceValue.forEach(function (val) {
+      this._addOption(val);
+    }.bind(this));
+  }
+
   _initialiseSelect(){
     this._handleFocus = this._handleFocus.bind(this);
     this._handleInput = this._handleInput.bind(this);
