@@ -41,6 +41,7 @@ class Select{
     this.focusIndex = null;
     this.customOverlayMessageShown = false;
     this.ctrlVPressed = false;
+    this.disabled = false;
 
     const passedOptions = Object.assign({}, options);
     const textOptions = Object.assign(text, passedOptions.text);
@@ -69,6 +70,9 @@ class Select{
       this._options.showSelected = true;
       this._initialiseInputKeywords();
     }
+    if(this.el.disabled) {
+      this.disable();
+    }
   }
 
   clearSelection(){
@@ -87,6 +91,34 @@ class Select{
     choiceValue.forEach(function (val) {
       this._addOption(val);
     }.bind(this));
+  }
+
+  disable(){
+    this.disabled = true;
+    this.el.setAttribute('disabled', '');
+    if(!this._options.keywordsMode) { // Mode select classique
+      this.button.setAttribute('aria-disabled', 'true');
+      this.button.setAttribute('tabindex', '-1');
+      this.button.setAttribute('disabled', '');
+    } else {
+      this.input.setAttribute('aria-disabled', 'true');
+      this.input.setAttribute('tabindex', '-1');
+      this.input.setAttribute('disabled', '');
+    }
+  }
+
+  enable(){
+    this.disabled = false;
+    this.el.removeAttribute('disabled', '');
+    if(!this._options.keywordsMode) { // Mode select classique
+      this.button.removeAttribute('aria-disabled');
+      this.button.removeAttribute('tabindex');
+      this.button.removeAttribute('disabled');
+    } else {
+      this.input.removeAttribute('aria-disabled');
+      this.input.removeAttribute('tabindex');
+      this.input.removeAttribute('disabled');
+    }
   }
 
   _initialiseSelect(){
@@ -612,6 +644,9 @@ class Select{
   }
 
   _handleSuggestionClick(event){
+    if(this.disabled) {
+      return;
+    }
     const option = closest.call(event.target, '[role="option"]');
 
     if(!option){
@@ -635,6 +670,9 @@ class Select{
   }
 
   _handleAutocompleteKeywordClick(event){
+    if(this.disabled) {
+      return;
+    }
     const option = closest.call(event.target, '[role="option"]');
 
     if(!option){
@@ -652,6 +690,9 @@ class Select{
   }
 
   _handleInput(){
+    if(this.disabled) {
+      return;
+    }
     // prevent event fireing on focus and blur
     if( this.search === this.input.value.trim() ){
       return;
@@ -744,6 +785,9 @@ class Select{
   }
 
   _handleKeyboard(event){
+    if(this.disabled) {
+      return;
+    }
     const option = closest.call(event.target, '[role="option"]');
     const group = closest.call(event.target, '[role="group"]');
     const selectAllButton = closest.call(event.target, '.a11y-select-all-suggestion[role="button"]');
@@ -937,6 +981,9 @@ class Select{
   }
 
   _moveIndex(step){
+    if(this.disabled) {
+      return;
+    }
     if(this.allSuggestionsAndGroups.length == 0) {
       return;
     }
@@ -963,6 +1010,9 @@ class Select{
   }
 
   _positionCursor(){
+    if(this.disabled) {
+      return;
+    }
     setTimeout(function(){
       this.input.selectionStart = this.input.selectionEnd = this.input.value.length;
       if(!this.open && this._options.text.welcomeMessage != null) {
@@ -1080,6 +1130,9 @@ class Select{
   }
 
   _toggleOverlay(state, focusBack, overrideText = null){
+    if(this.disabled) {
+      return;
+    }
     if(this._options.keywordsMode && this._options.url == null && overrideText == null) {// Pas d'overlay
       this.open = false;
     } else if(overrideText) {
@@ -1169,6 +1222,9 @@ class Select{
   }
   
   _toggleSelection(optionIndex, close = true){
+    if(this.disabled) {
+      return;
+    }
     const option = this.el.item(optionIndex);
 
     if(this.multiple){
