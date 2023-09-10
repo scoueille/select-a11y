@@ -203,7 +203,7 @@ class Select{
 
     const text = document.createElement('span');
 
-    if(this.multiple){
+    if(this.multiple && this.label != null){
       text.innerText = this.label.innerText;
     }
 
@@ -236,7 +236,7 @@ class Select{
     button.className = 'form-control form-control-a11y';
 
     button.setAttribute('id',this.el.id+'-input');
-    button.setAttribute('aria-label', this.label.innerText);
+    button.setAttribute('aria-label', this.label != null ? this.label.innerText : '');
     button.setAttribute('autocomplete', 'off');
     button.setAttribute('spellcheck', 'false');
     if(this._isType('Function', this._options.keywordInputTemplateFunction)) {
