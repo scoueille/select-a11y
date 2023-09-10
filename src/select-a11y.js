@@ -572,7 +572,12 @@ class Select{
       }
       this.ajaxRequest = new XMLHttpRequest();
       
-      var url = this._options.url + search;
+      var url = null;
+      if(this._isType('Function', this._options.url)) {
+        url = this._options.url(search);
+      } else {
+        url = this._options.url + search;
+      }
       
       var that = this;
       this.ajaxRequest.onload  = function(e) {
