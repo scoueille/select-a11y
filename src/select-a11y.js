@@ -120,6 +120,10 @@ class Select{
       this.input.removeAttribute('disabled');
     }
   }
+  
+  addOption(keyword, keywordValue){
+    this._addOption(keyword, keywordValue);
+  }
 
   _initialiseSelect(){
     this._handleFocus = this._handleFocus.bind(this);
@@ -1062,9 +1066,7 @@ class Select{
       this._updateSelectedList();
     }
 
-    if(this.el.onchange){
-      this.el.onchange();
-    }
+    this._dispatchChangeEvent();
   }
 
   _removeOption(event){
@@ -1266,9 +1268,7 @@ class Select{
     if(close && this.open){
       this._toggleOverlay();
     }
-    if(this.el.onchange){
-      this.el.onchange();
-    }
+    this._dispatchChangeEvent();
   }
 
   _toggleSelectionGroup(groupElement){
@@ -1306,9 +1306,7 @@ class Select{
       this._updateSelectedList();
     }
 
-    if(this.el.onchange){
-      this.el.onchange();
-    }
+    this._dispatchChangeEvent();
   }
 
   _toggleSelectAll (){
@@ -1346,9 +1344,7 @@ class Select{
     if(this._options.showSelected){
       this._updateSelectedList();
     }
-    if(this.el.onchange){
-      this.el.onchange(); 
-    }
+    this._dispatchChangeEvent();
   }
 
   _clearSelection(){
@@ -1370,7 +1366,7 @@ class Select{
     if(this._options.showSelected){
       this._updateSelectedList();
     }
-    this.el.onchange();
+    this._dispatchChangeEvent();
   }
 
   _updateSelectedList(){
@@ -1441,6 +1437,19 @@ class Select{
     }
   }
   
+  _dispatchChangeEvent () {
+    if(this.el != null) {
+      // Crée un nouvel événement "change"
+      var event = new Event('change', {
+          bubbles: true,  // Permet à l'événement de se propager (comme un vrai événement "change")
+          cancelable: true // Permet d'annuler l'événement si nécessaire
+      });
+      
+      // Déclenche l'événement "change" sur l'élément
+      this.el.dispatchEvent(event);
+    }
+  }
+
   /**
    * Tests value against a regular expression
    * @param  {string} value   Value to test
