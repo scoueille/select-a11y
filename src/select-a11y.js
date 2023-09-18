@@ -261,6 +261,7 @@ class Select{
   _createOverlay(){
     const container = document.createElement('div');
     container.classList.add('a11y-container');
+    container.setAttribute('tabindex', 0);
 
     const suggestions = document.createElement('div');
     suggestions.classList.add('a11y-suggestions');
