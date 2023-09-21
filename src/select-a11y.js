@@ -819,7 +819,7 @@ class Select{
 
     if(tagItem) {
       const tagItemSupp = closest.call(event.target, '.tag-item-supp');
-      const curentItem = closest.call(event.target, '[tabindex="0"]');
+      const currentItem = this.selectedList.querySelector('[tabindex="0"]');
       let cible = null;
       if(tagItemSupp && event.keyCode === 13){  
         this._removeOption(event);
@@ -879,7 +879,7 @@ class Select{
         cible = this.selectedList.lastChild.querySelector('[tabindex]');
       }
       if(cible) {
-        curentItem.setAttribute('tabindex', '-1');
+        currentItem.setAttribute('tabindex', '-1');
         cible.setAttribute('tabindex', '0');
         cible.focus();
       }
