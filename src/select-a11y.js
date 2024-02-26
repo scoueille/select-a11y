@@ -907,7 +907,7 @@ class Select{
       } 
       if(input && (event.keyCode === 13 || this._options.additionalDelemiters.includes(event.key)) && this._options.allowNewKeyword){
         event.preventDefault();
-        let keyword = this.input.value;
+        let keyword = this.input.value.trim();
         if( keyword != '') {
           let canAddItem = true;
           if (this._options.regexFilter) {
