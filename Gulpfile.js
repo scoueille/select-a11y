@@ -5,8 +5,9 @@ default: dev (build + watch)
 
 // var
 const gulp = require('gulp');
-const sass = require('gulp-sass');
-const autoprefixer = require('gulp-autoprefixer');
+const sass = require('gulp-sass')(require('sass'));
+const postcss = require('gulp-postcss');
+const autoprefixer =  require('autoprefixer');
 const browserSync = require('browser-sync').create();
 const watch = require('gulp');
 const runSequence = require('gulp4-run-sequence');
@@ -70,7 +71,7 @@ gulp.task('css:select', function () {
       outputStyle: 'expanded',
       includePaths: ['node_modules']
     }).on('error', sass.logError))
-    .pipe(autoprefixer(config.browser))
+    .pipe(postcss([ autoprefixer()]))      
     .pipe(gulp.dest('./public/assets/css'));
 });
 
@@ -81,7 +82,7 @@ gulp.task('css:public', function () {
           outputStyle: 'compressed',
           includePaths: ['node_modules']
         }).on('error', sass.logError))
-        .pipe(autoprefixer(config.browser))
+        .pipe(postcss([ autoprefixer()]))      
         .pipe(gulp.dest('./public/assets/css'))
 });
 
@@ -114,8 +115,6 @@ gulp.task( 'script:build', () => {
   const entryMin = { ...rollupIn };
   const outMin = { ...rollupOut };
 
-  entryMin.plugins.push(uglify());
-
   outMin.file = rollupOut.file.replace('.js', '.min.js');
 
   const minified = rollup( entryMin )
@@ -129,12 +128,11 @@ gulp.task( 'script:build', () => {
 babel
 -------------------------------------------------------- */
 const task = 'js';
-const { rollup } = require( 'rollup' );
-const commonjs = require( 'rollup-plugin-commonjs' );
-const nodeResolve = require( 'rollup-plugin-node-resolve' );
-const { uglify } = require( 'rollup-plugin-uglify' );
-const babel = require( 'rollup-plugin-babel' );
-
+const { rollup } = require( 'rollup' );                  
+const commonjs =  (...args) => import('@rollup/plugin-commonjs').then(({default: fetch}) => fetch(...args));
+const nodeResolve =  (...args) => import('@rollup/plugin-node-resolve').then(({default: fetch}) => fetch(...args));
+const babel =  (...args) => import('@rollup/plugin-babel').then(({default: fetch}) => fetch(...args));
+         
 const params = {
   src: `./src/select-a11y.js`,
   name: 'Select',
@@ -145,6 +143,7 @@ const plugins = [
   nodeResolve(),
   commonjs(),
   babel({
+    babelHelpers: 'bundled',
     exclude: 'node_modules/**',
     presets: [
       [ '@babel/preset-env', {

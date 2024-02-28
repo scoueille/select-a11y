@@ -156,7 +156,7 @@ $a11y-suggestion-border:      $gray-3 !default;
   }
 
   .a11y-suggestion {
-    padding: 0 (8em/16) 0 (26em/16);
+    padding: 0 calc(8em / 16) 0 calc(26em / 16);
     color: $a11y-suggestion-color;
     cursor: pointer;
     text-align: left;
@@ -182,7 +182,7 @@ $a11y-suggestion-border:      $gray-3 !default;
         position: absolute;
         top: 50%;
         transform: translateY(-50%);
-        left: (8em/16);
+        left: calc(8em / 16);
       }
     }
   }
@@ -190,13 +190,13 @@ $a11y-suggestion-border:      $gray-3 !default;
   .a11y-suggestion-group {
 
     div[role="presentation"] {
-      padding: 0 (8em/16) 0 (26em/16);
+      padding: 0 calc(8em / 16) 0 calc(26em / 16);
       color: $a11y-suggestion-color;
       cursor: pointer;
       text-align: left;
     }
     .a11y-suggestion {
-      padding: 0 (8em/16) 0 (2*26em/16);
+      padding: 0 calc(8em / 16) 0 calc(2 * 26em / 16);
     }
 
     div[role="presentation"]:focus,
@@ -220,7 +220,7 @@ $a11y-suggestion-border:      $gray-3 !default;
         position: absolute;
         top: 50%;
         transform: translateY(-50%);
-        left: (8em/16);
+        left: calc(8em / 16);
       }
     }
   }
