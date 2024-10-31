@@ -27,7 +27,7 @@ class Select{
       regexErrorText: 'Le mot clé est mal formaté',
       welcomeMessage: null,
     };
-    
+
     this.el = el;
     this.label = document.querySelector(`label[for=${el.id}]`);
     this.id = el.id;
@@ -78,7 +78,7 @@ class Select{
   clearSelection(){
     this._clearSelection();
   }
-  
+
   setValue(value) {
     this._clearSelection();
     if(value === undefined || value == "" || (this._isType('Array', value) && value.length == 0)) {
@@ -120,7 +120,7 @@ class Select{
       this.input.removeAttribute('disabled');
     }
   }
-  
+
   addOption(keyword, keywordValue){
     this._addOption(keyword, keywordValue);
   }
@@ -339,22 +339,22 @@ class Select{
         if(formatedText.indexOf(search) === -1){
           return;
         }
-  
+
         // create the option
         const suggestion = document.createElement('div');
         suggestion.setAttribute('role', 'option');
         suggestion.setAttribute('tabindex', 0);
         suggestion.setAttribute('data-index', optionIndex);
         suggestion.classList.add('a11y-suggestion');
-  
+
         // check if the option is selected
         if(optionEl.selected){
           nbSelectedValues++;
           suggestion.setAttribute('aria-selected', 'true');
         }
-  
+
         suggestion.innerText = optionEl.label || optionEl.value;
-  
+
         return suggestion;
       } else {
         const text = optionEl.label;
@@ -372,29 +372,29 @@ class Select{
           if(!groupMatchSearch && formatedText.indexOf(search) === -1){
             return;
           }
-    
+
           // create the option
           const suggestion = document.createElement('div');
           suggestion.setAttribute('role', 'option');
           suggestion.setAttribute('tabindex', 0);
           suggestion.setAttribute('data-index', optionIndex);
           suggestion.classList.add('a11y-suggestion');
-    
+
           // check if the option is selected
           if(option.selected){
             nbSelectedValues++;
             suggestion.setAttribute('aria-selected', 'true');
           }
-    
+
           suggestion.innerText = option.label || option.value;
-    
+
           return suggestion;
         }.bind(this)).filter(Boolean);
-        
+
         if(suggestionOptions.length == 0){
           return;
         }
-  
+
         const suggestionGroup = document.createElement('div');
         suggestionGroup.setAttribute('role', 'group');
         //suggestionGroup.setAttribute('tabindex', 0);
@@ -485,7 +485,7 @@ class Select{
       suggestionsEtGroups.forEach(function(suggestion){
         listBox.appendChild(suggestion);
       }.bind(this));
-      
+
       this._updateSelectedGroups();
 
       this.list.innerHTML = '';
@@ -497,14 +497,14 @@ class Select{
 
     this._setLiveZone();
   }
-  
+
   /**
    * Proceed Ajax results
    * @param  {String} data JSON result
    * @param  {String} value Search value
    * @return
    * @private
-   */ 
+   */
   _searchParseResult(data, value, focusOnResults = false) {
     let suggestionsEtGroups = Array.prototype.map.call(data[this._options.urlResultsArray], function(result) {
       let value = result[this._options.urlValueField];
@@ -512,7 +512,7 @@ class Select{
       if(this.selectedKeywords.includes(value)) {
         return;
       }
-      
+
       // create the option
       const suggestion = document.createElement('div');
       suggestion.setAttribute('role', 'option');
@@ -525,7 +525,7 @@ class Select{
 
       return suggestion;
     }.bind(this)).filter(Boolean);
-    
+
     // Initialise un tableau pour stocker les éléments avec le rôle "Option"
     let divOptions = [];
     // Initialise un tableau pour stocker les éléments avec le rôle "Presentation" pour la div de rôle "Group"
@@ -553,7 +553,7 @@ class Select{
       suggestionsEtGroups.forEach(function(suggestion){
         listBox.appendChild(suggestion);
       }.bind(this));
-      
+
       this.list.innerHTML = '';
       this.list.appendChild(listBox);
       this.input.setAttribute('aria-controls', `a11y-${this.id}-listbox`);
@@ -570,20 +570,20 @@ class Select{
 
   _fillAutocomplete(focusOnResults = false) {
     const search = this.search.toLowerCase();
-    
+
     if(search.length > 0) {
       if(this.ajaxRequest != null) {
         this.ajaxRequest.abort();
       }
       this.ajaxRequest = new XMLHttpRequest();
-      
+
       var url = null;
       if(this._isType('Function', this._options.url)) {
         url = this._options.url(search);
       } else {
         url = this._options.url + search;
       }
-      
+
       var that = this;
       this.ajaxRequest.onload  = function(e) {
         if(that.ajaxRequest != null && that.ajaxRequest.responseText) {
@@ -614,7 +614,7 @@ class Select{
     clearTimeout(this._focusTimeout);
 
     this._focusTimeout = setTimeout(function(){
-      if(!this.overlay.contains(document.activeElement) 
+      if(!this.overlay.contains(document.activeElement)
         && this.input !== document.activeElement
         && this.button !== document.activeElement){
         if(!this._options.preventCloseOnFocusLost) {
@@ -720,18 +720,18 @@ class Select{
       let errorMessage = null;
       let notUsedContent = '';
       let firstIteration = true;
-      
+
       do {
         firstDelimiter = null;
         delimiters.forEach(element => {
           var delimiterPos = this.search.indexOf(element);
-          
+
           if(delimiterPos >= 0 && (firstDelimiter == null || delimiterPos<firstDelimiter) ) {
             firstDelimiter = delimiterPos;
           }
         });
-        let keyword = null; 
-        let currentManagedString = null; 
+        let keyword = null;
+        let currentManagedString = null;
         if(firstDelimiter > 0) {
           keyword = this.search.substring(0, firstDelimiter).trim();
           currentManagedString = this.search.substring(0, firstDelimiter + 1);
@@ -750,7 +750,7 @@ class Select{
           }
           if(canAddItem) {
             this._addOption(keyword);
-          } else { 
+          } else {
             errorMessage = (errorMessage && errorMessage.length > 0 ? errorMessage + "<br />" : "") +
               (this._isType('Function', this._options.text.regexErrorText) ?
                 this._options.text.regexErrorText(keyword) :
@@ -767,10 +767,10 @@ class Select{
       if(notUsedContent.length > 0) {
         this.search = notUsedContent + this.search;
       }
-      
+
       this.input.value = this.search;
     }
-    
+
     if(!this._options.keywordsMode) { // Mode select classique
       this._fillSuggestions();
     } else if(this._options.url != null) { // Mode kayword avec autocomplete
@@ -821,11 +821,11 @@ class Select{
       const tagItemSupp = closest.call(event.target, '.tag-item-supp');
       const currentItem = this.selectedList.querySelector('[tabindex="0"]');
       let cible = null;
-      if(tagItemSupp && event.keyCode === 13){  
+      if(tagItemSupp && event.keyCode === 13){
         this._removeOption(event);
       } else if(event.keyCode === 46){  // Suppr
         event.preventDefault();
-        if(tagItemSupp) { 
+        if(tagItemSupp) {
           this._removeOption(event);
         } else { // Vers bouton suppr
           // Crée un nouvel événement keydown à transmettre à l'élément cible
@@ -841,7 +841,7 @@ class Select{
           const nextTag = tagItem.nextSibling;
           if(nextTag) {
             cible = nextTag.querySelector('[tabindex]');
-          } 
+          }
         } else { // Vers bouton suppr
           cible = tagItem.querySelector('.tag-item-supp');
         }
@@ -853,7 +853,7 @@ class Select{
           const prevTag = tagItem.previousSibling;
           if(prevTag) {
             cible = prevTag.querySelector('.tag-item-supp');
-          } 
+          }
         }
       } else if(event.keyCode === 40){ // Bas
         event.preventDefault();
@@ -904,7 +904,7 @@ class Select{
       if (input &&(event.ctrlKey || event.metaKey) && event.key === 'v') {
         // La combinaison CTRL+V a été pressée
         this.ctrlVPressed = true;
-      } 
+      }
       if(input && (event.keyCode === 13 || this._options.additionalDelemiters.includes(event.key)) && this._options.allowNewKeyword){
         event.preventDefault();
         let keyword = this.input.value.trim();
@@ -937,7 +937,7 @@ class Select{
         return;
       }
       if(option && (event.keyCode === 13 || event.keyCode === 32)){
-        event.preventDefault();    
+        event.preventDefault();
         const optionValue = option.getAttribute('data-value');
         const optionlabel = option.getAttribute('data-label');
         this._addOption(optionlabel, optionValue);
@@ -946,7 +946,7 @@ class Select{
         } else {
           this._removeSuggestion(option);
         }
-        
+
         return;
       }
     }
@@ -975,7 +975,7 @@ class Select{
 
     if(!option && !group){
       return;
-    } 
+    }
 
     if(option && (( !this.multiple && event.keyCode === 13 ) || event.keyCode === 32)){
       event.preventDefault();
@@ -1030,22 +1030,23 @@ class Select{
       }
     }.bind(this))
   }
-  
+
   _removeSuggestion(option) {
     const selectionItemsCount = this.allSuggestionsAndGroups.length - 1;
     const optionIndex = this.allSuggestionsAndGroups.indexOf(option);
     const optionIndex1 = this.suggestions.indexOf(option);
-    
     if(selectionItemsCount < 1) {
-      this._fillAutocomplete();
+      this._close();
+      //this._fillAutocomplete();
       this.input.focus();
-      this._positionCursor();
-      return;
-    } 
-    if(this.focusIndex == null || selectionItemsCount > this.focusIndex) {
-      this._moveIndex(1);
+      //this._positionCursor();
+      //return;
     } else {
-      this._moveIndex(-1);
+      if(this.focusIndex == null || selectionItemsCount > this.focusIndex) {
+        this._moveIndex(1);
+      } else {
+        this._moveIndex(-1);
+      }
     }
 
     if(optionIndex !== -1){
@@ -1123,7 +1124,7 @@ class Select{
       text = overrideText;
     } else {
       const suggestions = this.suggestions.length;
-  
+
       if(this.open){
         if(!suggestions){
           text = this._options.text.noResult;
@@ -1170,7 +1171,7 @@ class Select{
         } else {
           this._fillAutocomplete(focusBack === false);
         }
-      } 
+      }
       if(focusBack !== false) {
         this.input.focus();
       }
@@ -1228,7 +1229,7 @@ class Select{
       }
     });
   }
-  
+
   _toggleSelection(optionIndex, close = true){
     if(this.disabled) {
       return;
@@ -1256,7 +1257,7 @@ class Select{
 
     const selectAllButton = this.list.querySelector('.a11y-select-all-suggestion');
     if(selectAllButton) selectAllButton.setAttribute('aria-pressed', 'false');
-    
+
     this._updateSelectedGroups();
 
     if(!this.multiple){
@@ -1273,7 +1274,7 @@ class Select{
   }
 
   _toggleSelectionGroup(groupElement){
-    
+
     let optionElementsInGroup = groupElement.querySelectorAll('[role="option"]');
     optionElementsInGroup.forEach(function(optionElement) {
       const optionIndex = parseInt(optionElement.getAttribute('data-index'), 10);
@@ -1286,7 +1287,7 @@ class Select{
         this.el.selectedIndex = optionIndex;
       }
     }.bind(this));
-        
+
     this.suggestions.forEach(function(suggestion){
       const index = parseInt(suggestion.getAttribute('data-index'), 10);
       if(index != NaN) {
@@ -1317,13 +1318,13 @@ class Select{
 
     const nbValues = selectAllButton.querySelectorAll('[role="option"]').length;
     const nbSelectedValues = selectAllButton.querySelectorAll('[role="option"][aria-selected="true"]').length;
-    
+
     if(nbSelectedValues == nbValues && buttonSelected) {
       // On déselectionne tout
       Array.prototype.map.call(this.el.options, function(option, index){
         this.el.item(index).selected = false;
       }.bind(this));
-      
+
       this.suggestions.forEach(function(suggestion){
         suggestion.removeAttribute('aria-selected');
       });
@@ -1355,13 +1356,13 @@ class Select{
     Array.prototype.map.call(this.el.options, function(option, index){
       this.el.item(index).selected = false;
     }.bind(this));
-    
+
     this.suggestions.forEach(function(suggestion){
       suggestion.removeAttribute('aria-selected');
     }.bind(this));
 
     if(selectAllButton) selectAllButton.setAttribute('aria-pressed', 'false');
-    
+
     this._updateSelectedGroups();
 
     if(this._options.showSelected){
@@ -1437,7 +1438,7 @@ class Select{
       return wrapper;
     }
   }
-  
+
   _dispatchChangeEvent () {
     if(this.el != null) {
       // Crée un nouvel événement "change"
@@ -1445,7 +1446,7 @@ class Select{
           bubbles: true,  // Permet à l'événement de se propager (comme un vrai événement "change")
           cancelable: true // Permet d'annuler l'événement si nécessaire
       });
-      
+
       // Déclenche l'événement "change" sur l'élément
       this.el.dispatchEvent(event);
     }
