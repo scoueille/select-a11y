@@ -132,6 +132,7 @@ const { rollup } = require( 'rollup' );
 const commonjs =  (...args) => import('@rollup/plugin-commonjs').then(({default: fetch}) => fetch(...args));
 const nodeResolve =  (...args) => import('@rollup/plugin-node-resolve').then(({default: fetch}) => fetch(...args));
 const babel =  (...args) => import('@rollup/plugin-babel').then(({default: fetch}) => fetch(...args));
+const terser =  (...args) => import('@rollup/plugin-terser').then(({default: fetch}) => fetch(...args));
          
 const params = {
   src: `./src/select-a11y.js`,
@@ -155,6 +156,7 @@ const plugins = [
     ],
     plugins: ['@babel/plugin-transform-object-assign']
   }),
+  terser(),
 ];
 
 const rollupIn = {
