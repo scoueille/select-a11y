@@ -3,6 +3,7 @@
   "version": "1.4.0",
   "description": "Module de select multiple accessible",
   "main": "src/select-a11y.js",
+  "sass": "src/select-a11y.scss",
   "repository": {
     "type": "git",
     "url": "https://github.com/scoueille/select-a11y.git"
