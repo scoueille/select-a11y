@@ -2,10 +2,10 @@
   "name": "select-a11y",
   "version": "1.4.0",
   "description": "Module de select multiple accessible",
-  "main": "index.js",
+  "main": "src/select-a11y.js",
   "repository": {
     "type": "git",
-    "url": "https://gitlab.com/pidila/select-a11y.git"
+    "url": "https://github.com/scoueille/select-a11y.git"
   },
   "scripts": {
     "test": "tape tests/index.js | tap-diff"
