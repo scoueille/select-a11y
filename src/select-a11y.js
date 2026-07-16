@@ -45,6 +45,7 @@ class Select{
     this.required = this.el.hasAttribute('required');
     this.requiredInvalid = false;
     this.form = this.el.form;
+    this.invalidObserver = null;
 
     if(this.required) {
       this.el.removeAttribute('required');
@@ -153,6 +154,7 @@ class Select{
     this.liveZone = this._createLiveZone();
     this.overlay = this._createOverlay();
     this.wrap = this._wrap();
+    this._initialiseInvalid();
     this._initialiseRequired();
 
     if(this.multiple && this._options.showSelected){
@@ -196,6 +198,7 @@ class Select{
     this.wrap = this._wrap();
     this.selectedList = this._createSelectedList();
     this._updateSelectedList();
+    this._initialiseInvalid();
     this._initialiseRequired();
     this.ajaxRequest = null;
 
@@ -322,6 +325,23 @@ class Select{
     return list;
   }
 
+  _initialiseInvalid() {
+    this._syncInvalidState();
+
+    if(typeof MutationObserver === 'undefined') {
+      return;
+    }
+
+    this.invalidObserver = new MutationObserver(function(){
+      this._syncInvalidState();
+    }.bind(this));
+
+    this.invalidObserver.observe(this.el, {
+      attributes: true,
+      attributeFilter: ['class']
+    });
+  }
+
   _initialiseRequired() {
     if(!this.required) {
       return;
@@ -370,12 +390,11 @@ class Select{
     return this.el.value !== '';
   }
 
-  _setRequiredInvalid(invalid) {
-    if(!this.required) {
-      return;
-    }
+  _hasSourceInvalidClass() {
+    return this.el.classList.contains('is-invalid');
+  }
 
-    this.requiredInvalid = invalid;
+  _setInvalid(invalid) {
     this.wrap.classList.toggle('select-a11y-invalid', invalid);
 
     const target = this._getRequiredTarget();
@@ -388,6 +407,19 @@ class Select{
     } else {
       target.removeAttribute('aria-invalid');
     }
+  }
+
+  _syncInvalidState() {
+    this._setInvalid(this.requiredInvalid || this._hasSourceInvalidClass());
+  }
+
+  _setRequiredInvalid(invalid) {
+    if(!this.required) {
+      return;
+    }
+
+    this.requiredInvalid = invalid;
+    this._syncInvalidState();
   }
 
   _updateRequiredState(showInvalid = false) {
