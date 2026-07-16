@@ -84,6 +84,12 @@ $a11y-suggestion-border:      $gray-3 !default;
     }
   }
 
+  .btn-select-a11y[aria-invalid="true"],
+  .form-control-a11y[aria-invalid="true"] {
+    border-color: $tag-item-supp-border;
+    outline: 1px solid $tag-item-supp-border;
+  }
+
   .list-selected {
     padding: 0.5em 0;
     margin: 0;

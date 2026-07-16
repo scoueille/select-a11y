@@ -42,6 +42,13 @@ class Select{
     this.customOverlayMessageShown = false;
     this.ctrlVPressed = false;
     this.disabled = false;
+    this.required = this.el.hasAttribute('required');
+    this.requiredInvalid = false;
+    this.form = this.el.form;
+
+    if(this.required) {
+      this.el.removeAttribute('required');
+    }
 
     const passedOptions = Object.assign({}, options);
     const textOptions = Object.assign(text, passedOptions.text);
@@ -105,6 +112,7 @@ class Select{
       this.input.setAttribute('tabindex', '-1');
       this.input.setAttribute('disabled', '');
     }
+    this._setRequiredInvalid(false);
   }
 
   enable(){
@@ -119,6 +127,7 @@ class Select{
       this.input.removeAttribute('tabindex');
       this.input.removeAttribute('disabled');
     }
+    this._updateRequiredState();
   }
 
   addOption(keyword, keywordValue){
@@ -133,8 +142,10 @@ class Select{
     this._handleReset = this._handleReset.bind(this);
     this._handleSuggestionClick = this._handleSuggestionClick.bind(this);
     this._handleCloseButton = this._handleCloseButton.bind(this);
+    this._handleFormInvalid = this._handleFormInvalid.bind(this);
     this._positionCursor = this._positionCursor.bind(this);
     this._removeOption = this._removeOption.bind(this);
+    this._handleSubmit = this._handleSubmit.bind(this);
 
     this._disable();
 
@@ -142,6 +153,7 @@ class Select{
     this.liveZone = this._createLiveZone();
     this.overlay = this._createOverlay();
     this.wrap = this._wrap();
+    this._initialiseRequired();
 
     if(this.multiple && this._options.showSelected){
       this.selectedList = this._createSelectedList();
@@ -160,7 +172,7 @@ class Select{
       this.closeButton.addEventListener('click', this._handleCloseButton);
     }
 
-    this.el.form.addEventListener('reset', this._handleReset);
+    this._bindFormEvents();
   }
 
   _initialiseInputKeywords(){
@@ -171,8 +183,10 @@ class Select{
     this._handleReset = this._handleReset.bind(this);
     this._handleAutocompleteKeywordClick = this._handleAutocompleteKeywordClick.bind(this);
     this._handleCloseButton = this._handleCloseButton.bind(this);
+    this._handleFormInvalid = this._handleFormInvalid.bind(this);
     this._positionCursor = this._positionCursor.bind(this);
     this._removeOption = this._removeOption.bind(this);
+    this._handleSubmit = this._handleSubmit.bind(this);
 
     this._disable();
 
@@ -182,6 +196,7 @@ class Select{
     this.wrap = this._wrap();
     this.selectedList = this._createSelectedList();
     this._updateSelectedList();
+    this._initialiseRequired();
     this.ajaxRequest = null;
 
     this.selectedList.addEventListener('click', this._removeOption);
@@ -196,7 +211,7 @@ class Select{
       this.closeButton.addEventListener('click', this._handleCloseButton);
     }
 
-    this.el.form.addEventListener('reset', this._handleReset);
+    this._bindFormEvents();
   }
 
   _createButton(){
@@ -305,6 +320,108 @@ class Select{
     list.ariaLabel = "Eléments sélectionnés";
 
     return list;
+  }
+
+  _initialiseRequired() {
+    if(!this.required) {
+      return;
+    }
+
+    this.wrap.classList.add('select-a11y-required');
+
+    const target = this._getRequiredTarget();
+    if(target) {
+      target.setAttribute('aria-required', 'true');
+    }
+
+    this._updateRequiredState();
+  }
+
+  _bindFormEvents() {
+    if(!this.form) {
+      return;
+    }
+
+    this.form.addEventListener('reset', this._handleReset);
+
+    if(this.required) {
+      this.form.addEventListener('invalid', this._handleFormInvalid, true);
+      this.form.addEventListener('submit', this._handleSubmit, true);
+    }
+  }
+
+  _getRequiredTarget() {
+    if(!this._options.keywordsMode) {
+      return this.button;
+    }
+
+    return this.input;
+  }
+
+  _hasRequiredValue() {
+    if(!this.required || this.disabled || this.el.disabled) {
+      return true;
+    }
+
+    if(this.multiple) {
+      return this.el.selectedOptions.length > 0;
+    }
+
+    return this.el.value !== '';
+  }
+
+  _setRequiredInvalid(invalid) {
+    if(!this.required) {
+      return;
+    }
+
+    this.requiredInvalid = invalid;
+    this.wrap.classList.toggle('select-a11y-invalid', invalid);
+
+    const target = this._getRequiredTarget();
+    if(!target) {
+      return;
+    }
+
+    if(invalid) {
+      target.setAttribute('aria-invalid', 'true');
+    } else {
+      target.removeAttribute('aria-invalid');
+    }
+  }
+
+  _updateRequiredState(showInvalid = false) {
+    if(!this.required) {
+      return true;
+    }
+
+    const valid = this._hasRequiredValue();
+    if(valid) {
+      this._setRequiredInvalid(false);
+    } else if(showInvalid || this.requiredInvalid) {
+      this._setRequiredInvalid(true);
+    }
+
+    return valid;
+  }
+
+  _shouldSkipRequiredValidation(event) {
+    if(!this.required || this.disabled || this.el.disabled) {
+      return true;
+    }
+
+    if(this.form && this.form.noValidate) {
+      return true;
+    }
+
+    return event && event.submitter && event.submitter.formNoValidate;
+  }
+
+  _focusRequiredTarget() {
+    const target = this._getRequiredTarget();
+    if(target) {
+      target.focus();
+    }
   }
 
   _disable() {
@@ -650,7 +767,24 @@ class Select{
         const option = this.el.item(this.el.selectedIndex);
         this._setButtonText(option.label || option.value);
       }
+      this._setRequiredInvalid(false);
     }.bind(this), 10);
+  }
+
+  _handleFormInvalid() {
+    this._updateRequiredState(true);
+  }
+
+  _handleSubmit(event) {
+    if(this._shouldSkipRequiredValidation(event)) {
+      return;
+    }
+
+    if(!this._updateRequiredState(true)) {
+      event.preventDefault();
+      event.stopPropagation();
+      this._focusRequiredTarget();
+    }
   }
 
   _handleSuggestionClick(event){
@@ -1441,6 +1575,8 @@ class Select{
 
   _dispatchChangeEvent () {
     if(this.el != null) {
+      this._updateRequiredState();
+
       // Crée un nouvel événement "change"
       var event = new Event('change', {
           bubbles: true,  // Permet à l'événement de se propager (comme un vrai événement "change")
