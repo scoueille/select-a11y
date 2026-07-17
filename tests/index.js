@@ -5,9 +5,14 @@ const nodePath = require('path');
 const test = require( 'tape' );
 const puppeteer = require( 'puppeteer' );
 const path = `file://${nodePath.resolve(__dirname, '../public/index.html')}`;
+const scriptPath = nodePath.resolve(__dirname, '../public/assets/scripts/select-a11y.js');
+
+const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 const createBrowser = async () => {
-  const browser = await puppeteer.launch();
+  const browser = await puppeteer.launch({
+    args: ['--no-sandbox', '--disable-setuid-sandbox']
+  });
   const page = await browser.newPage();
 
   await page.goto( path );
@@ -136,11 +141,12 @@ test( 'État par défaut', async t => {
   const [ browser, page ] = await createBrowser();
 
   const selects = await page.evaluate(() => {
-    const selects = Array.from(document.querySelectorAll('select'));
+    const selects = Array.from(document.querySelectorAll('select'))
+      .filter(select => select.closest('.select-a11y').querySelector('button[aria-expanded]'));
 
     return selects.map(select => {
       const wrapper = select.closest('.select-a11y');
-      const label = document.querySelector(`label[for=${select.id}]`);
+      const label = document.querySelector(`label[for="${select.id}"]`);
 
       const button = wrapper.querySelector('button[aria-expanded]');
 
@@ -150,7 +156,7 @@ test( 'État par défaut', async t => {
 
         return {
           multiple: true,
-          label: label.textContent.trim(),
+          label: label ? label.textContent.trim() : '',
           buttonLabel: button.textContent.trim(),
           values: selectedValues.join(':'),
           listItems: listItems.join(':'),
@@ -343,7 +349,7 @@ test( 'Gestion de la selection au clavier d’un select', async t => {
 
   await page.keyboard.press('Space');
 
-  await page.waitFor(10);
+  await wait(10);
 
   const spacePressed = await page.evaluate(() => {
     const button = document.querySelector('.form-group button');
@@ -373,7 +379,7 @@ test( 'Gestion de la selection au clavier d’un select', async t => {
 
   await page.keyboard.press('Enter');
 
-  await page.waitFor(10);
+  await wait(10);
 
   const enterPressed = await page.evaluate(() => {
     const button = document.querySelector('.form-group button');
@@ -409,7 +415,7 @@ test( 'Gestion de la selection au clavier d’un select multiple', async t => {
 
   await page.keyboard.press('Space');
 
-  await page.waitFor(10);
+  await wait(10);
 
   const spacePressed = await page.evaluate(() => {
     const button = document.querySelector('.multiple button');
@@ -431,13 +437,14 @@ test( 'Gestion de la selection au clavier d’un select multiple', async t => {
 
   await page.keyboard.press('Enter');
 
-  await page.waitFor(10);
+  await wait(10);
 
   const enterPressed = await page.evaluate(() => {
     const button = document.querySelector('.multiple button');
     const select = document.querySelector('.multiple select');
     const activeElement = document.activeElement;
-    const list = Array.from(document.querySelectorAll('.multiple .list-selected li'));
+    const wrapper = document.querySelector('.form-group.multiple .select-a11y');
+    const list = Array.from(wrapper.querySelectorAll('.list-selected .tag-item'));
 
     return {
       closed: button.getAttribute('aria-expanded') === 'false',
@@ -470,20 +477,20 @@ test( 'Suppression des options via la liste des options sélectionnées', async 
   await page.keyboard.press('Space');
   await page.keyboard.press('Enter');
 
-  await page.focus('.list-selected .tag-item:nth-child(3) button');
+  await page.focus('.form-group.multiple .list-selected .tag-item:nth-child(3) [role="button"]');
   await page.keyboard.press('Enter');
 
   const secondButtonFocused = await page.evaluate(() => {
-    return document.activeElement === document.querySelector('.list-selected .tag-item:nth-child(2) button');
+    return document.activeElement === document.querySelector('.form-group.multiple .list-selected .tag-item:nth-child(2) [role="button"]');
   });
 
   t.true(secondButtonFocused, 'Le focus est placé sur le bouton précédant dans l’ordre du document lors de la suppression');
 
-  await page.focus('.list-selected .tag-item:nth-child(1) button');
+  await page.focus('.form-group.multiple .list-selected .tag-item:nth-child(1) [role="button"]');
   await page.keyboard.press('Enter');
 
   const firstButtonFocused = await page.evaluate(() => {
-    return document.activeElement === document.querySelector('.list-selected .tag-item:nth-child(1) button');
+    return document.activeElement === document.querySelector('.form-group.multiple .list-selected .tag-item:nth-child(1) [role="button"]');
   });
 
   t.true(firstButtonFocused, 'Le focus est placé sur le premier bouton dans l’ordre du document lors de la suppression du premier bouton');
@@ -491,11 +498,11 @@ test( 'Suppression des options via la liste des options sélectionnées', async 
   await page.keyboard.press('Enter');
   await page.keyboard.press('Enter');
 
-  const openerFocused = await page.evaluate(() => {
-    return document.activeElement === document.querySelector('.multiple button');
+  const inputFocused = await page.evaluate(() => {
+    return document.activeElement === document.querySelector('.multiple .a11y-container input');
   });
 
-  t.true(openerFocused, 'Le focus est placé sur le bouton d’ouverture du select lorsque tous les boutons de suppression ont disparu');
+  t.true(inputFocused, 'Le focus est placé dans le champ de recherche lorsque tous les boutons de suppression ont disparu');
 
   await browser.close();
 
@@ -511,22 +518,27 @@ test( 'Gestion de la liste au blur', async t => {
   await page.keyboard.press('Tab');
   await page.keyboard.up('Shift');
 
-  const buttonFocus = await page.evaluate(() => {
-    const button = document.activeElement;
+  const containerFocus = await page.evaluate(() => {
+    const wrapper = document.querySelector('.multiple .select-a11y');
+    const button = document.querySelector('.multiple button');
 
     return {
-      isButton: document.activeElement === document.querySelector('.multiple button'),
+      isInsideSelect: wrapper.contains(document.activeElement),
       expanded: button.getAttribute('aria-expanded')
     }
   });
 
-  t.same(buttonFocus.isButton && buttonFocus.expanded, 'true', 'La liste reste ouverte lorsque le bouton d’ouverture à la focus');
+  t.same(containerFocus.isInsideSelect && containerFocus.expanded, 'true', 'La liste reste ouverte lorsque le focus reste dans le select');
 
   await page.keyboard.down('Shift');
   await page.keyboard.press('Tab');
   await page.keyboard.up('Shift');
 
-  await page.waitFor(10);
+  await page.keyboard.down('Shift');
+  await page.keyboard.press('Tab');
+  await page.keyboard.up('Shift');
+
+  await wait(10);
 
   const buttonBlurTopExpanded = await page.evaluate(() => {
     const button = document.querySelector('.multiple button');
@@ -545,11 +557,11 @@ test( 'Gestion de la liste au blur', async t => {
   await page.keyboard.press('Tab');
   await page.keyboard.press('Tab');
 
-  await page.waitFor(10);
+  await wait(10);
 
   const select = await page.evaluate(() => {
     const button = document.querySelector('.multiple button');
-    const selected = document.querySelector('.multiple .tag-item button');
+    const selected = document.querySelector('.form-group.multiple .tag-item [role="button"]');
 
     return {
       expanded: button.getAttribute('aria-expanded'),
@@ -557,15 +569,15 @@ test( 'Gestion de la liste au blur', async t => {
     }
   });
 
-  t.same(select.selectionFocused && select.expanded, 'false', 'La liste est fermée lorsque le focus est sur les boutons de la liste de sélection');
+  t.same(select.selectionFocused && select.expanded, false, 'La liste est fermée lorsque le focus est sur les boutons de la liste de sélection');
 
   await page.click('.multiple button');
 
-  await page.waitFor(10);
+  await wait(10);
 
   await page.click('body')
 
-  await page.waitFor(20);
+  await wait(20);
 
   const focused = await page.evaluate(() => {
     const button = document.querySelector('.multiple button');
@@ -587,7 +599,7 @@ test( 'Gestion de la liste du select simple au clic', async t => {
 
   await page.click('.a11y-suggestions [role="option"]:nth-child(2)');
 
-  await page.waitFor(10);
+  await wait(10);
 
   const clickStatus = await page.evaluate(() => {
     const activeElement = document.activeElement;
@@ -608,7 +620,7 @@ test( 'Gestion de la liste du select simple au clic', async t => {
   await page.click('.a11y-suggestions [role="option"]:nth-child(2)');
   await page.keyboard.up('Meta');
 
-  await page.waitFor(10);
+  await wait(10);
 
   const metaClickStatus = await page.evaluate(() => {
     const activeElement = document.activeElement;
@@ -635,7 +647,7 @@ test( 'Gestion de la liste du select multiple au clic', async t => {
 
   await page.click('.a11y-suggestions [role="option"]:nth-child(2)');
 
-  await page.waitFor(10);
+  await wait(10);
 
   const clickStatus = await page.evaluate(() => {
     const activeElement = document.activeElement;
@@ -647,21 +659,19 @@ test( 'Gestion de la liste du select multiple au clic', async t => {
     }
   });
 
-  t.same(clickStatus.expanded, 'false', 'La liste est refermée après un clic sur une option');
-  t.true(clickStatus.openerFocused, 'Le focus est replacé sur le bouton ouvrant la liste');
-
-  await page.click('.multiple button');
+  t.same(clickStatus.expanded, 'true', 'La liste reste ouverte après un clic sur une option');
+  t.false(clickStatus.openerFocused, 'Le focus n’est pas replacé sur le bouton ouvrant la liste');
 
   await page.keyboard.down('Meta');
-  await page.click('.a11y-suggestions [role="option"]:nth-child(2)');
+  await page.click('.multiple .a11y-suggestions [role="option"]:nth-child(2)');
   await page.keyboard.up('Meta');
 
-  await page.waitFor(10);
+  await wait(10);
 
   const metaClickStatus = await page.evaluate(() => {
     const activeElement = document.activeElement;
-    const opener = document.querySelector('.form-group button');
-    const option = document.querySelector('.a11y-suggestions [role="option"]:nth-child(2')
+    const opener = document.querySelector('.multiple button');
+    const option = document.querySelector('.multiple .a11y-suggestions [role="option"]:nth-child(2')
 
     return {
       expanded: opener.getAttribute('aria-expanded'),
@@ -669,7 +679,7 @@ test( 'Gestion de la liste du select multiple au clic', async t => {
     }
   });
 
-  t.same(metaClickStatus.expanded, 'false', 'La liste n’est pas refermée après un meta + clic sur une option');
+  t.same(metaClickStatus.expanded, 'true', 'La liste n’est pas refermée après un meta + clic sur une option');
   t.true(metaClickStatus.optionFocused, 'Le focus reste sur l’option cliquée');
 
   await browser.close();
@@ -738,22 +748,23 @@ test( 'Reset du forumlaire', async t => {
 
   await page.click('.a11y-suggestions [role="option"]:nth-child(2)');
 
-  await page.waitFor(10);
+  await wait(10);
 
   await page.click('.multiple button');
 
   await page.click('.a11y-suggestions [role="option"]:nth-child(2)');
 
-  await page.waitFor(10);
+  await wait(10);
 
   await page.click('[type="reset"]');
 
-  await page.waitFor(10);
+  await wait(10);
 
   const [singleState, multipleState] = await page.evaluate(() => {
     const singleSelect = document.querySelector('select[data-select-a11y]:not([multiple])');
     const multipleSelect = document.querySelector('select[data-select-a11y][multiple]');
-    const list = Array.from(document.querySelectorAll('.multiple .list-selected li'));
+    const wrapper = document.querySelector('.form-group.multiple .select-a11y');
+    const list = Array.from(wrapper.querySelectorAll('.list-selected .tag-item'));
 
     return [
       {
@@ -774,6 +785,221 @@ test( 'Reset du forumlaire', async t => {
   })
 
   t.true(selectedOptionsMatches, 'Le reset de formulaire change la liste des éléments sélectionnés')
+
+  await browser.close();
+
+  t.end();
+});
+
+test( 'Required déplacé sur le composant visible', async t => {
+  const [ browser, page ] = await createBrowser();
+
+  await page.setContent(`
+    <form id="form">
+      <label for="required-select">Required select</label>
+      <select id="required-select" required>
+        <option value="">Choisir</option>
+        <option value="a">A</option>
+      </select>
+      <button type="submit">Envoyer</button>
+    </form>
+  `);
+  await page.addScriptTag({ path: scriptPath });
+
+  const data = await page.evaluate(async () => {
+    const select = document.getElementById('required-select');
+    const form = document.getElementById('form');
+    let submitCount = 0;
+
+    form.addEventListener('submit', event => {
+      submitCount++;
+      event.preventDefault();
+    });
+
+    new Select(select);
+
+    const button = document.querySelector('.btn-select-a11y');
+    const wrapper = document.querySelector('.select-a11y');
+
+    const init = {
+      selectRequired: select.hasAttribute('required'),
+      ariaRequired: button.getAttribute('aria-required'),
+      ariaInvalid: button.getAttribute('aria-invalid'),
+    };
+
+    form.requestSubmit();
+    await new Promise(resolve => setTimeout(resolve, 20));
+
+    const invalidSubmit = {
+      submitCount,
+      ariaInvalid: button.getAttribute('aria-invalid'),
+      wrapperInvalid: wrapper.classList.contains('select-a11y-invalid'),
+      focusVisible: document.activeElement === button,
+    };
+
+    button.click();
+    document.querySelector('[role="option"][data-index="1"]').click();
+    await new Promise(resolve => setTimeout(resolve, 20));
+
+    const afterSelection = {
+      value: select.value,
+      ariaInvalid: button.getAttribute('aria-invalid'),
+      wrapperInvalid: wrapper.classList.contains('select-a11y-invalid'),
+    };
+
+    form.requestSubmit();
+    await new Promise(resolve => setTimeout(resolve, 20));
+
+    return {
+      init,
+      invalidSubmit,
+      afterSelection,
+      validSubmitCount: submitCount,
+    };
+  });
+
+  t.false(data.init.selectRequired, 'L’attribut required est retiré du select masqué');
+  t.same(data.init.ariaRequired, 'true', 'Le composant visible expose aria-required');
+  t.same(data.init.ariaInvalid, null, 'Le composant visible n’est pas invalide avant submit');
+  t.same(data.invalidSubmit.submitCount, 0, 'Le submit est bloqué quand aucune valeur required n’est choisie');
+  t.same(data.invalidSubmit.ariaInvalid, 'true', 'Le composant visible expose aria-invalid après submit échoué');
+  t.true(data.invalidSubmit.wrapperInvalid, 'La classe invalid est posée sur le composant');
+  t.true(data.invalidSubmit.focusVisible, 'Le focus est placé sur le composant visible');
+  t.same(data.afterSelection.value, 'a', 'Une valeur est sélectionnée');
+  t.same(data.afterSelection.ariaInvalid, null, 'aria-invalid est retiré après sélection');
+  t.false(data.afterSelection.wrapperInvalid, 'La classe invalid est retirée après sélection');
+  t.same(data.validSubmitCount, 1, 'Le submit passe quand une valeur est choisie');
+
+  await browser.close();
+
+  t.end();
+});
+
+test( 'Classe is-invalid synchronisée sur le composant visible', async t => {
+  const [ browser, page ] = await createBrowser();
+
+  await page.setContent(`
+    <form>
+      <label for="server-invalid-select">Invalid select</label>
+      <select id="server-invalid-select" class="is-invalid">
+        <option value="">Choisir</option>
+        <option value="a">A</option>
+      </select>
+    </form>
+  `);
+  await page.addScriptTag({ path: scriptPath });
+
+  const data = await page.evaluate(async () => {
+    const select = document.getElementById('server-invalid-select');
+    new Select(select);
+
+    const button = document.querySelector('.btn-select-a11y');
+    const wrapper = document.querySelector('.select-a11y');
+
+    const init = {
+      ariaInvalid: button.getAttribute('aria-invalid'),
+      wrapperInvalid: wrapper.classList.contains('select-a11y-invalid'),
+    };
+
+    select.classList.remove('is-invalid');
+    await new Promise(resolve => setTimeout(resolve, 20));
+
+    const afterRemove = {
+      ariaInvalid: button.getAttribute('aria-invalid'),
+      wrapperInvalid: wrapper.classList.contains('select-a11y-invalid'),
+    };
+
+    select.classList.add('is-invalid');
+    await new Promise(resolve => setTimeout(resolve, 20));
+
+    const afterAdd = {
+      ariaInvalid: button.getAttribute('aria-invalid'),
+      wrapperInvalid: wrapper.classList.contains('select-a11y-invalid'),
+    };
+
+    return {
+      init,
+      afterRemove,
+      afterAdd,
+    };
+  });
+
+  t.same(data.init.ariaInvalid, 'true', 'aria-invalid est posé si le select source a is-invalid');
+  t.true(data.init.wrapperInvalid, 'La classe invalid est posée si le select source a is-invalid');
+  t.same(data.afterRemove.ariaInvalid, null, 'aria-invalid est retiré quand is-invalid est retirée');
+  t.false(data.afterRemove.wrapperInvalid, 'La classe invalid est retirée quand is-invalid est retirée');
+  t.same(data.afterAdd.ariaInvalid, 'true', 'aria-invalid est reposé quand is-invalid est ajoutée');
+  t.true(data.afterAdd.wrapperInvalid, 'La classe invalid est reposée quand is-invalid est ajoutée');
+
+  await browser.close();
+
+  t.end();
+});
+
+test( 'Les contenus HTML-like sont rendus comme du texte', async t => {
+  const [ browser, page ] = await createBrowser();
+
+  await page.setContent(`
+    <form>
+      <label for="unsafe-select">Unsafe select</label>
+      <select id="unsafe-select" multiple></select>
+    </form>
+  `);
+  await page.addScriptTag({ path: scriptPath });
+
+  const data = await page.evaluate(async () => {
+    const payload = '<img src=x onerror="window.__selectA11yXss=true">';
+    const select = document.getElementById('unsafe-select');
+    window.__selectA11yXss = false;
+    select.add(new Option(payload, payload, true, true));
+
+    new Select(select, {
+      text: {
+        noResult: payload,
+        help: payload,
+        placeholder: payload,
+        deleteItem: 'Supprimer {t}'
+      }
+    });
+
+    const wrapper = document.querySelector('.select-a11y');
+    const tag = wrapper.querySelector('.tag-item');
+    const removeButton = wrapper.querySelector('.tag-item-supp');
+    const opener = wrapper.querySelector('.btn-select-a11y');
+
+    opener.click();
+    const input = wrapper.querySelector('.a11y-container input');
+    input.value = 'no-match';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    await new Promise(resolve => setTimeout(resolve, 20));
+
+    const overlay = wrapper.querySelector('.a11y-container');
+    const noSuggestion = wrapper.querySelector('.a11y-no-suggestion');
+
+    return {
+      tagText: tag.firstElementChild.textContent.trim(),
+      tagHasImage: tag.querySelector('img') !== null,
+      removeTitle: removeButton.getAttribute('title'),
+      overlayHasImage: overlay.querySelector('img') !== null,
+      helpText: overlay.querySelector(`#a11y-usage-${select.id}-js`).textContent,
+      placeholderText: overlay.querySelector('label').textContent,
+      inputPlaceholder: input.getAttribute('placeholder'),
+      noSuggestionText: noSuggestion.textContent,
+      xssExecuted: window.__selectA11yXss,
+    };
+  });
+
+  const payload = '<img src=x onerror="window.__selectA11yXss=true">';
+
+  t.same(data.tagText, payload, 'Le libellé du tag est conservé comme texte');
+  t.false(data.tagHasImage, 'Le libellé du tag ne crée pas d’élément HTML');
+  t.same(data.removeTitle, `Supprimer ${payload}`, 'Le titre du bouton de suppression conserve le texte');
+  t.false(data.overlayHasImage, 'Les textes de l’overlay ne créent pas d’élément HTML');
+  t.same(data.helpText, payload, 'Le texte d’aide est conservé comme texte');
+  t.same(data.placeholderText, payload, 'Le label du champ de recherche est conservé comme texte');
+  t.same(data.inputPlaceholder, payload, 'Le placeholder est conservé comme attribut texte');
+  t.same(data.noSuggestionText, payload, 'Le message aucun résultat est conservé comme texte');
+  t.false(data.xssExecuted, 'Aucun gestionnaire injecté n’est exécuté');
 
   await browser.close();
 

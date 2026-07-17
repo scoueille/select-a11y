@@ -242,7 +242,10 @@ class Select{
 
     button.appendChild(text);
 
-    button.insertAdjacentHTML('beforeend', '<span class="icon-select" aria-hidden="true"></span>');
+    const icon = document.createElement('span');
+    icon.classList.add('icon-select');
+    icon.setAttribute('aria-hidden', 'true');
+    button.appendChild(icon);
 
     return button;
   }
@@ -285,16 +288,30 @@ class Select{
     suggestions.classList.add('a11y-suggestions');
     suggestions.id = `a11y-${this.id}-suggestions`;
 
+    const help = document.createElement('p');
+    help.setAttribute('id', `a11y-usage-${this.id}-js`);
+    help.classList.add('sr-only');
+    help.textContent = this._options.text.help;
+    container.appendChild(help);
+
     if(!this._options.keywordsMode) { // Mode select classique
-      container.innerHTML = `
-        <p id="a11y-usage-${this.id}-js" class="sr-only">${this._options.text.help}</p>
-        <label for="a11y-${this.id}-js" class="sr-only">${this._options.text.placeholder}</label>
-        <input type="text" id="a11y-${this.id}-js" class="${this.el.className}" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${this._options.text.placeholder}" aria-describedby="a11y-usage-${this.id}-js">
-      `;
-    } else {
-      container.innerHTML = `
-        <p id="a11y-usage-${this.id}-js" class="sr-only">${this._options.text.help}</p>
-      `;
+      const label = document.createElement('label');
+      label.setAttribute('for', `a11y-${this.id}-js`);
+      label.classList.add('sr-only');
+      label.textContent = this._options.text.placeholder;
+      container.appendChild(label);
+
+      const input = document.createElement('input');
+      input.setAttribute('type', 'text');
+      input.setAttribute('id', `a11y-${this.id}-js`);
+      input.className = this.el.className;
+      input.setAttribute('autocomplete', 'off');
+      input.setAttribute('autocapitalize', 'off');
+      input.setAttribute('spellcheck', 'false');
+      input.setAttribute('placeholder', this._options.text.placeholder);
+      input.setAttribute('aria-describedby', `a11y-usage-${this.id}-js`);
+      container.appendChild(input);
+      this.input = input;
     }
 
     container.appendChild(suggestions);
@@ -310,9 +327,6 @@ class Select{
     }
 
     this.list = suggestions;
-    if(!this._options.keywordsMode) { // Mode select classique
-      this.input = container.querySelector('input');
-    }
     return container;
   }
 
@@ -460,13 +474,28 @@ class Select{
     this.el.setAttribute('tabindex', -1);
   }
 
+  _emptyElement(element) {
+    while(element.firstChild) {
+      element.removeChild(element.firstChild);
+    }
+  }
+
+  _fillNoSuggestion(text) {
+    this._emptyElement(this.list);
+
+    const noSuggestion = document.createElement('p');
+    noSuggestion.classList.add('a11y-no-suggestion');
+    noSuggestion.textContent = text;
+    this.list.appendChild(noSuggestion);
+  }
+
   _fillOverlayWithText(text){
     this.suggestions                = [];
     this.suggestionsGroups          = [];
     this.allSuggestionsAndGroups    = [];
     this.customOverlayMessageShown  = true;
 
-    this.list.innerHTML = `<p class="a11y-no-suggestion">${text}</p>`;
+    this._fillNoSuggestion(text);
     this._setLiveZone(text);
   }
 
@@ -603,7 +632,7 @@ class Select{
     this.suggestionsGroups        = divOptgroup;
 
     if(!this.suggestions.length){
-      this.list.innerHTML = `<p class="a11y-no-suggestion">${this._options.text.noResult}</p>`;
+      this._fillNoSuggestion(this._options.text.noResult);
     }
     else {
       const listBox = document.createElement('div');
@@ -637,7 +666,7 @@ class Select{
 
       this._updateSelectedGroups();
 
-      this.list.innerHTML = '';
+      this._emptyElement(this.list);
       this.list.appendChild(listBox);
       this.button.setAttribute('aria-controls', `a11y-${this.id}-listbox`);
     }
@@ -692,7 +721,7 @@ class Select{
     this.suggestionsGroups        = divOptgroup;
 
     if(!this.suggestions.length){
-      this.list.innerHTML = `<p class="a11y-no-suggestion">${this._options.text.noResult}</p>`;
+      this._fillNoSuggestion(this._options.text.noResult);
     } else {
       const listBox = document.createElement('div');
       listBox.setAttribute('role', 'listbox');
@@ -703,7 +732,7 @@ class Select{
         listBox.appendChild(suggestion);
       }.bind(this));
 
-      this.list.innerHTML = '';
+      this._emptyElement(this.list);
       this.list.appendChild(listBox);
       this.input.setAttribute('aria-controls', `a11y-${this.id}-listbox`);
     }
@@ -1550,15 +1579,43 @@ class Select{
 
       const tagItem = document.createElement('div');
       tagItem.classList.add('tag-item');
-      tagItem.role = 'row';
+      tagItem.setAttribute('role', 'row');
 
-      tagItem.insertAdjacentHTML('beforeend', '<span role="gridcell"><span tabindex="-1" id="tag-item-' + index + '">' + text + '</span></span>');
-      tagItem.insertAdjacentHTML('beforeend', '<span role="gridcell"><span class="tag-item-supp" tabindex="-1" title="' + this._options.text.deleteItem.replace('{t}', text) + '" id="tag-item-remove-' + index + '" role="button" data-index="' + index + '" aria-label="' + this._options.text.delete + '" aria-labelledby="tag-item-remove-' + index + ' tag-item-' + index + '"><span class="icon-delete" aria-hidden="true"></span></span></span>');
+      const labelCell = document.createElement('span');
+      labelCell.setAttribute('role', 'gridcell');
+
+      const labelText = document.createElement('span');
+      labelText.setAttribute('tabindex', '-1');
+      labelText.setAttribute('id', `tag-item-${index}`);
+      labelText.textContent = text;
+      labelCell.appendChild(labelText);
+
+      const removeCell = document.createElement('span');
+      removeCell.setAttribute('role', 'gridcell');
+
+      const removeButton = document.createElement('span');
+      removeButton.classList.add('tag-item-supp');
+      removeButton.setAttribute('tabindex', '-1');
+      removeButton.setAttribute('title', this._options.text.deleteItem.replace('{t}', text));
+      removeButton.setAttribute('id', `tag-item-remove-${index}`);
+      removeButton.setAttribute('role', 'button');
+      removeButton.setAttribute('data-index', index);
+      removeButton.setAttribute('aria-label', this._options.text.delete);
+      removeButton.setAttribute('aria-labelledby', `tag-item-remove-${index} tag-item-${index}`);
+
+      const removeIcon = document.createElement('span');
+      removeIcon.classList.add('icon-delete');
+      removeIcon.setAttribute('aria-hidden', 'true');
+      removeButton.appendChild(removeIcon);
+      removeCell.appendChild(removeButton);
+
+      tagItem.appendChild(labelCell);
+      tagItem.appendChild(removeCell);
 
       return tagItem;
     }.bind(this)).filter(Boolean);
 
-    this.selectedList.innerHTML = '';
+    this._emptyElement(this.selectedList);
     items.forEach(function(item){
       this.selectedList.appendChild(item);
     }.bind(this));
