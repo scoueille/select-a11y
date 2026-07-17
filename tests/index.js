@@ -936,6 +936,109 @@ test( 'Classe is-invalid synchronisée sur le composant visible', async t => {
   t.end();
 });
 
+test( 'Autocomplete peut garder les suggestions sélectionnées visibles', async t => {
+  const [ browser, page ] = await createBrowser();
+
+  await page.setRequestInterception(true);
+  page.on('request', request => {
+    if(request.url().startsWith('https://select-a11y.test/competences?search=')) {
+      request.respond({
+        status: 200,
+        contentType: 'application/json',
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+        },
+        body: JSON.stringify({
+          competences: [
+            { text: 'amenagement', value: 'Aménagement du territoire' },
+            { text: 'urbanisme', value: 'Urbanisme' },
+          ],
+        }),
+      });
+      return;
+    }
+
+    request.continue();
+  });
+
+  await page.setContent(`
+    <form>
+      <label for="autocomplete-select">Compétences</label>
+      <select id="autocomplete-select" multiple></select>
+    </form>
+  `);
+  await page.addScriptTag({ path: scriptPath });
+
+  await page.evaluate(() => {
+    const select = document.getElementById('autocomplete-select');
+    new Select(select, {
+      keywordsMode: true,
+      url: search => `https://select-a11y.test/competences?search=${encodeURIComponent(search)}`,
+      urlResultsArray: 'competences',
+      urlValueField: 'text',
+      urlLabelField: 'value',
+      allowNewKeyword: false,
+      preventCloseOnSelect: true,
+      showSelectedAutocompleteResults: true,
+    });
+
+    const input = document.querySelector('.form-control-a11y');
+    input.value = 'am';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+
+  await page.waitForFunction(() => document.querySelectorAll('.a11y-suggestions [role="option"]').length === 2);
+
+  await page.click('.a11y-suggestions [data-value="amenagement"]');
+  await wait(20);
+
+  const selected = await page.evaluate(() => {
+    const suggestion = document.querySelector('.a11y-suggestions [data-value="amenagement"]');
+    const select = document.getElementById('autocomplete-select');
+
+    return {
+      suggestionVisible: suggestion !== null,
+      suggestionSelected: suggestion && suggestion.getAttribute('aria-selected'),
+      selectedValues: Array.prototype.map.call(select.selectedOptions, option => option.value),
+      selectedTags: Array.prototype.map.call(document.querySelectorAll('.tag-item'), tag => tag.textContent.trim()),
+      expanded: document.querySelector('.form-control-a11y').getAttribute('aria-expanded'),
+    };
+  });
+
+  t.true(selected.suggestionVisible, 'La suggestion sélectionnée reste affichée');
+  t.same(selected.suggestionSelected, 'true', 'La suggestion sélectionnée est marquée avec aria-selected');
+  t.same(selected.selectedValues, ['amenagement'], 'La valeur est sélectionnée dans le select source');
+  t.true(
+    selected.selectedTags.some(tag => tag.includes('Aménagement du territoire')),
+    'Le tag sélectionné est affiché'
+  );
+  t.same(selected.expanded, 'true', 'La liste autocomplete reste ouverte');
+
+  await page.click('.a11y-suggestions [data-value="amenagement"]');
+  await wait(20);
+
+  const deselected = await page.evaluate(() => {
+    const suggestion = document.querySelector('.a11y-suggestions [data-value="amenagement"]');
+    const select = document.getElementById('autocomplete-select');
+
+    return {
+      suggestionVisible: suggestion !== null,
+      suggestionSelected: suggestion && suggestion.getAttribute('aria-selected'),
+      selectedValues: Array.prototype.map.call(select.selectedOptions, option => option.value),
+      selectedTags: document.querySelectorAll('.tag-item').length,
+    };
+  });
+
+  t.true(deselected.suggestionVisible, 'La suggestion désélectionnée reste affichée');
+  t.same(deselected.suggestionSelected, null, 'La suggestion désélectionnée n’est plus marquée');
+  t.same(deselected.selectedValues, [], 'La valeur est désélectionnée dans le select source');
+  t.same(deselected.selectedTags, 0, 'Le tag est retiré');
+
+  await browser.close();
+
+  t.end();
+});
+
 test( 'Les contenus HTML-like sont rendus comme du texte', async t => {
   const [ browser, page ] = await createBrowser();
 

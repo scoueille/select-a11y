@@ -64,6 +64,7 @@ class Select{
       addCloseButton: false,
       keywordsMode: false,
       url: null,
+      showSelectedAutocompleteResults: false,
       allowNewKeyword: true,
       regexFilter: null,
       additionalDelemiters: [],
@@ -687,7 +688,9 @@ class Select{
     let suggestionsEtGroups = Array.prototype.map.call(data[this._options.urlResultsArray], function(result) {
       let value = result[this._options.urlValueField];
       let label = result[this._options.urlLabelField];
-      if(this.selectedKeywords.includes(value)) {
+      const isSelected = this.selectedKeywords.includes(String(value));
+
+      if(isSelected && !this._options.showSelectedAutocompleteResults) {
         return;
       }
 
@@ -698,6 +701,9 @@ class Select{
       suggestion.setAttribute('data-value', value);
       suggestion.setAttribute('data-label', label);
       suggestion.classList.add('a11y-suggestion');
+      if(isSelected) {
+        suggestion.setAttribute('aria-selected', 'true');
+      }
 
       suggestion.innerText = label;
 
@@ -886,10 +892,24 @@ class Select{
 
     const optionValue = option.getAttribute('data-value');
     const optionlabel = option.getAttribute('data-label');
-    this._addOption(optionlabel, optionValue);
+    this._toggleAutocompleteKeyword(optionlabel, optionValue, option);
+  }
+
+  _toggleAutocompleteKeyword(optionlabel, optionValue, option) {
+    const keepSuggestion = this._options.showSelectedAutocompleteResults;
+    const existingOption = this._getOptionByValue(optionValue);
+
+    if(keepSuggestion && existingOption != null && existingOption.selected) {
+      existingOption.selected = false;
+      this._updateSelectedList();
+      this._dispatchChangeEvent();
+    } else {
+      this._addOption(optionlabel, optionValue);
+    }
+
     if(!this._options.preventCloseOnSelect) {
       this._toggleOverlay( false );
-    } else {
+    } else if(!keepSuggestion) {
       this._removeSuggestion(option);
     }
   }
@@ -1135,12 +1155,7 @@ class Select{
         event.preventDefault();
         const optionValue = option.getAttribute('data-value');
         const optionlabel = option.getAttribute('data-label');
-        this._addOption(optionlabel, optionValue);
-        if(!this._options.preventCloseOnSelect) {
-          this._toggleOverlay( false );
-        } else {
-          this._removeSuggestion(option);
-        }
+        this._toggleAutocompleteKeyword(optionlabel, optionValue, option);
 
         return;
       }
@@ -1252,9 +1267,18 @@ class Select{
 
   }
 
+  _getOptionByValue(optionValue){
+    const value = String(optionValue);
+    const options = Array.prototype.filter.call(this.el.options, function(option){
+      return option.value === value;
+    });
+
+    return options.length ? options[0] : null;
+  }
+
   _addOption(keyword, keywordValue){
     const optionValue = keywordValue || keyword;
-    const existingOption =  this.el.querySelector('option[value="' + optionValue + '"]');
+    const existingOption = this._getOptionByValue(optionValue);
     if(existingOption != null) {
       existingOption.selected = true;
       this._updateSelectedList();
@@ -1425,6 +1449,25 @@ class Select{
     });
   }
 
+  _syncAutocompleteSuggestionsSelection(){
+    if(!this._options.showSelectedAutocompleteResults) {
+      return;
+    }
+
+    this.suggestions.forEach(function(suggestion){
+      const value = suggestion.getAttribute('data-value');
+      if(value == null) {
+        return;
+      }
+
+      if(this.selectedKeywords.includes(value)){
+        suggestion.setAttribute('aria-selected', 'true');
+      } else {
+        suggestion.removeAttribute('aria-selected');
+      }
+    }.bind(this));
+  }
+
   _toggleSelection(optionIndex, close = true){
     if(this.disabled) {
       return;
@@ -1441,7 +1484,7 @@ class Select{
     this.suggestions.forEach(function(suggestion){
       const index = parseInt(suggestion.getAttribute('data-index'), 10);
 
-      if(index != NaN) {
+      if(!Number.isNaN(index)) {
         if(this.el.item(index).selected){
           suggestion.setAttribute('aria-selected', 'true');
         } else {
@@ -1485,7 +1528,7 @@ class Select{
 
     this.suggestions.forEach(function(suggestion){
       const index = parseInt(suggestion.getAttribute('data-index'), 10);
-      if(index != NaN) {
+      if(!Number.isNaN(index)) {
         if(this.el.item(index).selected){
           suggestion.setAttribute('aria-selected', 'true');
         } else {
@@ -1629,6 +1672,8 @@ class Select{
     else if(this.selectedList.parentElement){
       this.wrap.removeChild(this.selectedList);
     }
+
+    this._syncAutocompleteSuggestionsSelection();
   }
 
   _wrap(){
