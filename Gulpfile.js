@@ -69,7 +69,8 @@ gulp.task('css:select', function () {
   return gulp.src('./src/select-a11y.scss')
     .pipe(sass({
       outputStyle: 'expanded',
-      includePaths: ['node_modules']
+      includePaths: ['node_modules'],
+      quietDeps: true
     }).on('error', sass.logError))
     .pipe(postcss([ autoprefixer()]))      
     .pipe(gulp.dest('./public/assets/css'));
@@ -80,7 +81,8 @@ gulp.task('css:public', function () {
     return gulp.src('./public/assets/scss/*.scss')
         .pipe(sass({
           outputStyle: 'compressed',
-          includePaths: ['node_modules']
+          includePaths: ['node_modules'],
+          quietDeps: true
         }).on('error', sass.logError))
         .pipe(postcss([ autoprefixer()]))      
         .pipe(gulp.dest('./public/assets/css'))
