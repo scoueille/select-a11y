@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: pages-${{ github.workflow }}-${{ github.ref }}
+  group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -35,32 +35,3 @@ jobs:
 
       - name: Test
         run: npm test
-
-      - name: Configure GitHub Pages
-        if: github.event_name == 'push' && github.ref_name == github.event.repository.default_branch
-        uses: actions/configure-pages@v5
-
-      - name: Upload GitHub Pages artifact
-        if: github.event_name == 'push' && github.ref_name == github.event.repository.default_branch
-        uses: actions/upload-pages-artifact@v4
-        with:
-          path: public
-
-  deploy-pages:
-    name: Deploy GitHub Pages
-    needs: build
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref_name == github.event.repository.default_branch
-
-    permissions:
-      pages: write
-      id-token: write
-
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-
-    steps:
-      - name: Deploy GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
