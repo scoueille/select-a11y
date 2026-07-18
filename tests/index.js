@@ -671,7 +671,7 @@ test( 'Gestion de la liste du select multiple au clic', async t => {
   const metaClickStatus = await page.evaluate(() => {
     const activeElement = document.activeElement;
     const opener = document.querySelector('.multiple button');
-    const option = document.querySelector('.multiple .a11y-suggestions [role="option"]:nth-child(2')
+    const option = document.querySelector('.multiple .a11y-suggestions [role="option"]:nth-child(2)')
 
     return {
       expanded: opener.getAttribute('aria-expanded'),
@@ -1223,6 +1223,259 @@ test( 'Autocomplete peut garder les suggestions sélectionnées visibles', async
   t.same(deselected.suggestionSelected, null, 'La suggestion désélectionnée n’est plus marquée');
   t.same(deselected.selectedValues, [], 'La valeur est désélectionnée dans le select source');
   t.same(deselected.selectedTags, 0, 'Le tag est retiré');
+
+  await browser.close();
+
+  t.end();
+});
+
+test( 'Autocomplete vide la recherche à la fermeture après sélection', async t => {
+  const [ browser, page ] = await createBrowser();
+
+  await page.setRequestInterception(true);
+  page.on('request', request => {
+    if(request.url().startsWith('https://select-a11y.test/close-selected?search=')) {
+      request.respond({
+        status: 200,
+        contentType: 'application/json',
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+        },
+        body: JSON.stringify({
+          results: [
+            { text: 'alpha', value: 'Alpha' },
+            { text: 'alpine', value: 'Alpine' },
+          ],
+        }),
+      });
+      return;
+    }
+
+    request.continue();
+  });
+
+  await page.setContent(`
+    <form>
+      <label for="autocomplete-close-selected">Mots clés</label>
+      <select id="autocomplete-close-selected" multiple></select>
+      <button type="button" id="outside-selected">Sortir</button>
+    </form>
+  `);
+  await page.addScriptTag({ path: scriptPath });
+
+  await page.evaluate(() => {
+    const select = document.getElementById('autocomplete-close-selected');
+    new Select(select, {
+      keywordsMode: true,
+      url: search => `https://select-a11y.test/close-selected?search=${encodeURIComponent(search)}`,
+      urlResultsArray: 'results',
+      urlValueField: 'text',
+      urlLabelField: 'value',
+      allowNewKeyword: true,
+      preventCloseOnSelect: true,
+    });
+  });
+
+  await page.type('.form-control-a11y', 'al');
+  await page.waitForFunction(() => document.querySelectorAll('.a11y-suggestions [role="option"]').length === 2);
+  await page.click('.a11y-suggestions [data-value="alpha"]');
+  await page.click('#outside-selected');
+  await wait(50);
+
+  const data = await page.evaluate(() => {
+    const wrapper = document.querySelector('.select-a11y');
+    const input = wrapper.querySelector('.form-control-a11y');
+    const select = document.getElementById('autocomplete-close-selected');
+
+    return {
+      values: Array.prototype.map.call(select.selectedOptions, option => option.value),
+      inputValue: input.value,
+      expanded: input.getAttribute('aria-expanded'),
+      opened: wrapper.classList.contains('select-a11y-opened'),
+      overlayVisible: wrapper.querySelector('.a11y-container') !== null,
+    };
+  });
+
+  t.same(data.values, ['alpha'], 'La valeur autocomplete est sélectionnée');
+  t.same(data.inputValue, '', 'La recherche est vidée à la fermeture après sélection');
+  t.same(data.expanded, 'false', 'L’autocomplete est marqué fermé');
+  t.false(data.opened, 'Le composant n’est plus marqué ouvert');
+  t.false(data.overlayVisible, 'L’overlay autocomplete est retiré du DOM');
+
+  await browser.close();
+
+  t.end();
+});
+
+test( 'Autocomplete conserve la recherche sans sélection et se rouvre au focus', async t => {
+  const [ browser, page ] = await createBrowser();
+
+  await page.setRequestInterception(true);
+  page.on('request', request => {
+    if(request.url().startsWith('https://select-a11y.test/close-empty?search=')) {
+      request.respond({
+        status: 200,
+        contentType: 'application/json',
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+        },
+        body: JSON.stringify({
+          results: [
+            { text: 'alpha', value: 'Alpha' },
+            { text: 'alpine', value: 'Alpine' },
+          ],
+        }),
+      });
+      return;
+    }
+
+    request.continue();
+  });
+
+  await page.setContent(`
+    <form>
+      <label for="autocomplete-close-empty">Mots clés</label>
+      <select id="autocomplete-close-empty" multiple></select>
+      <button type="button" id="outside-empty">Sortir</button>
+    </form>
+  `);
+  await page.addScriptTag({ path: scriptPath });
+
+  await page.evaluate(() => {
+    const select = document.getElementById('autocomplete-close-empty');
+    new Select(select, {
+      keywordsMode: true,
+      url: search => `https://select-a11y.test/close-empty?search=${encodeURIComponent(search)}`,
+      urlResultsArray: 'results',
+      urlValueField: 'text',
+      urlLabelField: 'value',
+      allowNewKeyword: true,
+    });
+  });
+
+  await page.type('.form-control-a11y', 'al');
+  await page.waitForFunction(() => document.querySelectorAll('.a11y-suggestions [role="option"]').length === 2);
+  await page.click('#outside-empty');
+  await wait(50);
+
+  const closed = await page.evaluate(() => {
+    const wrapper = document.querySelector('.select-a11y');
+    const input = wrapper.querySelector('.form-control-a11y');
+    const select = document.getElementById('autocomplete-close-empty');
+
+    return {
+      values: Array.prototype.map.call(select.selectedOptions, option => option.value),
+      inputValue: input.value,
+      expanded: input.getAttribute('aria-expanded'),
+      opened: wrapper.classList.contains('select-a11y-opened'),
+      overlayVisible: wrapper.querySelector('.a11y-container') !== null,
+    };
+  });
+
+  await page.focus('.form-control-a11y');
+  await page.waitForFunction(() => document.querySelectorAll('.a11y-suggestions [role="option"]').length === 2);
+
+  const reopened = await page.evaluate(() => {
+    const wrapper = document.querySelector('.select-a11y');
+    const input = wrapper.querySelector('.form-control-a11y');
+
+    return {
+      inputValue: input.value,
+      expanded: input.getAttribute('aria-expanded'),
+      opened: wrapper.classList.contains('select-a11y-opened'),
+      suggestions: wrapper.querySelectorAll('.a11y-suggestions [role="option"]').length,
+    };
+  });
+
+  t.same(closed.values, [], 'Aucune valeur autocomplete n’est sélectionnée');
+  t.same(closed.inputValue, 'al', 'La recherche est conservée à la fermeture sans sélection');
+  t.same(closed.expanded, 'false', 'L’autocomplete est fermé après sortie du champ');
+  t.false(closed.opened, 'Le composant n’est plus marqué ouvert après sortie du champ');
+  t.false(closed.overlayVisible, 'L’overlay autocomplete est retiré après sortie du champ');
+  t.same(reopened.inputValue, 'al', 'La recherche est toujours présente au retour focus');
+  t.same(reopened.expanded, 'true', 'L’autocomplete est rouvert au retour focus');
+  t.true(reopened.opened, 'Le composant est marqué ouvert au retour focus');
+  t.same(reopened.suggestions, 2, 'Les suggestions sont rechargées au retour focus');
+
+  await browser.close();
+
+  t.end();
+});
+
+test( 'Autocomplete se ferme quand un mot clé libre est ajouté avec un séparateur', async t => {
+  const [ browser, page ] = await createBrowser();
+
+  await page.setRequestInterception(true);
+  page.on('request', request => {
+    if(request.url().startsWith('https://select-a11y.test/keywords?search=')) {
+      request.respond({
+        status: 200,
+        contentType: 'application/json',
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+        },
+        body: JSON.stringify({
+          results: [
+            { text: 'alpha', value: 'Alpha' },
+            { text: 'beta', value: 'Beta' },
+          ],
+        }),
+      });
+      return;
+    }
+
+    request.continue();
+  });
+
+  await page.setContent(`
+    <form>
+      <label for="autocomplete-free-keyword-select">Mots clés</label>
+      <select id="autocomplete-free-keyword-select" multiple></select>
+    </form>
+  `);
+  await page.addScriptTag({ path: scriptPath });
+
+  await page.evaluate(() => {
+    const select = document.getElementById('autocomplete-free-keyword-select');
+    new Select(select, {
+      keywordsMode: true,
+      url: search => `https://select-a11y.test/keywords?search=${encodeURIComponent(search)}`,
+      urlResultsArray: 'results',
+      urlValueField: 'text',
+      urlLabelField: 'value',
+      allowNewKeyword: true,
+      additionalDelimiters: [','],
+    });
+  });
+
+  await page.type('.form-control-a11y', 'nouveau');
+  await page.waitForFunction(() => document.querySelectorAll('.a11y-suggestions [role="option"]').length === 2);
+  await page.keyboard.press(',');
+  await wait(50);
+
+  const data = await page.evaluate(() => {
+    const wrapper = document.querySelector('.select-a11y');
+    const input = wrapper.querySelector('.form-control-a11y');
+    const select = document.getElementById('autocomplete-free-keyword-select');
+
+    return {
+      values: Array.prototype.map.call(select.selectedOptions, option => option.value),
+      inputValue: input.value,
+      expanded: input.getAttribute('aria-expanded'),
+      controls: input.getAttribute('aria-controls'),
+      opened: wrapper.classList.contains('select-a11y-opened'),
+      overlayVisible: wrapper.querySelector('.a11y-container') !== null,
+      suggestions: wrapper.querySelectorAll('.a11y-suggestions [role="option"]').length,
+    };
+  });
+
+  t.same(data.values, ['nouveau'], 'Le mot clé libre est ajouté dans le select source');
+  t.same(data.inputValue, '', 'Le champ autocomplete est vidé');
+  t.same(data.expanded, 'false', 'L’autocomplete est marqué fermé');
+  t.same(data.controls, null, 'aria-controls est retiré quand la liste disparaît');
+  t.false(data.opened, 'Le composant n’est plus marqué ouvert');
+  t.false(data.overlayVisible, 'L’overlay autocomplete est retiré du DOM');
+  t.same(data.suggestions, 0, 'Les anciennes suggestions autocomplete ne restent pas affichées');
 
   await browser.close();
 

@@ -44,6 +44,7 @@ class Select{
     this.disabled = false;
     this.required = this.el.hasAttribute('required');
     this.requiredInvalid = false;
+    this.autocompleteSelectionMade = false;
     this.form = this.el.form;
     this.invalidObserver = null;
 
@@ -807,14 +808,15 @@ class Select{
       }
 
       var that = this;
-      this.ajaxRequest.onload  = function(e) {
-        if(that.ajaxRequest != null && that.ajaxRequest.responseText) {
+      const ajaxRequest = this.ajaxRequest;
+      ajaxRequest.onload  = function(e) {
+        if(that.ajaxRequest === ajaxRequest && that.search.toLowerCase() === search && that.ajaxRequest.responseText) {
           var data = JSON.parse(that.ajaxRequest.responseText);
           that._searchParseResult(data, search, focusOnResults);
         }
       }
-      this.ajaxRequest.open('GET', url, true);
-      this.ajaxRequest.send();
+      ajaxRequest.open('GET', url, true);
+      ajaxRequest.send();
     }
 
     this._setLiveZone();
@@ -920,6 +922,16 @@ class Select{
 
     this._addOption(keyword);
     this.input.value = "";
+    this.search = "";
+
+    if(this.ajaxRequest != null) {
+      this.ajaxRequest.abort();
+      this.ajaxRequest = null;
+    }
+
+    if(this.open) {
+      this._toggleOverlay(false, false);
+    }
 
     return true;
   }
@@ -974,6 +986,7 @@ class Select{
       this._updateSelectedList();
       this._dispatchChangeEvent();
     } else {
+      this.autocompleteSelectionMade = true;
       this._addOption(optionlabel, optionValue);
     }
 
@@ -998,6 +1011,10 @@ class Select{
     }
 
     this.search = this.input.value.trim();
+
+    if(this._options.keywordsMode && this._options.url != null) {
+      this.autocompleteSelectionMade = false;
+    }
 
     if(this.ctrlVPressed && this._options.keywordsMode && this._options.allowNewKeyword && this._options.additionalDelimiters.length > 0 && this.search != '') { // Mode keyword libre
       let delimiters = this._options.additionalDelimiters;
@@ -1288,7 +1305,10 @@ class Select{
     }
     setTimeout(function(){
       this.input.selectionStart = this.input.selectionEnd = this.input.value.length;
-      if(!this.open && this._options.text.welcomeMessage != null) {
+      if(this._options.keywordsMode && this._options.url != null && !this.open && this.input.value.trim() != '') {
+        this.search = this.input.value.trim();
+        this._toggleOverlay(true, true);
+      } else if(!this.open && this._options.text.welcomeMessage != null) {
         this._toggleOverlay(true, false, this._options.text.welcomeMessage);
       }
     }.bind(this))
@@ -1461,7 +1481,11 @@ class Select{
       if(!this._options.keywordsMode) { // Mode select classique
         this.input.value = '';
         this.search = '';
+      } else if(this._options.url != null && this.autocompleteSelectionMade) {
+        this.input.value = '';
+        this.search = '';
       }
+      this.autocompleteSelectionMade = false;
       this.wrap.classList.remove('select-a11y-opened');
       this._clearControls();
 
