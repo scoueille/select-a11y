@@ -237,13 +237,21 @@ Cela évite qu'un libellé contenant du HTML soit interprété comme du balisage
 
 ## Tests
 
-Les tests utilisent Tape et Puppeteer.
+Les tests utilisent Tape, Puppeteer et axe-core.
 
 ```bash
 npm test
 ```
 
 La suite ouvre Chromium en mode headless et vérifie le DOM généré, les interactions clavier/souris, le comportement de validation et la non-interprétation des contenus HTML-like.
+
+Les tests axe-core sont inclus dans `npm test` et peuvent aussi être lancés seuls :
+
+```bash
+npm run test:a11y
+```
+
+Ils vérifient les rendus principaux du composant : select simple fermé/ouvert, select multiple, sélection globale, optgroups, absence de résultat, required invalide, état serveur `.is-invalid`, mots clés et autocomplete.
 
 Pour obtenir la sortie TAP brute :
 

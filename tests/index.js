@@ -824,6 +824,7 @@ test( 'Required déplacé sur le composant visible', async t => {
     const init = {
       selectRequired: select.hasAttribute('required'),
       ariaRequired: button.getAttribute('aria-required'),
+      wrapperRequired: wrapper.classList.contains('select-a11y-required'),
       ariaInvalid: button.getAttribute('aria-invalid'),
     };
 
@@ -859,7 +860,8 @@ test( 'Required déplacé sur le composant visible', async t => {
   });
 
   t.false(data.init.selectRequired, 'L’attribut required est retiré du select masqué');
-  t.same(data.init.ariaRequired, 'true', 'Le composant visible expose aria-required');
+  t.same(data.init.ariaRequired, null, 'Le bouton visible ne porte pas aria-required');
+  t.true(data.init.wrapperRequired, 'Le composant visible expose la classe required');
   t.same(data.init.ariaInvalid, null, 'Le composant visible n’est pas invalide avant submit');
   t.same(data.invalidSubmit.submitCount, 0, 'Le submit est bloqué quand aucune valeur required n’est choisie');
   t.same(data.invalidSubmit.ariaInvalid, 'true', 'Le composant visible expose aria-invalid après submit échoué');

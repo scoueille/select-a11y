@@ -237,13 +237,21 @@ This prevents labels containing HTML-like content from being interpreted as acti
 
 ## Tests
 
-Tests use Tape and Puppeteer.
+Tests use Tape, Puppeteer and axe-core.
 
 ```bash
 npm test
 ```
 
 The suite opens headless Chromium and checks generated DOM, keyboard/mouse interactions, validation behavior and non-interpretation of HTML-like content.
+
+axe-core tests are included in `npm test` and can also be run on their own:
+
+```bash
+npm run test:a11y
+```
+
+They check the main component renderings: closed/open single select, multiple select, select-all action, optgroups, no-result state, invalid required state, server-side `.is-invalid`, keyword mode and autocomplete.
 
 To get raw TAP output:
 

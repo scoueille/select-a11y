@@ -11,11 +11,13 @@
   "scripts": {
     "build": "gulp build",
     "dev": "gulp dev",
-    "test": "tape tests/index.js | tap-diff"
+    "test": "tape tests/index.js tests/a11y.js | tap-diff",
+    "test:a11y": "tape tests/a11y.js | tap-diff"
   },
   "author": "DILA - PiDILA",
   "license": "(MIT OR CeCILL-B)",
   "devDependencies": {
+    "@axe-core/puppeteer": "^4.12.1",
     "@babel/core": "^7.4.3",
     "@babel/plugin-transform-object-assign": "^7.2.0",
     "@babel/preset-env": "^7.4.3",

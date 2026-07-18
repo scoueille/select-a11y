@@ -391,6 +391,14 @@ class Select{
 
   _getRequiredTarget() {
     if(!this._options.keywordsMode) {
+      return null;
+    }
+
+    return this.input;
+  }
+
+  _getInvalidTarget() {
+    if(!this._options.keywordsMode) {
       return this.button;
     }
 
@@ -416,7 +424,7 @@ class Select{
   _setInvalid(invalid) {
     this.wrap.classList.toggle('select-a11y-invalid', invalid);
 
-    const target = this._getRequiredTarget();
+    const target = this._getInvalidTarget();
     if(!target) {
       return;
     }
@@ -469,7 +477,7 @@ class Select{
   }
 
   _focusRequiredTarget() {
-    const target = this._getRequiredTarget();
+    const target = this._getInvalidTarget();
     if(target) {
       target.focus();
     }
@@ -487,11 +495,36 @@ class Select{
 
   _fillNoSuggestion(text) {
     this._emptyElement(this.list);
+    this._clearControls();
 
     const noSuggestion = document.createElement('p');
     noSuggestion.classList.add('a11y-no-suggestion');
     noSuggestion.textContent = text;
     this.list.appendChild(noSuggestion);
+  }
+
+  _setListBoxAccessibleName(listBox) {
+    const label = this.label && this.label.innerText ? this.label.innerText : this._options.text.placeholder;
+
+    if(label) {
+      listBox.setAttribute('aria-label', label);
+    }
+  }
+
+  _setControls() {
+    const target = this._getInvalidTarget();
+
+    if(target) {
+      target.setAttribute('aria-controls', `a11y-${this.id}-listbox`);
+    }
+  }
+
+  _clearControls() {
+    const target = this._getInvalidTarget();
+
+    if(target) {
+      target.removeAttribute('aria-controls');
+    }
   }
 
   _fillOverlayWithText(text){
@@ -580,13 +613,13 @@ class Select{
 
         const suggestionGroup = document.createElement('div');
         suggestionGroup.setAttribute('role', 'group');
-        //suggestionGroup.setAttribute('tabindex', 0);
+        if(this.multiple) {
+          suggestionGroup.setAttribute('tabindex', 0);
+        }
         suggestionGroup.setAttribute('aria-labelledby', this.id + '_group_label_' + indexGroup);
         suggestionGroup.classList.add('a11y-suggestion-group');
 
         const suggestionGroupLabel = document.createElement('div');
-        suggestionGroupLabel.setAttribute('role', 'presentation');
-        suggestionGroupLabel.setAttribute('tabindex', 0);
         suggestionGroupLabel.setAttribute('id', this.id + '_group_label_' + indexGroup);
         suggestionGroupLabel.classList.add('a11y-suggestion-group-label');
         suggestionGroupLabel.innerText = text
@@ -617,11 +650,7 @@ class Select{
         divOptgroupAndOption.push(element);
       } else if (element.getAttribute('role') === 'group') {
         if(this.multiple){
-          let presentationElementsInGroup = element.querySelectorAll('[role="presentation"]');
-          presentationElementsInGroup.forEach(function(presentationElement) {
-              //divOptions.push(presentationElement);
-              divOptgroupAndOption.push(presentationElement);
-          });
+          divOptgroupAndOption.push(element);
         }
         // Si l'élément a le rôle "Group", parcours ses enfants pour récupérer les div avec le rôle "Option"
         let optionElementsInGroup = element.querySelectorAll('[role="option"]');
@@ -643,24 +672,25 @@ class Select{
       const listBox = document.createElement('div');
       listBox.setAttribute('role', 'listbox');
       listBox.id = `a11y-${this.id}-listbox`;
+      this._setListBoxAccessibleName(listBox);
+      let selectAll = null;
 
       if(this.multiple){
         listBox.setAttribute('aria-multiselectable', 'true');
 
         if(this._options.selectAll && nbValues > 0) {
           // create the option
-          const selectAll = document.createElement('div');
+          selectAll = document.createElement('div');
           selectAll.setAttribute('role', 'button');
           selectAll.setAttribute('tabindex', 0);
           if(nbValues == nbSelectedValues) {
-            selectAll.setAttribute('aria-pressed', 1);
+            selectAll.setAttribute('aria-pressed', 'true');
           } else {
-            selectAll.setAttribute('aria-pressed', 0);
+            selectAll.setAttribute('aria-pressed', 'false');
           }
           selectAll.classList.add('a11y-suggestion');
           selectAll.classList.add('a11y-select-all-suggestion');
           selectAll.innerText = this._options.text.selectAll;
-          listBox.appendChild(selectAll);
           divOptgroupAndOption.unshift(selectAll);
         }
       }
@@ -672,8 +702,11 @@ class Select{
       this._updateSelectedGroups();
 
       this._emptyElement(this.list);
+      if(selectAll) {
+        this.list.appendChild(selectAll);
+      }
       this.list.appendChild(listBox);
-      this.button.setAttribute('aria-controls', `a11y-${this.id}-listbox`);
+      this._setControls();
     }
 
     this.allSuggestionsAndGroups  = divOptgroupAndOption;
@@ -736,6 +769,7 @@ class Select{
       const listBox = document.createElement('div');
       listBox.setAttribute('role', 'listbox');
       listBox.id = `a11y-${this.id}-listbox`;
+      this._setListBoxAccessibleName(listBox);
       listBox.setAttribute('aria-multiselectable', 'true');
 
       suggestionsEtGroups.forEach(function(suggestion){
@@ -744,7 +778,7 @@ class Select{
 
       this._emptyElement(this.list);
       this.list.appendChild(listBox);
-      this.input.setAttribute('aria-controls', `a11y-${this.id}-listbox`);
+      this._setControls();
     }
 
     this.wrap.append(this.overlay);
@@ -1429,6 +1463,7 @@ class Select{
         this.search = '';
       }
       this.wrap.classList.remove('select-a11y-opened');
+      this._clearControls();
 
       // reset aria-live
       this._setLiveZone();
