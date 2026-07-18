@@ -1,64 +1,91 @@
 # Select-a11y
 
-[Version de cette page en français](readme.md)
+[Version française](readme.md)
 
+## Overview
 
-**select-a11y** transforms selects (multiple or not) into suggestions list with search input. It is compliant with [Web Content Accessibility Guidelines (WCAG)](https://www.w3.org/WAI/intro/wcag) and [General Accessibility Framework for Administrations](https://disic.github.io/rgaa_referentiel_en/introduction-RGAA.html) (Référentiel général d'accessibilité pour les administrations - RGAA).
+**select-a11y** is a JavaScript/CSS component that turns a single or multiple `<select>` into an accessible component with an opener button, a search input, a suggestions list and, for multiple selects, a selected-items list.
 
-To see the demo, three solutions are available:
-*  view the [online demo](http://pidila.gitlab.io/select-a11y/) ;
-* download or clone this repository, then open the file /public/index.html ;
-* install locally by cloning the repository, and then running the commands `$ npm install` then `$ gulp dev`.
+The original `<select>` stays in the DOM so forms keep submitting the same values. The component adds a visible interface that is easier to use and keyboard-friendly.
 
-**select-a11y** is part of the DILA’s accessible and responsive UI components library [Scampi (fr)](https://gitlab.com/pidila/scampi). It was primarily developed and is currently used in production on service-public.fr, official website of the french administration. See filter boxes on [this page (fr)](https://www.service-public.fr/demarches-silence-vaut-accord/recherche).
+Main features:
 
-## References
+- single and multiple selects;
+- option filtering with a search input;
+- option groups (`optgroup`);
+- selected-items list with remove buttons;
+- select-all action;
+- free keyword mode;
+- remote autocomplete mode;
+- `required` handling on the visible component;
+- server-side `.is-invalid` state synchronization;
+- DOM-based rendering (`textContent`, `setAttribute`) so injected HTML-like content is not interpreted.
 
-- https://select2.github.io/examples.html
-- https://a11y.nicolas-hoffmann.net/autocomplet-list/
+**select-a11y** is part of [Scampi](https://gitlab.com/pidila/scampi), DILA's accessible UI component library.
 
-## Use
+## Demo
 
-All you need is ~~love~~ the files in the public/ directory.
+Three options:
 
-The source files are in the src/ directory.
+- view the [online demo](http://pidila.gitlab.io/select-a11y/);
+- open [public/index.html](public/index.html) directly in a browser;
+- run the local demo with `npm install` then `npx gulp dev`.
 
-* Call the select-a11y.js script in the bottom of your page, just before the body closing tag, or compile it with your others scripts.
+The local Gulp server serves `public/` on port `8080`.
 
-* Add the css or scss in your style files.
-You can retrieve select-a11y.css, an already compiled version, in public/assets/css/
+## Installation
 
-To be transformed by select-a11y.js, the fastest way is to add the ```data-select-a11y``` attribute on the `select` tag you want to transform.
+After cloning the repository:
 
+```bash
+npm install
+```
 
-### Code sample
+To build the distributed files in `public/assets/`:
+
+```bash
+npx gulp build
+```
+
+To run the demo with automatic rebuilds:
+
+```bash
+npx gulp dev
+```
+
+## Usage
+
+Source files are in `src/`.
+
+Generated integration files are in:
+
+- `public/assets/scripts/select-a11y.min.js`
+- `public/assets/css/select-a11y.css`
+
+The simplest setup is to add an attribute to the `<select>` elements you want to enhance, then instantiate the component after loading the script.
 
 ```html
-<!-- select simple -->
 <div class="form-group">
-  <label for="select-option">Is your website…</label>
+  <label for="select-option">Is your website...</label>
   <select class="form-control" id="select-option" data-select-a11y>
-      <option>Perceivable</option>
-      <option>Operable</option>
-      <option>Understandable</option>
-      <option>Robust</option>
+    <option>Perceivable</option>
+    <option>Operable</option>
+    <option>Understandable</option>
+    <option>Robust</option>
   </select>
 </div>
 
-<!-- select multiple -->
 <div class="form-group">
   <label for="select-element">What do you want to do today?</label>
-  <select class="form-control" id="select-element" multiple data-select-a11y data-placeholder="Search in list">
-      <option>Sleeping</option>
-      <option>Climbing trees</option>
-      <option>Knitting</option>
-      <option selected>Dancing with unicorns</option>
-      <option>Dreaming</option>
+  <select class="form-control" id="select-element" multiple data-select-a11y>
+    <option>Sleeping</option>
+    <option>Climbing trees</option>
+    <option>Knitting</option>
+    <option selected>Riding bikes</option>
+    <option>Dreaming</option>
   </select>
 </div>
 ```
-
-Then, add the following JavaScript code in one of your file (that must be after select-a11y script):
 
 ```js
 var selects = document.querySelectorAll('select[data-select-a11y]');
@@ -68,81 +95,185 @@ var selectA11ys = Array.prototype.map.call(selects, function(select){
 });
 ```
 
-The default texts used for accessibility can be changed. When creating a new select a11y, you can pass an object containing the `text` property as a second parameter:
+## Options
+
+Options are passed as the second constructor argument.
 
 ```js
-var selects = document.querySelectorAll('select[data-select-a11y]');
-
-var selectA11ys = Array.prototype.map.call(selects, function(select){
-  new Select(select, {
-    text:{
-      help: 'Utilisez la tabulation (ou la touche flèche du bas) pour naviguer dans la liste des suggestions',
-      placeholder: 'Rechercher dans la liste',
-      noResult: 'Aucun résultat',
-      results: '{x} suggestion(s) disponibles',
-      deleteItem: 'Supprimer {t}',
-      delete: 'Supprimer'
-    }
-  })
+new Select(select, {
+  text: {
+    help: 'Utilisez la tabulation (ou les touches flèches) pour naviguer dans la liste des suggestions',
+    placeholder: 'Rechercher dans la liste',
+    noResult: 'Aucun résultat',
+    results: '{x} suggestion(s) disponibles',
+    deleteItem: 'Supprimer {t}',
+    delete: 'Supprimer',
+    selectAll: 'Sélectionner tout',
+    closeButton: 'Retour',
+    regexErrorText: 'Le mot clé est mal formaté',
+    welcomeMessage: null
+  },
+  preventCloseOnSelect: false,
+  preventCloseOnFocusLost: false,
+  showSelected: true,
+  selectAll: false,
+  addCloseButton: false,
+  keywordsMode: false,
+  url: null,
+  showSelectedAutocompleteResults: false,
+  allowNewKeyword: true,
+  regexFilter: null,
+  additionalDelimiters: [],
+  keywordInputTemplateFunction: null,
+  wrapTemplateFunction: null
 });
 ```
 
-The texts in the example are the default texts used in the script.
+Main options:
 
-## Contribute
+- `text`: component labels and messages.
+- `preventCloseOnSelect`: keeps the list open after selection.
+- `preventCloseOnFocusLost`: keeps the list open when focus leaves the component.
+- `showSelected`: displays selected items.
+- `selectAll`: adds a select-all action for multiple selects.
+- `addCloseButton`: adds a close button inside the list.
+- `keywordsMode`: enables keyword mode.
+- `url`: URL or URL factory for autocomplete.
+- `urlResultsArray`, `urlValueField`, `urlLabelField`: fields used to parse autocomplete results.
+- `showSelectedAutocompleteResults`: keeps already selected autocomplete results visible so they can be unselected.
+- `allowNewKeyword`: allows free keyword creation.
+- `regexFilter`: validation pattern for free keywords.
+- `additionalDelimiters`: characters that split pasted keywords, such as `,` or `;`.
+- `keywordInputTemplateFunction`: customizes the visible keyword input.
+- `wrapTemplateFunction`: customizes the generated wrapper.
 
-This project is under Test Driven Development with tape.
+The old misspelled option name `additionalDelemiters` is still accepted for compatibility, but `additionalDelimiters` should be preferred.
 
-Requisite: Node.js 10.x, npm, npm gulp 3.x globally installed.
+## Keyword Mode
 
-### Installation and development
+Keyword mode turns a `<select multiple>` into an input that feeds selected options.
 
-After cloning this repository, install dependencies:
-
-```bash
-$ npm install
+```js
+new Select(select, {
+  keywordsMode: true,
+  allowNewKeyword: true,
+  additionalDelimiters: [',', ';']
+});
 ```
 
-#### Display locally (localhost:3000)
+If a keyword is still being typed when the form is submitted, it is added before submit. If `regexFilter` is set and the keyword does not match it, submit is blocked, the error message is shown and focus stays on the input.
 
-```bash
-$ gulp
+Email validation example:
+
+```js
+new Select(select, {
+  keywordsMode: true,
+  allowNewKeyword: true,
+  regexFilter: /^.+@.+\..+$/,
+  additionalDelimiters: [',', ';'],
+  text: {
+    regexErrorText: function(value) {
+      return 'The email address "' + String(value) + '" is invalid or malformed';
+    }
+  }
+});
 ```
 
-This task is a combination of the `gulp build` (compilation of sources and sending to the demo directory) and `gulp dev` (launching the server to display the page locally and recompiling sources on the fly if modified) tasks.
+## Autocomplete
 
-#### Run tests
+In autocomplete mode, `url` can be either a string or a function.
 
-```bash
-$ npm test
+```js
+new Select(select, {
+  keywordsMode: true,
+  url: function(search) {
+    return '/api/search?q=' + encodeURIComponent(search);
+  },
+  urlResultsArray: 'results',
+  urlValueField: 'id',
+  urlLabelField: 'label',
+  allowNewKeyword: false,
+  preventCloseOnSelect: true
+});
 ```
 
-## Content of the repository
+The expected response must contain an array in the field defined by `urlResultsArray`.
 
-* public/ : demo page and its assets
-  * assets/css : the compiled css
-  * assets/img : the images (only used for demo)
-  * assets/scripts : the select-a11y.js script and instantiation for the demo in main.js
-  * assets/scss : sass sources for the demo page (style.scss imports styles dedicated to select-a11y + demo specific styles)
-  * index.html : html source of the demo page
-* src/ : source files (js and sass)
-* tests/ : index.js to run the tests
+```json
+{
+  "results": [
+    { "id": "1", "label": "Result 1" }
+  ]
+}
+```
 
-***Important note:*** do not directly modify the assets/scripts/select-a11y.js file or the assets/css/select-a11y.css file : they are generated by the build tasks.
+## Validation
 
-### What can I do to help?
+If the source `<select>` has `required`, the component removes that attribute from the hidden select so native validation does not block submit on a non-visible field.
 
-- close issues
-- testing and report issues
-- suggest enhancement
-- translate documentation in english
-- enhance documentation in english or in french
-- say thank you if you use it :)
+The required state is moved to the visible control with:
+
+- `aria-required="true"`;
+- `aria-invalid="true"` after a failed submit;
+- `.select-a11y-invalid` on the wrapper.
+
+If the source `<select>` has the `.is-invalid` class, for example after a server-side validation response, the visible component also receives `aria-invalid="true"` and `.select-a11y-invalid`. This synchronization follows later additions and removals of `.is-invalid`.
+
+## API
+
+Public instance methods:
+
+- `clearSelection()`: clears selected options.
+- `setValue(value)`: replaces the current selection with one value or an array of values.
+- `addOption(keyword, keywordValue)`: adds and selects an option.
+- `disable()`: disables the component.
+- `enable()`: enables the component.
+
+## Rendering Safety
+
+Content from options, messages and configuration texts is rendered with DOM APIs (`createElement`, `textContent`, `setAttribute`). It is not injected with `innerHTML`.
+
+This prevents labels containing HTML-like content from being interpreted as active markup. This behavior is covered by tests.
+
+## Tests
+
+Tests use Tape and Puppeteer.
+
+```bash
+npm test
+```
+
+The suite opens headless Chromium and checks generated DOM, keyboard/mouse interactions, validation behavior and non-interpretation of HTML-like content.
+
+To get raw TAP output:
+
+```bash
+node tests/index.js
+```
+
+## Repository Structure
+
+- `src/`: JavaScript and SCSS sources.
+- `public/`: demo and generated files.
+- `public/assets/scripts/select-a11y.min.js`: distributed bundle.
+- `public/assets/css/select-a11y.css`: compiled CSS.
+- `tests/`: Tape/Puppeteer tests.
+
+Important note: do not directly edit generated files in `public/assets/scripts/` or `public/assets/css/`. Edit sources in `src/`, then run `npx gulp build`.
+
+## Quality
+
+Before proposing a change:
+
+```bash
+npx gulp build
+npm test
+```
 
 ## Authors
 
-Developpers and reviewers: Alain Batifol, Thomas Beduneau, Nicolas Bovorasmy, Anne Cavalier, Laurent Dutheil, Lucile Houdinet, Aurélien Lévy, Hugues Moreno - For the DILA, Direction de l'information légale et administrative.
+Developers and reviewers: Alain Batifol, Thomas Beduneau, Nicolas Bovorasmy, Anne Cavalier, Benoît Dequick, Laurent Dutheil, Lucile Houdinet, Aurélien Lévy, Hugues Moreno, Damien Petton - For the DILA, Direction de l'information légale et administrative.
 
 ## License
 
-MIT and [CeCILL-B](http://www.cecill.info/licences/Licence_CeCILL-B_V1-fr.html). Feel free to use it with one or the other.
+MIT and [CeCILL-B](http://www.cecill.info/licences/Licence_CeCILL-B_V1-fr.html). Feel free to use one or the other.
