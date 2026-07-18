@@ -29,7 +29,7 @@ Three options:
 
 - view the [online demo](http://pidila.gitlab.io/select-a11y/);
 - open [public/index.html](public/index.html) directly in a browser;
-- run the local demo with `npm install` then `npx gulp dev`.
+- run the local demo with `npm install` then `npm run dev`.
 
 The local Gulp server serves `public/` on port `8080`.
 
@@ -44,13 +44,13 @@ npm install
 To build the distributed files in `public/assets/`:
 
 ```bash
-npx gulp build
+npm run build
 ```
 
 To run the demo with automatic rebuilds:
 
 ```bash
-npx gulp dev
+npm run dev
 ```
 
 ## Usage
@@ -266,7 +266,7 @@ Important note: do not directly edit generated files in `public/assets/scripts/`
 Before proposing a change:
 
 ```bash
-npx gulp build
+npm run build
 npm test
 ```
 
