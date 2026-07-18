@@ -875,6 +875,194 @@ test( 'Required déplacé sur le composant visible', async t => {
   t.end();
 });
 
+test( 'Mot clé en cours ajouté lors du submit', async t => {
+  const [ browser, page ] = await createBrowser();
+
+  await page.setContent(`
+    <form id="keyword-form">
+      <label for="keyword-select">Mots clés</label>
+      <select id="keyword-select" multiple></select>
+      <button type="submit">Envoyer</button>
+    </form>
+    <form id="required-keyword-form">
+      <label for="required-keyword-select">Mots clés requis</label>
+      <select id="required-keyword-select" multiple required></select>
+      <button type="submit">Envoyer</button>
+    </form>
+    <form id="regex-keyword-form">
+      <label for="regex-keyword-select">Mots clés filtrés</label>
+      <select id="regex-keyword-select" multiple></select>
+      <button type="submit">Envoyer</button>
+    </form>
+  `);
+  await page.addScriptTag({ path: scriptPath });
+
+  const data = await page.evaluate(async () => {
+    const keywordForm = document.getElementById('keyword-form');
+    const keywordSelect = document.getElementById('keyword-select');
+    let keywordSubmitCount = 0;
+    keywordForm.addEventListener('submit', event => {
+      keywordSubmitCount++;
+      event.preventDefault();
+    });
+
+    new Select(keywordSelect, {
+      keywordsMode: true,
+      allowNewKeyword: true,
+    });
+
+    const keywordInput = keywordForm.querySelector('.form-control-a11y');
+    keywordInput.value = '  Nouveau mot clé  ';
+    keywordForm.requestSubmit();
+    await new Promise(resolve => setTimeout(resolve, 20));
+
+    const requiredForm = document.getElementById('required-keyword-form');
+    const requiredSelect = document.getElementById('required-keyword-select');
+    let requiredSubmitCount = 0;
+    requiredForm.addEventListener('submit', event => {
+      requiredSubmitCount++;
+      event.preventDefault();
+    });
+
+    new Select(requiredSelect, {
+      keywordsMode: true,
+      allowNewKeyword: true,
+    });
+
+    const requiredInput = requiredForm.querySelector('.form-control-a11y');
+    const requiredWrapper = requiredForm.querySelector('.select-a11y');
+    requiredInput.value = 'Compétence requise';
+    requiredForm.requestSubmit();
+    await new Promise(resolve => setTimeout(resolve, 20));
+
+    const regexForm = document.getElementById('regex-keyword-form');
+    const regexSelect = document.getElementById('regex-keyword-select');
+    let regexSubmitCount = 0;
+    regexForm.addEventListener('submit', event => {
+      regexSubmitCount++;
+      event.preventDefault();
+    });
+
+    new Select(regexSelect, {
+      keywordsMode: true,
+      allowNewKeyword: true,
+      regexFilter: /^[0-9]+$/,
+      text: {
+        regexErrorText: value => `Valeur refusée : ${value}`,
+      },
+    });
+
+    const regexInput = regexForm.querySelector('.form-control-a11y');
+    regexInput.value = 'abc';
+    regexForm.requestSubmit();
+    await new Promise(resolve => setTimeout(resolve, 20));
+
+    return {
+      keyword: {
+        submitCount: keywordSubmitCount,
+        values: Array.prototype.map.call(keywordSelect.selectedOptions, option => option.value),
+        inputValue: keywordInput.value,
+      },
+      required: {
+        submitCount: requiredSubmitCount,
+        values: Array.prototype.map.call(requiredSelect.selectedOptions, option => option.value),
+        inputValue: requiredInput.value,
+        ariaInvalid: requiredInput.getAttribute('aria-invalid'),
+        wrapperInvalid: requiredWrapper.classList.contains('select-a11y-invalid'),
+      },
+      regex: {
+        submitCount: regexSubmitCount,
+        values: Array.prototype.map.call(regexSelect.selectedOptions, option => option.value),
+        inputValue: regexInput.value,
+        inputFocused: document.activeElement === regexInput,
+        notice: regexForm.querySelector('.a11y-no-suggestion').textContent,
+      },
+    };
+  });
+
+  t.same(data.keyword.submitCount, 1, 'Le formulaire non-required est soumis');
+  t.same(data.keyword.values, ['Nouveau mot clé'], 'Le mot clé en cours est ajouté au submit');
+  t.same(data.keyword.inputValue, '', 'Le champ de saisie est vidé après ajout');
+
+  t.same(data.required.submitCount, 1, 'Le formulaire required est soumis après ajout du mot clé en cours');
+  t.same(data.required.values, ['Compétence requise'], 'Le mot clé en cours satisfait le required');
+  t.same(data.required.inputValue, '', 'Le champ required est vidé après ajout');
+  t.same(data.required.ariaInvalid, null, 'Le champ required n’est pas marqué invalide');
+  t.false(data.required.wrapperInvalid, 'Le composant required n’est pas marqué invalide');
+
+  t.same(data.regex.submitCount, 0, 'Le submit est bloqué si le mot clé en cours ne respecte pas le filtre');
+  t.same(data.regex.values, [], 'Le mot clé invalide n’est pas ajouté');
+  t.same(data.regex.inputValue, 'abc', 'Le mot clé invalide reste dans le champ');
+  t.true(data.regex.inputFocused, 'Le focus reste sur le champ invalide');
+  t.same(data.regex.notice, 'Valeur refusée : abc', 'Le message d’erreur du filtre est affiché');
+
+  await browser.close();
+
+  t.end();
+});
+
+test( 'additionalDelimiters découpe les mots clés collés', async t => {
+  const [ browser, page ] = await createBrowser();
+
+  await page.setContent(`
+    <form>
+      <label for="delimiters-select">Mots clés</label>
+      <select id="delimiters-select" multiple></select>
+      <label for="legacy-delimiters-select">Mots clés legacy</label>
+      <select id="legacy-delimiters-select" multiple></select>
+    </form>
+  `);
+  await page.addScriptTag({ path: scriptPath });
+
+  const data = await page.evaluate(async () => {
+    const pasteKeywords = (input, value) => {
+      input.dispatchEvent(new KeyboardEvent('keydown', {
+        key: 'v',
+        ctrlKey: true,
+        bubbles: true,
+      }));
+      input.value = value;
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+    };
+
+    const select = document.getElementById('delimiters-select');
+    new Select(select, {
+      keywordsMode: true,
+      allowNewKeyword: true,
+      additionalDelimiters: [',', ';'],
+    });
+
+    pasteKeywords(select.closest('.select-a11y').querySelector('.form-control-a11y'), 'alpha, beta; gamma');
+
+    const legacySelect = document.getElementById('legacy-delimiters-select');
+    new Select(legacySelect, {
+      keywordsMode: true,
+      allowNewKeyword: true,
+      additionalDelemiters: ['|'],
+    });
+
+    pasteKeywords(legacySelect.closest('.select-a11y').querySelector('.form-control-a11y'), 'delta| epsilon');
+
+    await new Promise(resolve => setTimeout(resolve, 20));
+
+    return {
+      values: Array.prototype.map.call(select.selectedOptions, option => option.value),
+      inputValue: select.closest('.select-a11y').querySelector('.form-control-a11y').value,
+      legacyValues: Array.prototype.map.call(legacySelect.selectedOptions, option => option.value),
+      legacyInputValue: legacySelect.closest('.select-a11y').querySelector('.form-control-a11y').value,
+    };
+  });
+
+  t.same(data.values, ['alpha', 'beta', 'gamma'], 'Le nom corrigé additionalDelimiters découpe les mots clés collés');
+  t.same(data.inputValue, '', 'Le champ est vidé après découpage complet');
+  t.same(data.legacyValues, ['delta', 'epsilon'], 'L’ancien nom additionalDelemiters reste compatible');
+  t.same(data.legacyInputValue, '', 'Le champ legacy est vidé après découpage complet');
+
+  await browser.close();
+
+  t.end();
+});
+
 test( 'Classe is-invalid synchronisée sur le composant visible', async t => {
   const [ browser, page ] = await createBrowser();
 

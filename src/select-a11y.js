@@ -54,6 +54,10 @@ class Select{
     const passedOptions = Object.assign({}, options);
     const textOptions = Object.assign(text, passedOptions.text);
     delete passedOptions.text;
+    if(passedOptions.additionalDelimiters === undefined && passedOptions.additionalDelemiters !== undefined) {
+      passedOptions.additionalDelimiters = passedOptions.additionalDelemiters;
+    }
+    delete passedOptions.additionalDelemiters;
 
     this._options = Object.assign({
       text: textOptions,
@@ -67,7 +71,7 @@ class Select{
       showSelectedAutocompleteResults: false,
       allowNewKeyword: true,
       regexFilter: null,
-      additionalDelemiters: [],
+      additionalDelimiters: [],
       keywordInputTemplateFunction: null,
       wrapTemplateFunction: null,
     }, passedOptions );
@@ -378,10 +382,10 @@ class Select{
     }
 
     this.form.addEventListener('reset', this._handleReset);
+    this.form.addEventListener('submit', this._handleSubmit, true);
 
     if(this.required) {
       this.form.addEventListener('invalid', this._handleFormInvalid, true);
-      this.form.addEventListener('submit', this._handleSubmit, true);
     }
   }
 
@@ -843,6 +847,13 @@ class Select{
   }
 
   _handleSubmit(event) {
+    if(!this._addPendingKeywordFromInput()) {
+      event.preventDefault();
+      event.stopPropagation();
+      this.input.focus();
+      return;
+    }
+
     if(this._shouldSkipRequiredValidation(event)) {
       return;
     }
@@ -852,6 +863,31 @@ class Select{
       event.stopPropagation();
       this._focusRequiredTarget();
     }
+  }
+
+  _addPendingKeywordFromInput() {
+    if(!this._options.keywordsMode || !this._options.allowNewKeyword || !this.input) {
+      return true;
+    }
+
+    const keyword = this.input.value.trim();
+    if(keyword == '') {
+      return true;
+    }
+
+    if(this._options.regexFilter && !this._regexFilter(keyword)) {
+      const notice = this._isType('Function', this._options.text.regexErrorText) ?
+        this._options.text.regexErrorText(keyword) :
+        this._options.text.regexErrorText;
+      this._toggleOverlay(true, true, notice);
+
+      return false;
+    }
+
+    this._addOption(keyword);
+    this.input.value = "";
+
+    return true;
   }
 
   _handleSuggestionClick(event){
@@ -929,8 +965,8 @@ class Select{
 
     this.search = this.input.value.trim();
 
-    if(this.ctrlVPressed && this._options.keywordsMode && this._options.allowNewKeyword && this._options.additionalDelemiters.length > 0 && this.search != '') { // Mode keyword libre
-      let delimiters = this._options.additionalDelemiters;
+    if(this.ctrlVPressed && this._options.keywordsMode && this._options.allowNewKeyword && this._options.additionalDelimiters.length > 0 && this.search != '') { // Mode keyword libre
+      let delimiters = this._options.additionalDelimiters;
       let firstDelimiter = null;
       let errorMessage = null;
       let notUsedContent = '';
@@ -1120,26 +1156,9 @@ class Select{
         // La combinaison CTRL+V a été pressée
         this.ctrlVPressed = true;
       }
-      if(input && (event.keyCode === 13 || this._options.additionalDelemiters.includes(event.key)) && this._options.allowNewKeyword){
+      if(input && (event.keyCode === 13 || this._options.additionalDelimiters.includes(event.key)) && this._options.allowNewKeyword){
         event.preventDefault();
-        let keyword = this.input.value.trim();
-        if( keyword != '') {
-          let canAddItem = true;
-          if (this._options.regexFilter) {
-            // Determine whether we can update based on whether
-            // our regular expression passes
-            canAddItem = this._regexFilter(keyword);
-          }
-          if(canAddItem) {
-            this._addOption(keyword);
-            this.input.value = "";
-          } else {
-            const notice = this._isType('Function', this._options.text.regexErrorText) ?
-              this._options.text.regexErrorText(keyword) :
-              this._options.text.regexErrorText;
-            this._toggleOverlay(true, true, notice);
-          }
-        }
+        this._addPendingKeywordFromInput();
 
         return;
       } else if(input && this.input.value.trim() != "" && event.keyCode === 40){ // Bas
